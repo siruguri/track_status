@@ -1,5 +1,6 @@
 class StatusesController < ApplicationController
   # Status controller
+  skip_before_filter :verify_authenticity_token
   def index
   end
 
