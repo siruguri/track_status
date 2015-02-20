@@ -1,6 +1,5 @@
 class StatusesController < ApplicationController
   # Status controller
-  
   def index
   end
 
