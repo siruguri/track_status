@@ -3,7 +3,7 @@
 /log/*
 !/log/.keep
 /tmp
-/db/
+/db/*sqlite3
 /log/
 
 *.rbc
