@@ -5,7 +5,6 @@
 /tmp
 /db/
 /log/
-/bin/
 
 *.rbc
 capybara-*.html
