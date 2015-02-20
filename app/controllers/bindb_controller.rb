@@ -20,7 +20,7 @@ class BindbController < ApplicationController
     clean_json = clean_binlist_resp(json)
 
     b=BinRecord.new(clean_json)
-    if b.valid?
+    if b.valid? and BinRecord.where(number: clean_json[:number]).count == 0
       b.save
       render 'pages/success'
     else

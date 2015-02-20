@@ -16,6 +16,13 @@ class StatusesControllerTest < ActionController::TestCase
     assert_redirected_to s
   end
 
+  test 'can show status' do
+    s=Status.first
+    get :show, {id: s.id}
+    
+    assert_match s.source, response.body
+  end
+  
   test 'fails on bad params' do
     bad_params = {}
     post :create, bad_params

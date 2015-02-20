@@ -1,6 +1,11 @@
 class StatusesController < ApplicationController
   # Status controller
   skip_before_filter :verify_authenticity_token
+
+  def show
+    @status=Status.find params[:id]
+  end
+  
   def index
   end
 
