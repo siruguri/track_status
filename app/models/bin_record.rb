@@ -1,3 +1,3 @@
 class BinRecord < ActiveRecord::Base
-  validates :number, :brand, :bank, presence: true
+  validates :number, presence: true
 end
