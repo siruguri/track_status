@@ -1,0 +1,52 @@
+{
+  "Unknown Test Framework": {
+    "coverage": {
+    },
+    "timestamp": 1424399217
+  },
+  "MiniTest": {
+    "coverage": {
+      "/Users/sameer/code/rails/track_status/app/controllers/statuses_controller.rb": [
+        1,
+        null,
+        null,
+        1,
+        null,
+        null,
+        1,
+        3,
+        3,
+        1,
+        null,
+        2,
+        2,
+        1,
+        1,
+        null,
+        1,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "/Users/sameer/code/rails/track_status/app/controllers/application_controller.rb": [
+        1,
+        null,
+        null,
+        1,
+        null
+      ],
+      "/Users/sameer/code/rails/track_status/app/helpers/application_helper.rb": [
+        1,
+        null
+      ],
+      "/Users/sameer/code/rails/track_status/app/models/status.rb": [
+        1,
+        1,
+        null
+      ]
+    },
+    "timestamp": 1424399248
+  }
+}
