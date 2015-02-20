@@ -12,14 +12,17 @@ class StatusesController < ApplicationController
   def create
     permit_keys = [:source, :description, :message]
     if params[:status].nil?
-      render nothing: true
+      puts request.request_parameters
+
+      render nothing: true, status: 400
     else
+      puts params[:status]
       @status = Status.new(params[:status].permit(permit_keys))
       if @status.valid?
         @status.save
         redirect_to @status
       else
-        render nothing: true
+        render nothing: true, status: 500
       end
     end
   end

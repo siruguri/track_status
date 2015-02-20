@@ -12,10 +12,9 @@ class StatusesControllerTest < ActionController::TestCase
       post :create, good_params
     end
 
-    s=Status.last
-    assert_redirected_to s
+    assert_template nil
+    assert_equal 302, response.status
   end
-
   test 'can show status' do
     s=Status.first
     get :show, {id: s.id}
@@ -26,10 +25,14 @@ class StatusesControllerTest < ActionController::TestCase
   test 'fails on bad params' do
     bad_params = {}
     post :create, bad_params
+
+    assert_equal 400, response.status
     assert_template nil
 
     bad_params = {status: {source: 'hello'}}
     post :create, bad_params
+    assert_equal 500, response.status
     assert_template nil
   end
+
 end
