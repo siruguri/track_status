@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150221050041) do
+ActiveRecord::Schema.define(version: 20150221065455) do
 
   create_table "bin_records", force: :cascade do |t|
     t.string   "number"
@@ -26,6 +26,13 @@ ActiveRecord::Schema.define(version: 20150221050041) do
     t.float    "long"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "received_emails", force: :cascade do |t|
+    t.string   "source"
+    t.text     "payload"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "statuses", force: :cascade do |t|
