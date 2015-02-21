@@ -11,25 +11,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150220045315) do
+ActiveRecord::Schema.define(version: 20150221040106) do
 
   create_table "bin_records", force: :cascade do |t|
-    t.string "number"
-    t.string "brand"
-    t.string "sub_brand"
-    t.string "country_code"
-    t.string "country_name"
-    t.string "bank"
-    t.string "card_type"
-    t.string "card_category"
-    t.float  "lat"
-    t.float  "long"
+    t.string   "number"
+    t.string   "brand"
+    t.string   "sub_brand"
+    t.string   "country_code"
+    t.string   "country_name"
+    t.string   "bank"
+    t.string   "card_type"
+    t.string   "card_category"
+    t.float    "lat"
+    t.float    "long"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "statuses", force: :cascade do |t|
-    t.string "source"
-    t.string "description"
-    t.text   "message"
+    t.string   "source"
+    t.string   "description"
+    t.text     "message"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
 end

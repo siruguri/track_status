@@ -32,6 +32,9 @@ class BindbControllerTest < ActionController::TestCase
 
   test 'can count bindbs' do
     get :index
+    b_last = bin_records(:bin2)
     assert_match '2 records', response.body
+    assert_match b_last.number, response.body
+    
   end
 end

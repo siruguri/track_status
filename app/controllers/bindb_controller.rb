@@ -6,6 +6,7 @@ class BindbController < ApplicationController
 
   def index
     @count = BinRecord.count
+    @binrec = BinRecord.order(created_at: :desc).first 
   end
 
   def add
