@@ -4,6 +4,10 @@ class BindbController < ApplicationController
   # Process bins
   skip_before_filter :verify_authenticity_token
 
+  def index
+    @count = BinRecord.count
+  end
+
   def add
     url = 'http://www.binlist.net/json/' + params[:bin]
     begin

@@ -28,5 +28,10 @@ class BindbControllerTest < ActionController::TestCase
     assert_no_difference('BinRecord.count') do
       post :add, @good_params
     end
-  end  
+  end
+
+  test 'can count bindbs' do
+    get :index
+    assert_match '2 records', response.body
+  end
 end
