@@ -6,6 +6,16 @@ class PostStatusTest < ActiveSupport::TestCase
     Rails.application
   end
 
+  def setup
+    stub_request(:get, "http://www.binlist.net/json/546616").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Ruby'}).
+      to_return(:status => 200, :body => fixture_file('binlist_546616.json'), :headers => {})
+
+    stub_request(:get, "http://www.binlist.net/json/111").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Ruby'}).
+      to_return(:status => 404, :body => '', :headers => {})
+  end
+  
   test 'can post binlist request' do
     post '/bindb_add/546616'
 

@@ -10,23 +10,27 @@ class BindbController < ApplicationController
   end
 
   def add
-    url = 'http://www.binlist.net/json/' + params[:bin]
-    begin
-      resp = open(url).each_line.map { |l| l }.join('')
-    rescue OpenURI::HTTPError => e
-      render 'pages/fail', status: 404
-      return
-    end
-    
-    json = JSON.parse resp
-    json['number']=json['bin']
+    if BinRecord.where(number: params[:bin]).count == 0
+      url = 'http://www.binlist.net/json/' + params[:bin]
+      begin
+        resp = open(url).each_line.map { |l| l }.join('')
+      rescue OpenURI::HTTPError => e
+        render 'pages/fail', status: 404
+        return
+      end
+      
+      json = JSON.parse resp
+      json['number']=json['bin']
 
-    clean_json = clean_binlist_resp(json)
+      clean_json = clean_binlist_resp(json)
 
-    b=BinRecord.new(clean_json)
-    if b.valid? and BinRecord.where(number: clean_json[:number]).count == 0
-      b.save
-      render 'pages/success'
+      b=BinRecord.new(clean_json)
+      if b.valid?
+        b.save
+        render 'pages/success'
+      else
+        render 'pages/fail'
+      end
     else
       render 'pages/fail'
     end

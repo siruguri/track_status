@@ -19,6 +19,10 @@ gem 'pg'
 gem 'haml'
 gem 'json'
 
+# Reddit scraping
+
+gem 'nokogiri'
+
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  
   gem 'sqlite3'
@@ -34,4 +38,5 @@ end
 
 group :test do
   gem 'simplecov'
+  gem 'webmock'
 end
