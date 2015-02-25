@@ -2,15 +2,13 @@ require 'open-uri'
 
 class RedditScraper
   class SafeDom
-    extend Forwardable
-    
     # Wrapper class to implement parser management
     def initialize(dom_or_ns)
       @_dom_or_ns = dom_or_ns
     end
     
     def try_css(patt)
-      @_dom_or_ns.css(patt)
+      @_dom_or_ns.css patt
     end
   end
 
@@ -41,7 +39,7 @@ class RedditScraper
   end
 
   def initialize
-    @userinfo = {}
+    @userinfo = RedditUserInfo.new   
   end
   
   def user_info(username)
@@ -57,7 +55,7 @@ class RedditScraper
       @dom = get_dom(pg_queue.shift)
       pg_queue << next_page_link
       
-      @userinfo.merge!(extract_userinfo)
+      @userinfo.aggregate!(extract_userinfo)
     end
 
     @userinfo
@@ -67,7 +65,7 @@ class RedditScraper
   def next_page_link
     # If the user page has a next link return it else return nil (might work for other pages)
 
-    candidate = @dom.css('.nextprev a')
+    candidate = @dom.try_css('.nextprev a')
     if candidate.count > 0 and /next/.match(candidate.first.text)
       candidate.first.attribute('href').value
     else
@@ -96,7 +94,7 @@ class RedditScraper
     else
       handle = input
     end
-    Nokogiri::HTML.parse(handle.readlines.join(''))
+    SafeDom.new(Nokogiri::HTML.parse(handle.readlines.join('')))
   end
   
 end

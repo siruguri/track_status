@@ -35,4 +35,10 @@ class StatusesControllerTest < ActionController::TestCase
     assert_template nil
   end
 
+  test 'can list with params set' do
+    get :index, {limit: 1}
+    assert_match 'status 1', response.body
+    assert (/status 2/.match(response.body).nil?), 'Statuses list had status 2 when it shd not have.'
+  end
+    
 end

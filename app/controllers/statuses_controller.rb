@@ -7,6 +7,8 @@ class StatusesController < ApplicationController
   end
   
   def index
+    limit = params[:limit] ? params[:limit].to_i : 100
+    @statuses = Status.order(created_at: :desc).limit(limit).all
   end
 
   def create
