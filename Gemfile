@@ -15,12 +15,15 @@ group :production do
   gem 'rails_12factor'
 end
 
+# Everybody gotta have some Bootstrap!
+gem 'jquery-rails'
+gem 'bootstrap-sass'
+
 gem 'pg'
 gem 'haml'
 gem 'json'
 
 # Reddit scraping
-
 gem 'nokogiri'
 
 group :development, :test do
