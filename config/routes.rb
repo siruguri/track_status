@@ -5,4 +5,6 @@ Rails.application.routes.draw do
   get '/bindb_index' => 'bindb#index'
 
   post '/process_email' => 'email#transform'
+
+  post '/timeout' => 'timeout#infinite_loop'
 end
