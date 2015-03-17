@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'webmock/minitest'
 
 class PostStatusTest < ActiveSupport::TestCase
   include Rack::Test::Methods
@@ -27,5 +28,4 @@ class PostStatusTest < ActiveSupport::TestCase
     post '/bindb_add/111'
     assert last_response.not_found?
   end
-
 end

@@ -42,4 +42,7 @@ end
 group :test do
   gem 'simplecov'
   gem 'webmock'
+  gem 'minitest-spec-rails'
+  gem 'minitest-rails-capybara'
+  gem 'capybara-webkit'
 end
