@@ -1,15 +1,20 @@
 status_1:
   source: status_1
-  description: x
+  description: general
   message: status 1
   created_at: <%= Time.now - 1.days %>
 status_2:
   source: status_1
-  description: x
+  description: general
   message: status 2
   created_at: <%= Time.now - 2.days %>
 status_3:
   source: status_1
-  description: x
+  description: specific
   message: status 3
   created_at: <%= Time.now - 3.days %>
+status_too_old:
+  source: status_1
+  description: too old
+  message: too old
+  created_at: <%= Time.now - 10.days %>

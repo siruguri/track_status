@@ -8,7 +8,11 @@ class StatusesController < ApplicationController
   
   def index
     limit = params[:limit] ? params[:limit].to_i : 100
-    @statuses = Status.order(created_at: :desc).limit(limit).all
+    @statuses = Status.order(created_at: :desc).limit(limit)
+
+    if params[:type]
+      @statuses = @statuses.where('description like ?', "%#{params[:type]}%")
+    end
   end
 
   def create
@@ -25,5 +29,12 @@ class StatusesController < ApplicationController
       end
     end
   end
-  
+
+  def destroy
+    # Deletes statuses older than a week (for now)
+    Status.where('created_at < ?', Time.now - 7.days).map &:delete
+
+    @statuses = Status.order(created_at: :desc).limit(100)
+    render :index
+  end
 end

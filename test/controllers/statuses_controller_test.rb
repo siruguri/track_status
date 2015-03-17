@@ -3,6 +3,7 @@ require 'test_helper'
 class StatusesControllerTest < ActionController::TestCase
   test 'routes exist' do
     assert_routing '/statuses', {controller: 'statuses', action: 'index'}
+    assert_routing({method: :delete, path: '/statuses'}, {controller: 'statuses', action: 'destroy'})
   end
 
   test 'adds status correctly' do
@@ -35,10 +36,27 @@ class StatusesControllerTest < ActionController::TestCase
     assert_template nil
   end
 
-  test 'can list with params set' do
+  test 'can use limit param' do
     get :index, {limit: 1}
     assert_match 'status 1', response.body
     assert (/status 2/.match(response.body).nil?), 'Statuses list had status 2 when it shd not have.'
   end
-    
+
+  test 'can use type param' do
+    get :index, {type: 'specific'}
+    assert_match 'specific', response.body
+    assert_no_match 'general', response.body
+  end
+
+  test 'can delete old statuses' do
+    # Status exists before deletion
+    empty_statuses = Status.where(description: 'too old')
+    assert_equal 1, empty_statuses.count
+
+    post :destroy, {method: :default}
+    empty_statuses = Status.where(description: 'too old')
+    assert_equal 0, empty_statuses.count
+
+    assert_template :index
+  end
 end
