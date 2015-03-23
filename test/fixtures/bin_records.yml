@@ -1,7 +1,31 @@
 bin1:
   number: 1
   bank: citi
-
+  created_at: <%= Time.now - 2.days %>
 bin2:
   number: 2
-  bank: chase
+  bank: chase2
+  created_at: <%= Time.now - 2.days %>
+bin3:
+  number: 3
+  bank: chase3
+  created_at: <%= Time.now - 2.days %>
+bin4:
+  number: 4
+  bank: chase4
+  created_at: <%= Time.now - 2.days %>
+bin5:
+  number: 5
+  bank: chase5
+  created_at: <%= Time.now - 2.days %>
+bin_a6:
+  number: a6
+  bank: chase6
+  created_at: <%= Time.now - 2.days %>
+bin7:
+  number: 7
+  bank: chase7
+  created_at: <%= Time.now - 2.days %>
+bin_is_created_latest:
+  number: 42
+  bank: chase42

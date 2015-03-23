@@ -9,6 +9,19 @@ class BindbController < ApplicationController
     @binrec = BinRecord.where('created_at is not NULL').order(created_at: :desc).first
   end
 
+  def dump
+    start_index = (params[:start].nil? ? 0 : params[:start].to_i)
+    all_recs = BinRecord.offset(start_index).limit(10000)
+
+    payload = all_recs.map do |rec|
+      {bin: rec.number, data: {brand: rec.brand, sub_brand: rec.sub_brand, country_code: rec.country_code,
+                               country_name: rec.country_name, card_type: rec.card_type, bank: rec.bank,
+                               card_category: rec.card_category, lat: rec.lat, long: rec.long}}
+    end
+
+    render json: payload.to_json
+  end
+
   def add
     if BinRecord.where(number: params[:bin]).count == 0
       url = 'http://www.binlist.net/json/' + params[:bin]
@@ -48,7 +61,7 @@ class BindbController < ApplicationController
 
     [:bin, :latitude, :longitude, :query_time].each { |k| new_json.delete k}
     
-    new_json#.permit(:number, :bank, :card_type, :card_category, :brand, :sub_brand, :country_code, :country_name, :lat,                    :long)
+    new_json
   end
       
 end

@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'webmock/minitest'
 
 class BindbControllerTest < ActionController::TestCase
   def setup
@@ -11,7 +12,9 @@ class BindbControllerTest < ActionController::TestCase
   end
   
   test 'routing' do
-    assert_routing({method: 'post', path: '/bindb_add/111'}, {controller: 'bindb', action: 'add', bin: '111'})
+    assert_routing({method: 'post', path: '/bindb/add/111'}, {controller: 'bindb', action: 'add', bin: '111'})
+    assert_routing '/bindb/index', {controller: 'bindb', action: 'index'}
+    assert_routing '/bindb/dump', {controller: 'bindb', action: 'dump'}
   end
   
   test 'can create bindb record' do
@@ -36,9 +39,21 @@ class BindbControllerTest < ActionController::TestCase
 
   test 'can count bindbs' do
     get :index
-    b_last = bin_records(:bin2)
-    assert_match '2 records', response.body
+    b_last = bin_records(:bin_is_created_latest)
+    assert_match '8 records', response.body
     assert_match b_last.number, response.body
-    
+  end
+
+  test 'can dump records in gz format' do
+    get :dump , nil, {'HTTP_ACCEPT_ENCODING' => "gzip,deflate"}
+    assert_response :success
+    assert_match /citi/, response.body
+    assert_nothing_raised do
+      JSON.parse response.body
+    end
+
+    get :dump , {start: '3'}, {'HTTP_ACCEPT_ENCODING' => "gzip,deflate"}
+    assert_response :success
+    assert_equal 5, JSON.parse(response.body).count
   end
 end
