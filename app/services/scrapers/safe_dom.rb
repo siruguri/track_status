@@ -12,5 +12,17 @@ module Scrapers
         ret
       end
     end
+
+    def try_xpath(patt)
+      if (ret=@_dom_or_ns.xpath(patt)).empty?
+        raise DomFailure.new(patt)
+      else
+        ret
+      end
+    end
+
+    def xpath(patt)
+      @_dom_or_ns.xpath patt
+    end
   end
 end

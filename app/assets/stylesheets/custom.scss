@@ -1,3 +1,14 @@
 .top {
     margin-top: 10px;
 }
+
+.flash-box {
+    padding: 10px 5px;
+    min-height: 40px;
+    
+    background-color: lightred;
+    color: black;
+
+    display: inline-block;
+    margin: auto;
+}

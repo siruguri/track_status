@@ -11,6 +11,10 @@
     = csrf_meta_tags
 
   %body
+    .container.flash-notices
+      - if !(flash[:error].nil?)
+        .flash_box
+          = flash[:error]
     .container.top
       = yield
 

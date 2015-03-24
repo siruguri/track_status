@@ -32,7 +32,9 @@ class StatusesController < ApplicationController
 
   def destroy
     # Deletes statuses older than a week (for now)
-    Status.where('created_at < ?', Time.now - 7.days).map &:delete
+
+    day_window = params[:day_window] || 7
+    Status.where('created_at < ?', Time.now - day_window.to_i.days).map &:delete
 
     @statuses = Status.order(created_at: :desc).limit(100)
     render :index

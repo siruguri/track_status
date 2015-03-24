@@ -46,25 +46,26 @@ module Scrapers
     
     def user_info(username)
       # Supply Reddit username to retrieve an instance of RedditUserInfo
-      begin 
-        f=open("http://www.reddit.com/user/#{username}/")
-      rescue OpenURI::HTTPError => e
-        return nil
-      end
-      
-      pg_queue = [f]
+      pg_queue = ["http://www.reddit.com/user/#{username}/"]
 
-      begin
-        while pg_queue.compact.size > 0
-          @dom = get_dom(pg_queue.shift)
-          pg_queue << next_page_link
+      failure = false
+      while !failure and pg_queue.compact.size > 0
+        begin
+          link = pg_queue.shift
+          @dom = get_dom(link)
           @userinfo.aggregate!(extract_userinfo)
+
+          pg_queue << next_page_link
+        rescue DomFailure => e
+          @userinfo.set_status false
+          @userinfo.failed_css = e.message
+          failure = true
+        rescue OpenURI::HTTPError => e
+          @userinfo = nil
+          failure = true
+        else
+          @userinfo.set_status true
         end
-      rescue DomFailure => e
-        @userinfo.set_status false
-        @userinfo.failed_css = e.message
-      else
-        @userinfo.set_status true
       end
       
       @userinfo
@@ -73,8 +74,7 @@ module Scrapers
     private
     def next_page_link
       # If the user page has a next link return it else return nil (might work for other pages)
-
-      candidate = @dom.try_css('.nextprev a')
+      candidate = @dom.xpath('.//span[@class="nextprev"]//a[contains(@rel,"next")]')
       if candidate.count > 0 and /next/.match(candidate.first.text)
         candidate.first.attribute('href').value
       else
@@ -96,13 +96,8 @@ module Scrapers
       user_hash.merge({submitted_links: things.count})
     end
     
-    def get_dom(input)
-
-      if input.is_a? String
-        handle = open(input)
-      else
-        handle = input
-      end
+    def get_dom(uri_string)
+      handle = open(uri_string)
       SafeDom.new(Nokogiri::HTML.parse(handle.readlines.join('')))
     end
     

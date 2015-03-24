@@ -59,4 +59,18 @@ class StatusesControllerTest < ActionController::TestCase
 
     assert_template :index
   end
+
+  test 'can delete old statuses with window' do
+    # Status exists before deletion
+    empty_statuses = Status.where(description: 'sorta old')
+    assert_equal 1, empty_statuses.count
+
+    post :destroy, {method: :default, day_window: 4}
+    empty_statuses = Status.where(description: 'sorta old')
+    assert_equal 0, empty_statuses.count
+    empty_statuses = Status.where(description: 'too old')
+    assert_equal 0, empty_statuses.count
+
+    assert_template :index
+  end
 end
