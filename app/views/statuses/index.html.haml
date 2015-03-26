@@ -1,4 +1,5 @@
-= form_tag('/statuses', method: :delete) do 
+= form_tag('/statuses', method: :delete) do
+  = text_field_tag :day_window, '7'
   = submit_tag "Clean"
   
 %table.table.table-striped.table-bordered
