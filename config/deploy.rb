@@ -5,6 +5,8 @@ app_name = 'track_status'
 set :application, app_name
 set :full_app_name, app_name
 set :repo_url, "git@github.com:siruguri/#{app_name}.git"
+set :rails_env, 'development'
+set :bundle_without, [:test]
 
 # Default branch is :master
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
