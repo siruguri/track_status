@@ -23,8 +23,14 @@ gem 'pg'
 gem 'haml'
 gem 'json'
 
+gem 'sidekiq'
+# Required for sidekiq monitoring
+gem 'sinatra', :require => nil
+
 # Reddit scraping
 gem 'nokogiri'
+
+gem 'readability_parser'
 
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  

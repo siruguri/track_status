@@ -1,11 +1,15 @@
-require 'open-uri'
-
 module Scrapers
-  class RedditScraper
+  class RedditScraper < GenericScraper
     class RedditUserInfo < ScraperExtractionInfo
+      include Enumerable
+      attr_reader :error
+      
       # User info with keys subreddit_counts, submitted_links, and entries list; #extracted? return true or false
-      def initialize
+      def initialize(options = {})
         @_store = {submitted_links: 0, entries: [], subreddit_counts: {}}
+        if options[:error]
+          @error=options[:error]
+        end
       end
 
       def aggregate!(hash)
@@ -23,6 +27,12 @@ module Scrapers
         end
       end
 
+      def each(&block)
+        @_store.keys.each do  |k|
+          block.call([k, @_store[k]])
+        end
+      end
+      
       def [](key)
         @_store[key]
       end
@@ -61,6 +71,7 @@ module Scrapers
           @userinfo.failed_css = e.message
           failure = true
         rescue OpenURI::HTTPError => e
+          puts "Got HTTPError #{e.message}"
           @userinfo = nil
           failure = true
         else
@@ -95,11 +106,5 @@ module Scrapers
       end
       user_hash.merge({submitted_links: things.count})
     end
-    
-    def get_dom(uri_string)
-      handle = open(uri_string)
-      SafeDom.new(Nokogiri::HTML.parse(handle.readlines.join('')))
-    end
-    
   end
 end

@@ -10,4 +10,10 @@ Rails.application.routes.draw do
   post '/process_email' => 'email#transform'
 
   get '/reddits/userinfo/:user' => 'reddits#userinfo'  
+
+  # Admin
+  require 'sidekiq/web'
+  #authenticate :admin, lambda { |u| u.is_a? Admin } do
+  mount Sidekiq::Web => '/sidekiq_ui'
+  #end
 end

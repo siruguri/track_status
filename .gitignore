@@ -32,3 +32,6 @@ config/secrets.yml
 bower.json
 
 *.dmp
+.env
+*.rdb
+local/

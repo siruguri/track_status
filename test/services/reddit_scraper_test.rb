@@ -20,7 +20,14 @@ class RedditScraperTest < ActiveSupport::TestCase
   
   test 'valid username works' do
     payload = @test_obj.user_info(:ssiruguri)
-    
+
+    assert payload.respond_to? :each
+
+    payload.each do |i|
+      assert_equal Array, i.class
+      assert_equal 2, i.size
+    end
+      
     assert (payload[:submitted_links] == 41), "Failed to find 41 submitted links, found #{payload[:submitted_links]}"
 
     assert_equal 5, payload[:subreddit_counts]['nonprofit.']

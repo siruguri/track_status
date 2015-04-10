@@ -6,23 +6,15 @@ class RedditsController < ApplicationController
     @user = RedditRecord.find_by_username(username)
 
     if @user.nil?
-      # No such user in DB - create one
-      userinfo = Scrapers::RedditScraper.new.user_info(username)
+      # No such user in DB - schedule a job to create one
+      @user = RedditRecord.new(username: username, extraction_in_progress: true)
+      @user.save
+      RedditJob.perform_later(@user)
 
-      if userinfo and userinfo.extracted?
-        @user = RedditRecord.create(username: username, user_info: userinfo)
-        # Render userinfo
-      else
-        # No user found or extraction failed.
-        if userinfo.nil?
-          flash[:error] = "No such Reddit username"
-        else
-          flash[:error] = "Extraction code failed. Please contact sys admin."
-        end
-        render "application/blank_page"
-      end
+      @message = :job_started
+    else
+      # TODO there's a 3rd poss state of the job being in progress, prior to being extracted
+      @message = :extracted
     end
-
-    # render userinfo if user was found in DB
   end
 end
