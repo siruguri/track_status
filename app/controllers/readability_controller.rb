@@ -2,7 +2,7 @@ class ReadabilityController < ApplicationController
 
   def run_scrape
     # All jobs in Sidekiq queue run in the last 24 hours
-    all_jobs = JobRecord.where(job_name: 'ReadabilityJob').where('created_at > ?', Time.now - 1.minute)
+    all_jobs = JobRecord.where(job_name: 'ReadabilityJob').where('created_at > ?', Time.now - 24.hours)
 
     unless all_jobs.size > 0
       @message = 'job created'
