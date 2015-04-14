@@ -89,6 +89,7 @@ GEM
       safe_yaml (~> 1.0.0)
     debug_inspector (0.0.2)
     docile (1.1.5)
+    dotenv (2.0.1)
     erubis (2.7.0)
     execjs (2.5.2)
     faraday (0.9.1)
@@ -112,6 +113,7 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
+    metaclass (0.0.4)
     mime-types (2.4.3)
     mini_portile (0.6.2)
     minitest (5.6.0)
@@ -132,6 +134,8 @@ GEM
     minitest-spec-rails (5.2.0)
       minitest (~> 5.0)
       rails (~> 4.1)
+    mocha (1.1.0)
+      metaclass (~> 0.0.1)
     multi_json (1.11.0)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
@@ -257,11 +261,13 @@ DEPENDENCIES
   capistrano-rvm
   capybara-webkit
   coffee-rails (~> 4.1.0)
+  dotenv
   haml
   jquery-rails
   json
   minitest-rails-capybara
   minitest-spec-rails
+  mocha
   nokogiri
   pg
   rails (= 4.2.1)

@@ -38,6 +38,7 @@ gem 'readability_parser'
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  
   gem 'sqlite3'
+  gem 'dotenv'
   
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
@@ -56,6 +57,7 @@ group :development, :test do
 end
 
 group :test do
+  gem 'mocha'
   gem 'simplecov'
   gem 'webmock'
   gem 'minitest-spec-rails'

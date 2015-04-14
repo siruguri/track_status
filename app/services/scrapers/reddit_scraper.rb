@@ -27,6 +27,10 @@ module Scrapers
         end
       end
 
+      def error?
+        @error != nil
+      end      
+      
       def each(&block)
         @_store.keys.each do  |k|
           block.call([k, @_store[k]])
@@ -35,6 +39,10 @@ module Scrapers
       
       def [](key)
         @_store[key]
+      end
+
+      def []=(key, val)
+        @_store[key]=val
       end
 
       def keys

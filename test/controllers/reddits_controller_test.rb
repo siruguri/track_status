@@ -3,8 +3,13 @@ require 'webmock/minitest'
 
 class RedditsControllerTest < ActionController::TestCase
   include ActiveJob::TestHelper
+  self.use_transactional_fixtures = true
   
   def setup
+    # The reddit jobs test assumes there are records in the database, but the controller tests need
+    # to assume there aren't.
+
+    RedditRecord.all.map &:delete
     stub_request(:get, 'http://www.reddit.com/user/ssiruguri/').
       with(query: hash_including({count: '25'})).
       to_return(body: open(File.join(Rails.root, 'test', 'fixtures', 'files', 'reddit-page-2.html')).readlines.join(''))

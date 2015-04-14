@@ -13,6 +13,8 @@ Rails.application.routes.draw do
   get '/reddits/userinfo/:user' => 'reddits#userinfo'
   get '/readability/run_scrape' => 'readability#run_scrape'
   get '/readability/list' => 'readability#list_articles'
+
+  get '/test_env' => 'dummy#test_env'
   
   # Admin
   require 'sidekiq/web'

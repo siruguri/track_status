@@ -1,0 +1,8 @@
+valid_user:
+  username: ssiruguri
+
+nil_user:
+  username: hellobellomello
+
+failed_user:
+  username: failure
