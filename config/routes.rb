@@ -9,7 +9,9 @@ Rails.application.routes.draw do
 
   post '/process_email' => 'email#transform'
 
-  get '/reddits/userinfo/:user' => 'reddits#userinfo'  
+  # Various things this app does
+  get '/reddits/userinfo/:user' => 'reddits#userinfo'
+  get '/readability/run_scrape' => 'readability#run_scrape'
 
   # Admin
   require 'sidekiq/web'

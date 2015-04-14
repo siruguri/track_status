@@ -1,30 +1,28 @@
 require 'test_helper'
 
 class ReadabilityControllerTest < ActionController::TestCase
-  include ActiveJob::TestHelper
+  # Tests for Readability controller 
 
-  describe 'Readability job queue' do
-    it 'runs a job once per day' do 
-      assert_enqueued_with(job: ReadabilityJob, queue: 'scrapers', args: ['aldaily']) do
-        get :run_scrape, site: 'aldaily'
-      end
-
-      assert_match /job created/i, response.body
-      
-      # A job is only run once a day
-      assert_no_enqueued_jobs do
-        get :run_scrape, site: 'aldaily'
-      end
-      
-      assert_match /previous job/i, response.body
+  describe 'Routing' do
+    it 'Allows a scrape to be requested' do
+      assert_routing '/readability/run_scrape', {controller: 'readability', action: 'run_scrape'}
     end
-
-    it 'updates the scrape record' do
+  end
+  
+  describe 'Readability job queue' do
+    before do
+      Sidekiq::Queue.new(:scrapers).each do |j|
+        j.delete
+      end
+    end
+    
+    it 'runs a job once per day' do 
       get :run_scrape, site: 'aldaily'
 
-      assert_difference('ReadabilityRecord.count', 3) do
-        perform_enqueued_jobs { ReadabilityJob.perform_now('aldaily') }
-      end
+      assert_match /job created/i, response.body
+      get :run_scrape, site: 'aldaily'
+
+      assert_match /previous/i, response.body
     end
   end
 end

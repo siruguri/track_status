@@ -71,7 +71,6 @@ module Scrapers
           @userinfo.failed_css = e.message
           failure = true
         rescue OpenURI::HTTPError => e
-          puts "Got HTTPError #{e.message}"
           @userinfo = nil
           failure = true
         else

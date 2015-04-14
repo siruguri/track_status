@@ -3,7 +3,7 @@ class ReadabilityJob < ActiveJob::Base
   queue_as :scrapers
 
   def perform(site_key)
-    # Only works for site_key = :aldaily
+    # Only works for site_key = 'aldaily'
     payload = Scrapers::AldailyScraper.new.payload()
 
     if payload[:status] == 'success'
