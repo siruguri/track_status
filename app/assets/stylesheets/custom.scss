@@ -1,5 +1,13 @@
+body {
+     height: auto;
+     width: 100%;
+     font-family: 'Cabin', sans-serif;
+     font-size: 18px;
+}
+
 .top {
     margin-top: 10px;
+    border-top: solid 2px #CCC;
 }
 
 .flash-box {
@@ -11,4 +19,11 @@
 
     display: inline-block;
     margin: auto;
+}
+
+.next-link {
+  font-size: 2em;
+  color: #EE2222;
+
+  margin: 2em 0px;
 }

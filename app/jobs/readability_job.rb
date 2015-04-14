@@ -16,5 +16,10 @@ class ReadabilityJob < ActiveJob::Base
         WebArticle.create(source: site_key, body: b)
       end
     end
+
+    if (j = JobRecord.find_by_job_id self.job_id)
+      j.status = 'finished'
+      j.save
+    end
   end
 end

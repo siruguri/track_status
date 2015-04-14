@@ -2,16 +2,21 @@ class ReadabilityController < ApplicationController
 
   def run_scrape
     # All jobs in Sidekiq queue run in the last 24 hours
-    aldaily_jobs = Sidekiq::Queue.new(:scrapers).select do |j|
-      j.args[0]['job_class'] == 'ReadabilityJob' and Time.now - j.enqueued_at < 24.hours
-    end
+    all_jobs = JobRecord.where(job_name: 'ReadabilityJob').where('created_at > ?', Time.now - 1.minute)
 
-    unless aldaily_jobs.size > 0
+    unless all_jobs.size > 0
       @message = 'job created'
-      ReadabilityJob.perform_later('aldaily')
+      job = ReadabilityJob.perform_later('aldaily')
+      JobRecord.create(job_id: job.job_id, status: 'running', job_name: 'ReadabilityJob')
     else
-      @message = "previous job scheduled at #{aldaily_jobs[0].enqueued_at}"
+      @message = "previous job scheduled at #{all_jobs[0].created_at}, id = #{all_jobs[0].job_id}"
     end
+  end
 
+  def list_articles
+    @offset = params[:start] ? params[:start].to_i : 0
+    @article = WebArticle.order(created_at: :desc).offset(@offset).limit(1).first
+
+    render :list
   end
 end

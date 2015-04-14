@@ -1,0 +1,4 @@
+.next-link
+  = link_to 'Next', readability_list_path(start: @offset + 1), id: 'next'
+.readability-wrapper
+  = raw(@article.body)

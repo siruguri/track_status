@@ -12,7 +12,8 @@ Rails.application.routes.draw do
   # Various things this app does
   get '/reddits/userinfo/:user' => 'reddits#userinfo'
   get '/readability/run_scrape' => 'readability#run_scrape'
-
+  get '/readability/list' => 'readability#list_articles'
+  
   # Admin
   require 'sidekiq/web'
   #authenticate :admin, lambda { |u| u.is_a? Admin } do

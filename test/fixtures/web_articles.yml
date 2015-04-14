@@ -1,0 +1,8 @@
+web_article_1:
+  source: aldaily
+  body: web article 1 content
+  created_at: <%= Time.now %>
+web_article_2:
+  source: aldaily
+  body: web article 2 content
+  created_at: <%= Time.now - 1.minute %>
