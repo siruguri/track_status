@@ -9,6 +9,8 @@ gem 'sass-rails', '~> 5.0'
 gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.1.0'
+
+# No issue found that references possible bug in update to 3, possibly interacting with something else.
 gem 'sprockets', '~> 2'
 
 # Heroku
@@ -48,7 +50,9 @@ group :development, :test do
   gem 'capistrano-rails', '~> 1.1'
   gem 'capistrano-bundler'
   gem 'capistrano-rvm'
-  gem 'capistrano-passenger'
+
+  # Can unset when https://github.com/phusion/passenger/issues/1392 is closed.
+  gem 'capistrano-passenger', '0.0.2'
 end
 
 group :test do
