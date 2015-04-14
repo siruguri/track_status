@@ -10,11 +10,13 @@ class ReadabilityJob < ActiveJob::Base
       parser = ReadabilityParserWrapper.new
 
       # Readability cert expired on 4/14 10AM
-      OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+      prev_setting = OpenSSL::SSL.send(:remove_const, :VERIFY_PEER)
+      OpenSSL::SSL.const_set(:VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE)
       bodies = payload[:links].map do |uri|
         parser.parse(uri).content
       end
-      OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_PEER
+      OpenSSL::SSL.send(:remove_const, :VERIFY_PEER)
+      OpenSSL::SSL.const_set(:VERIFY_PEER, prev_setting)
       
       bodies.each do |b|
         WebArticle.create(source: site_key, body: b)
