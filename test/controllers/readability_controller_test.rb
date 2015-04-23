@@ -16,12 +16,28 @@ class ReadabilityControllerTest < ActionController::TestCase
   end
   
   describe 'Readability job queue' do
-    it 'runs a job succesfully' do
+    it 'runs a job succesfully when it is not Sunday' do
+      t = Date.parse('2015-04-11')
+      Time.stubs(:now).returns t.to_time + 1.minute
+
       assert_difference('JobRecord.count', 1) do
         get :run_scrape, site: 'aldaily'
       end
       
       assert_match /job created/i, response.body
+
+      Time.unstub :now
+    end
+
+    it 'does not run jobs on Sundays' do
+      t = Date.parse('2015-04-12')
+      Time.stubs(:now).returns t.to_time + 1.minute
+      assert_no_enqueued_jobs do
+        get :run_scrape, site: 'aldaily'
+      end
+
+      assert_match /no jobs/i, response.body
+      Time.unstub :now
     end
   end
 
