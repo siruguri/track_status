@@ -5,7 +5,7 @@ module ReadabilityHelper
     if matches
       matches[2]
     else
-      url
+      url || 'no url'
     end
   end
 end

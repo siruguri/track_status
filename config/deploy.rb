@@ -24,7 +24,10 @@ set :scm, :git
 set :log_level, :debug
 
 # Default value for :pty is false
-# set :pty, true
+set :pty, false
+
+# Sidekiq
+set :sidekiq_options_per_process, ["--queue scrapers"]
 
 # Default value for :linked_files is []
 set :linked_files, fetch(:linked_files, []).push('.env', 'config/database.yml', 'db/development.sqlite3', 'db/production.sqlite3')
