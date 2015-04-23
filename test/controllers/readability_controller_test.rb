@@ -48,10 +48,13 @@ class ReadabilityControllerTest < ActionController::TestCase
       get :list_articles, site: 'aldaily'
       assert_template :list
       assert_match /article 1 content/, response.body
-      
-      assert_select 'a#next', 1
-      assert_select 'a#next' do |link|
-        assert_match /\?start=1/, link.attribute('href')
+
+      assert_select('a', 2) do |link|
+        if link.attribute('id').value == 'next'
+          assert_match /\?start=1/, link.attribute('href').value
+        else
+          assert_equal 'http://www.origsource.com/article_1', link.attribute('href').value
+        end
       end
     end
   end

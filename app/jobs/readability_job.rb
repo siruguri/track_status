@@ -9,17 +9,11 @@ class ReadabilityJob < ActiveJob::Base
     if payload[:status] == 'success'
       parser = ReadabilityParserWrapper.new
 
-      # Readability cert expired on 4/14 10AM
-      prev_setting = OpenSSL::SSL.send(:remove_const, :VERIFY_PEER)
-      OpenSSL::SSL.const_set(:VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE)
-      bodies = payload[:links].map do |uri|
-        parser.parse(uri).content
+      readability_resps = payload[:links].map do |uri|
+        parser.parse(uri)
       end
-      OpenSSL::SSL.send(:remove_const, :VERIFY_PEER)
-      OpenSSL::SSL.const_set(:VERIFY_PEER, prev_setting)
-      
-      bodies.each do |b|
-        WebArticle.create(source: site_key, body: b)
+      readability_resps.each do |resp|
+        WebArticle.create(original_url: resp.url, source: site_key, body: resp.content)
       end
     end
 

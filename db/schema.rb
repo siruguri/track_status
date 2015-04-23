@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150414044648) do
+ActiveRecord::Schema.define(version: 20150423042417) do
 
   create_table "bin_records", force: :cascade do |t|
     t.string   "number"
@@ -64,6 +64,8 @@ ActiveRecord::Schema.define(version: 20150414044648) do
     t.text     "body"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "author"
+    t.string   "original_url"
   end
 
 end

@@ -1,8 +1,10 @@
 web_article_1:
   source: aldaily
   body: web article 1 content
+  original_url: http://www.origsource.com/article_1
   created_at: <%= Time.now %>
 web_article_2:
   source: aldaily
   body: web article 2 content
+  original_url: http://www.origsource.com/article_2
   created_at: <%= Time.now - 1.minute %>

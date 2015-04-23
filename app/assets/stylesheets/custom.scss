@@ -21,8 +21,15 @@ body {
     margin: auto;
 }
 
+.original-link {
+    margin-bottom: 20px;
+    a {
+        color: blue;
+    }
+}
+
 .next-link {
-  font-size: 2em;
+  font-size: 1.5em;
   color: #EE2222;
 
   margin: 2em 0px;

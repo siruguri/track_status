@@ -1,4 +1,9 @@
 .next-link
   = link_to 'Next', readability_list_path(start: @offset + 1), id: 'next'
+.original-link
+  %a{href: @article.original_url}
+    Original Article
+  %span.uppercase
+    = "(#{domain_name(@article.original_url)})"
 .readability-wrapper
   = raw(@article.body)
