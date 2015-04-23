@@ -57,5 +57,10 @@ class ReadabilityControllerTest < ActionController::TestCase
         end
       end
     end
+
+    it 'works when there is no original URL' do
+      get :list_articles, site: 'aldaily', start: 2
+      assert_template :list
+    end
   end
 end

@@ -1,8 +1,11 @@
 module ReadabilityHelper
   def domain_name(url)
     matches = /http.?.\/\/(www.)?([^\/\.]+)/.match url
-    domain = matches[2]
 
-    domain
+    if matches
+      matches[2]
+    else
+      url
+    end
   end
 end

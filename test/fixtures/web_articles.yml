@@ -3,8 +3,14 @@ web_article_1:
   body: web article 1 content
   original_url: http://www.origsource.com/article_1
   created_at: <%= Time.now %>
+
 web_article_2:
   source: aldaily
   body: web article 2 content
-  original_url: http://www.origsource.com/article_2
+  original_url: http://origsource.com/article_2
+  created_at: <%= Time.now - 1.minute %>
+
+web_article_3:
+  source: aldaily
+  body: web article 3 content
   created_at: <%= Time.now - 1.minute %>
