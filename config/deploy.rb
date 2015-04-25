@@ -28,6 +28,7 @@ set :pty, false
 
 # Sidekiq
 set :sidekiq_options_per_process, ["--queue scrapers"]
+set :sidekiq_monit_default_hooks, false
 
 # Default value for :linked_files is []
 set :linked_files, fetch(:linked_files, []).push('.env', 'config/database.yml', 'db/development.sqlite3', 'db/production.sqlite3')
