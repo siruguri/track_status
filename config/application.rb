@@ -25,5 +25,6 @@ module TrackStatus
 
     config.active_job.queue_adapter = :sidekiq
     config.middleware.use Rack::Deflater
+    config.autoload_paths += Dir[Rails.root.join('lib')]
   end
 end

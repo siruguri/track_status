@@ -14,7 +14,7 @@ Rails.application.routes.draw do
   get '/readability/run_scrape' => 'readability#run_scrape'
   get '/readability/list' => 'readability#list_articles'
 
-  get '/test_env' => 'dummy#test_env'
+  resources 'channel_posts', only: [:index, :create, :new]
   
   # Admin
   require 'sidekiq/web'

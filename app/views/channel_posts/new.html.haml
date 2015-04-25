@@ -1,0 +1,12 @@
+.div
+  Post your message!
+
+= form_for(@channel_post) do |f|
+  .div
+    = f.label :url, "URL"
+    = f.text_field :url
+  .div
+    = f.label :message, "Say something :)"
+    = f.text_field :message
+  = f.submit
+

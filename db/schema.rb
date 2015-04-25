@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150423042417) do
+ActiveRecord::Schema.define(version: 20150425022748) do
 
   create_table "bin_records", force: :cascade do |t|
     t.string   "number"
@@ -26,6 +26,20 @@ ActiveRecord::Schema.define(version: 20150423042417) do
     t.float    "long"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "channel_posts", force: :cascade do |t|
+    t.string   "url"
+    t.text     "message"
+    t.string   "tweet_tags"
+    t.string   "short_message"
+    t.datetime "last_posted_at"
+    t.string   "redirect_url"
+    t.integer  "total_post_count"
+    t.string   "post_strategy"
+    t.boolean  "post_again"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
   end
 
   create_table "job_records", force: :cascade do |t|
