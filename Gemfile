@@ -13,16 +13,15 @@ gem 'coffee-rails', '~> 4.1.0'
 # No issue found that references possible bug in update to 3, possibly interacting with something else.
 gem 'sprockets', '~> 2'
 
-# Heroku
 group :production do
-  gem 'rails_12factor'
+  gem 'pg'
+  gem 'execjs'
 end
 
 # Everybody gotta have some Bootstrap!
 gem 'jquery-rails'
 gem 'bootstrap-sass'
 
-gem 'pg'
 gem 'haml'
 gem 'json'
 
