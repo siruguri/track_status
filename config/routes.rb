@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   get '/readability/list' => 'readability#list_articles'
 
   resources 'channel_posts', only: [:index, :create, :new]
+  resources 'redirect_maps', path: 'r', only: [:show]
   
   # Admin
   require 'sidekiq/web'
