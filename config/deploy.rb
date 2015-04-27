@@ -27,7 +27,7 @@ set :log_level, :debug
 set :pty, false
 
 # Sidekiq
-set :sidekiq_options_per_process, ["--queue scrapers"]
+set :sidekiq_options_per_process, ["--queue scrapers twitter_channel_posts"]
 set :sidekiq_monit_default_hooks, false
 
 # Default value for :linked_files is []

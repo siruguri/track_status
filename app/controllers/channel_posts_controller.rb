@@ -15,7 +15,7 @@ class ChannelPostsController < ApplicationController
     c.post_strategy = PostStrategy.default
     c.save
 
-    TwitterChannelPoster.perform_now(c)
+    TwitterChannelPoster.perform_later(c)
     @channel_posts = ChannelPost.all
     render :index
   end

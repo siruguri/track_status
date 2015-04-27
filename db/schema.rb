@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150425022748) do
+ActiveRecord::Schema.define(version: 20150427020322) do
 
   create_table "bin_records", force: :cascade do |t|
     t.string   "number"
@@ -24,6 +24,13 @@ ActiveRecord::Schema.define(version: 20150425022748) do
     t.string   "card_category"
     t.float    "lat"
     t.float    "long"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "channel_post_redirect_maps", force: :cascade do |t|
+    t.integer  "channel_post_id"
+    t.integer  "redirect_map_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -50,6 +57,14 @@ ActiveRecord::Schema.define(version: 20150425022748) do
     t.string   "job_name"
   end
 
+  create_table "media_records", force: :cascade do |t|
+    t.string   "channel_id"
+    t.string   "channel_name"
+    t.integer  "channel_post_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "received_emails", force: :cascade do |t|
     t.string   "source"
     t.text     "payload"
@@ -63,6 +78,22 @@ ActiveRecord::Schema.define(version: 20150425022748) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "extraction_in_progress"
+  end
+
+  create_table "redirect_maps", force: :cascade do |t|
+    t.string   "src"
+    t.string   "dest"
+    t.integer  "redirect_requests_count"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "redirect_requests", force: :cascade do |t|
+    t.integer  "redirect_map_id"
+    t.string   "request_agent"
+    t.string   "request_referer"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "statuses", force: :cascade do |t|
