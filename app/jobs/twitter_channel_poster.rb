@@ -9,7 +9,7 @@ class TwitterChannelPoster < ActiveJob::Base
       config.access_token_secret = Rails.application.secrets.twitter_single_app_access_token_secret
     end
 
-    tweet = channel_post.message + " http://#{ENV['RAILS_HOSTNAME']}#{ENV['RAILS_PORT']?':'+ENV['RAILS_PORT']:''}#{ENV['RAILS_PATH_PREFIX']}/#{channel_post.redirect_maps[0].src}"
+    tweet = channel_post.message + " https://#{ENV['RAILS_REDIRECT_HOSTNAME']}#{ENV['RAILS_REDIRECT_PORT']?':'+ENV['RAILS_REDIRECT_PORT']:''}#{ENV['RAILS_REDIRECT_PATH_PREFIX']}/r/#{channel_post.redirect_maps[0].src}"
 
     logger.info("Wrote #{tweet}")
     a=@twitter_client.update(tweet) 
