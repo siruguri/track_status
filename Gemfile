@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '2.2.1'
+ruby '2.2.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.1'
@@ -17,6 +17,8 @@ group :production do
   gem 'pg'
   gem 'execjs'
 end
+
+gem 'dotenv'
 
 # Everybody gotta have some Bootstrap!
 gem 'jquery-rails'
@@ -38,7 +40,6 @@ gem 'twitter'
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  
   gem 'sqlite3'
-  gem 'dotenv'
   
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
