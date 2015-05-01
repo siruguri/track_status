@@ -1,12 +1,12 @@
-.div
+.paragraph
   Post your message!
 
 = form_for(@channel_post) do |f|
-  .div
-    = f.label :url, "URL"
-    = f.text_field :url
-  .div
+  .form-element-row
     = f.label :message, "Say something :)"
-    = f.text_field :message
-  = f.submit
+    = f.text_area :message, class: 'form-control', autofocus: true
+  .form-element-row
+    = f.label :url, "URL"
+    = f.text_field :url, class: 'form-control'
+  = f.submit 'Post!', class: 'btn btn-default'
 

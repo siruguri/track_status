@@ -1,0 +1,19 @@
+ae_one:
+  entry_date: <%= Time.now.utc %>
+  merchant_name: A merchant
+  entry_amount: 12.34
+
+untagged_ae:
+  entry_date: <%= Time.now.utc %>
+  merchant_name: most common merchant
+  entry_amount: 0.56
+
+untagged_ae_two:
+  entry_date: <%= Time.now.utc %>
+  merchant_name: most common merchant
+  entry_amount: 1.56
+
+untagged_ae_three:
+  entry_date: <%= Time.now.utc %>
+  merchant_name: not a common merchant
+  entry_amount: 0.56

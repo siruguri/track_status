@@ -1,4 +1,11 @@
 class ReadabilityController < ApplicationController
+  def tag_words
+    if params[:id].nil? || (w = WebArticle.find_by_id(params[:id])).nil?
+      render json: []
+    else
+      render json: w.top_bigrams
+    end
+  end
 
   def run_scrape
     # All jobs in Sidekiq queue run in the last 24 hours

@@ -11,7 +11,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150427020322) do
+ActiveRecord::Schema.define(version: 20150428224721) do
+
+  create_table "account_entries", force: :cascade do |t|
+    t.float    "entry_amount"
+    t.string   "merchant_name"
+    t.datetime "entry_date"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "account_entries_tags", force: :cascade do |t|
+    t.integer  "transaction_tag_id"
+    t.integer  "account_entry_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "bin_records", force: :cascade do |t|
     t.string   "number"
@@ -100,6 +115,12 @@ ActiveRecord::Schema.define(version: 20150427020322) do
     t.string   "source"
     t.string   "description"
     t.text     "message"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "transaction_tags", force: :cascade do |t|
+    t.string   "tag_name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

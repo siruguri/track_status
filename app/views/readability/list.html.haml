@@ -1,5 +1,10 @@
+.tagbox
+  %input.form-control.another-test-class#tags-list{name: 'tags-list'}
+  %input.btn.btn-default#tags-list-submit{type: 'submit', value: 'Add tags'}
 .next-link
   = link_to 'Next', readability_list_path(start: @offset + 1), id: 'next'
+#article-id-tag{display: 'none'}
+  = @article.id
 .original-link
   %a{href: @article.original_url}
     Original Article

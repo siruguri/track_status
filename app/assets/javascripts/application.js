@@ -10,7 +10,8 @@
 // Read Sprockets README (https://github.com/sstephenson/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require_tree .
 //= require jquery
 //= require bootstrap-sprockets
 //= require jquery_ujs
+//= require jquery.tokeninput
+//= require channel_post

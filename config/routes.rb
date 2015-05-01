@@ -13,8 +13,16 @@ Rails.application.routes.draw do
   get '/reddits/userinfo/:user' => 'reddits#userinfo'
   get '/readability/run_scrape' => 'readability#run_scrape'
   get '/readability/list' => 'readability#list_articles'
-
+  get '/readability/tag_words' => 'readability#tag_words'
+  
   resources 'channel_posts', only: [:index, :create, :new]
+  resources 'account_entries', only: [:new, :create] do
+    collection do
+      get 'tag', action: 'generate_tags'
+      post 'update_tag'
+    end
+  end
+  
   resources 'redirect_maps', path: 'r', only: [:show]
   
   # Admin

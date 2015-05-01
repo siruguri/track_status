@@ -26,7 +26,8 @@ module TrackStatus
     config.active_record.raise_in_transactional_callbacks = true
 
     config.active_job.queue_adapter = :sidekiq
-    config.middleware.use Rack::Deflater
+    config.middleware.insert(0, Rack::Deflater)
+    #config.middleware.use Rack::Deflater
     config.autoload_paths += Dir[Rails.root.join('lib')]
   end
 end

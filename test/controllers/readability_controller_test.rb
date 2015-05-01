@@ -23,12 +23,27 @@ class ReadabilityControllerTest < ActionController::TestCase
       assert_difference('JobRecord.count', 1) do
         get :run_scrape, site: 'aldaily'
       end
-      
+
       assert_match /job created/i, response.body
 
       Time.unstub :now
     end
 
+    it 'requires 24 hours to pass between jobs' do
+      t = DateTime.parse('2015-04-11 01:00:00')
+      Time.stubs(:now).returns t.to_time + 1.minute
+      assert_difference('JobRecord.count', 1) do
+        get :run_scrape, site: 'aldaily'
+      end
+
+      Time.stubs(:now).returns t.to_time + 2.hours
+      assert_no_difference('JobRecord.count', 1) do
+        get :run_scrape, site: 'aldaily'
+      end
+
+      Time.unstub :now
+
+    end
     it 'does not run jobs on Sundays' do
       t = Date.parse('2015-04-12')
       Time.stubs(:now).returns t.to_time + 1.minute
@@ -47,13 +62,13 @@ class ReadabilityControllerTest < ActionController::TestCase
       
       get :list_articles, site: 'aldaily'
       assert_template :list
-      assert_match /article 1 content/, response.body
+      assert_match /Combines all/, response.body
 
       assert_select('a', 2) do |link|
         if link.attribute('id').value == 'next'
           assert_match /\?start=1/, link.attribute('href').value
         else
-          assert_equal 'http://www.origsource.com/article_1', link.attribute('href').value
+          assert_equal 'http://www.origsource.com/article_3', link.attribute('href').value
         end
       end
     end
@@ -61,6 +76,21 @@ class ReadabilityControllerTest < ActionController::TestCase
     it 'works when there is no original URL' do
       get :list_articles, site: 'aldaily', start: 2
       assert_template :list
+    end
+  end
+
+  describe 'Article bigram API' do
+    it 'fails correctly' do
+      get :tag_words, id: 'cannot be id'
+
+      assert_match /json/, response.headers['Content-Type']
+      assert_equal "[]", response.body
+    end
+
+    it 'gets words correctly' do
+      get :tag_words, id: web_articles(:web_article_3).id
+      exp_bigrams_list = [{:id=>0, :name=>"value for"}, {:id=>1, :name=>"If you"}, {:id=>2, :name=>"of memo"}, {:id=>3, :name=>"element in"}, {:id=>4, :name=>"a block"}]
+      assert_equal exp_bigrams_list.to_json, response.body
     end
   end
 end
