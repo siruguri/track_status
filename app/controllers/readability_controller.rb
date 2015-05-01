@@ -11,10 +11,10 @@ class ReadabilityController < ApplicationController
     # All jobs in Sidekiq queue run in the last 24 hours
     all_jobs = JobRecord.where(job_name: 'ReadabilityJob').where('created_at > ?', Time.now - 24.hours)
 
-    unless Time.now.wday == 0 || all_jobs.size > 0
-      @message = 'job created'
+    unless params[:force_job]!='yes' and (Time.now.wday == 0 || all_jobs.size > 0)
       job = ReadabilityJob.perform_later('aldaily')
-      JobRecord.create(job_id: job.job_id, status: 'running', job_name: 'ReadabilityJob')
+      j = JobRecord.create(job_id: job.job_id, status: 'running', job_name: 'ReadabilityJob')
+      @message = "job created with ID #{j.id}"
     else
       if Time.now.wday == 0
         @message = "No jobs - today is Sunday"
