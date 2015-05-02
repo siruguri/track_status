@@ -38,4 +38,9 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+  JsRoutes.setup do |config|
+    config.default_url_options = {:format => "", :trailing_slash => false, :protocol => "http",
+                                  :host => "localhost", :port => 3000}
+    config.prefix = 'http://localhost:3000'
+  end
 end
