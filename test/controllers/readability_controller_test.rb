@@ -89,8 +89,9 @@ class ReadabilityControllerTest < ActionController::TestCase
 
     it 'gets words correctly' do
       get :tag_words, id: web_articles(:web_article_3).id
-      exp_bigrams_list = [{:id=>0, :name=>"value for"}, {:id=>1, :name=>"If you"}, {:id=>2, :name=>"of memo"}, {:id=>3, :name=>"element in"}, {:id=>4, :name=>"a block"}]
-      assert_equal exp_bigrams_list.to_json, response.body
+      exp_bigrams_json = "[{\"id\":0,\"name\":\"initial value\"},{\"id\":1,\"name\":\"named method\"},{\"id\":2,\"name\":\"value memo\"},{\"id\":3,\"name\":\"collection will\"},{\"id\":4,\"name\":\"accumulator value\"}]"
+
+      assert_equal exp_bigrams_json, response.body
     end
   end
 end

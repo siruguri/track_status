@@ -32,7 +32,8 @@ var DEFAULT_SETTINGS = {
     tokenDelimiter: ",",
     preventDuplicates: false,
 
-	// Output settings
+    // Output settings
+    selectFirst: true,
     tokenValue: "id",
     insertionPoint: "after",
 
@@ -233,7 +234,11 @@ $.TokenList = function (input, url_or_data, settings) {
                         var dropdown_item = null;
 
                         if(event.keyCode === KEY.DOWN || event.keyCode === KEY.RIGHT) {
-                            dropdown_item = $(selected_dropdown_item).next();
+			    if(selected_dropdown_item == null) {
+				dropdown_item = dropdown.find('li').first();
+			    } else {
+				dropdown_item = $(selected_dropdown_item).next();
+			    }
                         } else {
                             dropdown_item = $(selected_dropdown_item).prev();
                         }
@@ -270,10 +275,13 @@ $.TokenList = function (input, url_or_data, settings) {
                 case KEY.NUMPAD_ENTER:
                 case KEY.COMMA:
                   if(selected_dropdown_item) {
-                    add_token($(selected_dropdown_item).data("tokeninput"));
-                    hidden_input.change();
-                    return false;
-                  }
+                      add_token($(selected_dropdown_item).data("tokeninput"));
+		  } else {
+		      add_token({id: '-1.' + $(this).val(), name: $(this).val()});
+		  }
+
+                  hidden_input.change();
+                  return false;
                   break;
 
                 case KEY.ESCAPE:
@@ -707,10 +715,12 @@ $.TokenList = function (input, url_or_data, settings) {
                     this_li.addClass(settings.classes.dropdownItem2);
                 }
 
-                if(index === 0) {
-                    select_dropdown_item(this_li);
-                }
-
+		if(settings.selectFirst == true) {
+                    if(index === 0) {
+			select_dropdown_item(this_li);
+                    }
+		}
+		
                 $.data(this_li.get(0), "tokeninput", value);
             });
 
