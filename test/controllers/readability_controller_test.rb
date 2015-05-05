@@ -86,10 +86,19 @@ class ReadabilityControllerTest < ActionController::TestCase
       assert_match /json/, response.headers['Content-Type']
       assert_equal "[]", response.body
     end
-
-    it 'gets words correctly' do
-      get :tag_words, id: web_articles(:web_article_3).id
+  end
+  
+  describe'Correct functioning' do
+    it 'uses raw score correctly' do
+      get :tag_words, id: web_articles(:web_article_3).id, sort_by: 'raw'
       exp_bigrams_json = "[{\"id\":0,\"name\":\"initial value\"},{\"id\":1,\"name\":\"named method\"},{\"id\":2,\"name\":\"value memo\"},{\"id\":3,\"name\":\"collection will\"},{\"id\":4,\"name\":\"accumulator value\"}]"
+
+      assert_equal exp_bigrams_json, response.body
+    end
+
+    it 'uses unigram boosting correctly' do
+      get :tag_words, id: web_articles(:web_article_3).id, sort_by: 'unigram_boosted'
+      exp_bigrams_json = "[{\"id\":0,\"name\":\"value memo\"},{\"id\":1,\"name\":\"initial value\"},{\"id\":2,\"name\":\"accumulator value\"},{\"id\":3,\"name\":\"return value\"},{\"id\":4,\"name\":\"final value\"}]"     
 
       assert_equal exp_bigrams_json, response.body
     end

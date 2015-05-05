@@ -12,6 +12,6 @@ class ReadabilityArticlesTagsTest < Capybara::Rails::TestCase
     page.find('#token-input-tags-list').set('a')
 
     assert page.has_css?('.token-input-dropdown ul li', count: 5)
-    assert_equal 'initial value', page.find('.token-input-dropdown ul li:first-child').text
+    assert_equal 'value memo', page.find('.token-input-dropdown ul li:first-child').text
   end
 end

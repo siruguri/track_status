@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :users
 
   resources :statuses, only: [:index, :create, :show]
   delete '/statuses' => 'statuses#destroy'

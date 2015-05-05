@@ -3,6 +3,9 @@ class ChannelPostsController < ApplicationController
 
   def new
     @channel_post = ChannelPost.new
+
+    account_list = ENV['CHANNEL_POST_ACCOUNTS']
+    @channel_list = account_list ? account_list.strip.split(/\+/).each_with_index.map { |i, j| [j, i] } : nil
   end
   
   def index

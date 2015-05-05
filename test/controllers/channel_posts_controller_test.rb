@@ -19,6 +19,22 @@ class ChannelPostsControllerTest < ActionController::TestCase
     end
   end
 
+  describe 'Viewing the new post form' do
+    it 'Shows only the configured accounts' do
+      ENV['CHANNEL_POST_ACCOUNTS']='account_1+account_2'
+      get :new
+      assert_match /account_1/, response.body
+      assert_match /account_2/, response.body
+      assert_no_match /account_3/, response.body
+
+      ENV['CHANNEL_POST_ACCOUNTS']='account_1+account_2+account_3'
+      get :new
+      assert_match /account_1/, response.body
+      assert_match /account_2/, response.body
+      assert_match /account_3/, response.body
+    end
+  end
+  
   describe 'Creating posts' do
     before do
       @params = {channel_post: {url: 'http://www.google.com', message: 'What a great site this is.'}}

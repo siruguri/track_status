@@ -1,9 +1,10 @@
 class ReadabilityController < ApplicationController
   def tag_words
+    sort_score = params[:sort_by] || 'unigram_boosted'
     if params[:id].nil? || (w = WebArticle.find_by_id(params[:id])).nil?
       render json: []
     else
-      render json: w.top_bigrams
+      render json: w.top_grams(sort_score)
     end
   end
 

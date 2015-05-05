@@ -13,6 +13,8 @@ gem 'coffee-rails', '~> 4.1.0'
 # No issue found that references possible bug in update to 3, possibly interacting with something else.
 gem 'sprockets', '~> 2'
 
+gem 'devise'
+
 gem 'js-routes'
 
 group :production do
