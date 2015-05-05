@@ -9,8 +9,9 @@ class ReadabilityController < ApplicationController
   end
 
   def run_scrape
-    # All jobs in Sidekiq queue run in the last 24 hours
-    all_jobs = JobRecord.where(job_name: 'ReadabilityJob').where('created_at > ?', Time.now - 24.hours)
+    # All jobs in Sidekiq queue run in the last 24 hours - use 23 as a buffer for cron jobs
+    # To work.
+    all_jobs = JobRecord.where(job_name: 'ReadabilityJob').where('created_at > ?', Time.now - 23.hours)
 
     unless params[:force_job]!='yes' and (Time.now.wday == 0 || all_jobs.size > 0)
       job = ReadabilityJob.perform_later('aldaily')
