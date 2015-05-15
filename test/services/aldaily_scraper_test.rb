@@ -19,10 +19,10 @@ class AldailyScraperTest < ActiveSupport::TestCase
   
   test 'unparseable page fails gracefully' do
     stub_request(:get, 'http://www.aldaily.com/').
-      to_return(body: open(File.join(Rails.root, 'test', 'fixtures', 'files', 'aldaily-page-error.html')).readlines.join(''))
+      to_return(body: open(File.join(Rails.root, 'test', 'fixtures', 'files', 'aldaily-page-error-1.html')).readlines.join(''))
     payload = @test_obj.payload
 
-    assert_equal 'failure', payload[:status]
+    assert_match /failure.*fail.*at\s/i, payload[:status]
   end
 end
 

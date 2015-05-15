@@ -9,7 +9,7 @@ module Scrapers
       begin
         ret = {status: 'success'}.merge(extract_top3_articles)
       rescue DomFailure => e
-        ret = {status: 'failure'}
+        ret = {status: "Failure: #{e.message}"}
       end
 
       ret

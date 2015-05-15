@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   devise_for :users
 
   resources :statuses, only: [:index, :create, :show]
+  resources :job_records, only: [:index]
+  
   delete '/statuses' => 'statuses#destroy'
   
   post '/bindb/add/:bin' => 'bindb#add'

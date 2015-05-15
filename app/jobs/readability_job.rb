@@ -15,10 +15,14 @@ class ReadabilityJob < ActiveJob::Base
       readability_resps.each do |resp|
         WebArticle.create(original_url: resp.url, source: site_key, body: resp.content)
       end
+
+      status = 'finished'
+    else
+      status = "failed: #{payload[:status]}"
     end
 
     if (j = JobRecord.find_by_job_id self.job_id)
-      j.status = 'finished'
+      j.status = status
       j.save
     end
   end

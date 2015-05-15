@@ -1,11 +1,13 @@
 module Scrapers
   class DomFailure < Exception
+    attr_reader :failed_pattern
+
     def initialize(p)
-      @_failed_patt = p
+      @failed_pattern = p
     end
     
     def message
-      "Extraction failed at #{@_failed_patt}"
+      "Extraction failed at #{@failed_pattern}"
     end
   end
 end
