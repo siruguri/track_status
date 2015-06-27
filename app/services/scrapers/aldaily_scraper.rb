@@ -18,13 +18,12 @@ module Scrapers
     private
     def extract_top3_articles
       link_divs = []
-      link_divs <<  @_safe_d.try_css('span.articles-of-note')[0]
-      link_divs <<  @_safe_d.try_css('span.new-books')[0]
-      link_divs <<  @_safe_d.try_css('span.essays-and-opinion')[0]
-
-      refs = link_divs.map do |d|
-        link = SafeDom.new(d).try_css('a')
-        link.attribute('href')
+      first_2_links = @_safe_d.try_css('.col-md-3 p:nth-child(2) a')
+      first_2_links.each { |l| link_divs << l }
+      link_divs << @_safe_d.try_css('.col-md-4 p:nth-child(2) a')[0]
+      
+      refs = link_divs.map do |anchor|
+        anchor.attribute('href')
       end
 
       {links: refs}
