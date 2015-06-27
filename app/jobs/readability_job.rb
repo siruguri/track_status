@@ -10,10 +10,12 @@ class ReadabilityJob < ActiveJob::Base
       parser = ReadabilityParserWrapper.new
 
       readability_resps = payload[:links].map do |uri|
-        parser.parse(uri)
+        parser.parse(uri.value)
       end
       readability_resps.each do |resp|
-        WebArticle.create(original_url: resp.url, source: site_key, body: resp.content)
+        puts "#{resp.url} might not pass"
+        w = WebArticle.new(original_url: resp.url, source: site_key, body: resp.content)
+        w.save!
       end
 
       status = 'finished'

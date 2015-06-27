@@ -22,6 +22,7 @@ group :production do
   gem 'execjs'
 end
 
+gem 'quiet_assets'
 gem 'dotenv'
 
 # Everybody gotta have some Bootstrap!
@@ -37,8 +38,6 @@ gem 'sinatra', :require => nil
 
 # Reddit scraping
 gem 'nokogiri'
-
-gem 'readability_parser'
 gem 'twitter'
 
 group :development, :test do
