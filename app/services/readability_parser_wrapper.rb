@@ -12,7 +12,8 @@ class ReadabilityParserWrapper
   end
 
   def parse(uri_string)
-    uri = URI "https://www.readability.com/api/content/v1/parser?format=json&token=#{@_key}&url=#{uri_string}"
+    uri_string.chomp!
+    uri = URI "https://www.readability.com/api/content/v1/parser?format=json&token=#{@_key}&url=#{CGI.escape(uri_string)}"
 
     response = ''
     Net::HTTP.start(uri.host, uri.port,
@@ -21,7 +22,11 @@ class ReadabilityParserWrapper
       response = http.request request
     end
 
-    body = JSON.parse response.body
-    ReadabilityBody.new(content: body['content'], url: body['url'])
+    unless /error...true/.match(response.body)
+      body = JSON.parse response.body
+      ReadabilityBody.new(content: body['content'], url: body['url'])
+    else
+      nil
+    end
   end
 end

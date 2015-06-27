@@ -11,9 +11,9 @@ class ReadabilityJob < ActiveJob::Base
 
       readability_resps = payload[:links].map do |uri|
         parser.parse(uri.value)
-      end
+      end.compact
+
       readability_resps.each do |resp|
-        puts "#{resp.url} might not pass"
         w = WebArticle.new(original_url: resp.url, source: site_key, body: resp.content)
         w.save!
       end
