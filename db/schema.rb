@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150503004645) do
+ActiveRecord::Schema.define(version: 20150701220053) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -117,6 +117,28 @@ ActiveRecord::Schema.define(version: 20150503004645) do
     t.string   "request_referer"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "rt_movie_entries", force: :cascade do |t|
+    t.string   "original_uri"
+    t.string   "movie_title"
+    t.string   "ratings"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "scraper_registrations", force: :cascade do |t|
+    t.string   "db_model"
+    t.string   "scraper_class"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "scraper_requests", force: :cascade do |t|
+    t.string   "uri"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "scraper_registration_id"
   end
 
   create_table "statuses", force: :cascade do |t|

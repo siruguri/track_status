@@ -1,0 +1,3 @@
+reg_1:
+  db_model: DummyDbRecord
+  scraper_class: AnyScraper

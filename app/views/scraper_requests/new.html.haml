@@ -1,0 +1,7 @@
+= form_for @scraper_request, class: 'form-control' do |f|
+  .form-element-row
+    = f.label :uri, 'Enter RT URI to scrape:'
+    = f.text_field :uri, autofocus: true, class: 'form-control'
+  .form-element-row
+    = f.label :scraper_registration, 'Scraper Model'
+    = f.select :scraper_registration, options_from_collection_for_select(ScraperRegistration.all, 'id', 'scraper_class'), prompt: 'Select a scraper to use'

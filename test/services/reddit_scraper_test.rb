@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'webmock/minitest'
 
 class RedditScraperTest < ActiveSupport::TestCase
   describe 'all tests' do

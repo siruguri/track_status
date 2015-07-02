@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'webmock/minitest'
 
 class AldailyScraperTest < ActiveSupport::TestCase
   def setup 
@@ -8,7 +7,7 @@ class AldailyScraperTest < ActiveSupport::TestCase
   
   test 'can return top 3 links' do
     stub_request(:get, 'http://www.aldaily.com/').
-      to_return(body: open(File.join(Rails.root, 'test', 'fixtures', 'files', 'aldaily-page.html')).readlines.join(''))
+      to_return(body: fixture_file('aldaily-page.html'))
 
     payload = @test_obj.payload
 

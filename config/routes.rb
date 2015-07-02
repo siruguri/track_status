@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   resources :statuses, only: [:index, :create, :show]
   resources :job_records, only: [:index]
+  resources :scraper_requests, only: [:index, :new, :create]
   
   delete '/statuses' => 'statuses#destroy'
   

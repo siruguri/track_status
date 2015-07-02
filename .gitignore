@@ -35,3 +35,4 @@ bower.json
 .env
 *.rdb
 local/
+localtest_*
