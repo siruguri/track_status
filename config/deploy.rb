@@ -31,7 +31,7 @@ set :sidekiq_options_per_process, ["--queue scrapers --queue twitter_channel_pos
 set :sidekiq_monit_default_hooks, false
 
 # Default value for :linked_files is []
-set :linked_files, fetch(:linked_files, []).push('.env', 'config/database.yml', 'db/development.sqlite3', 'db/production.sqlite3')
+set :linked_files, fetch(:linked_files, []).push('.env', 'config/database.yml', 'config/secrets.yml')
 
 # Default value for linked_dirs is []
 set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system')
