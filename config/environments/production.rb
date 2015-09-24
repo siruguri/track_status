@@ -79,4 +79,14 @@ Rails.application.configure do
   JsRoutes.setup do |config|
     config.prefix = ENV['PRODUCTION_DOMAIN_PREFIX']
   end
+
+  config.action_mailer.smtp_settings = {
+      :address        => 'smtp.gmail.com',
+      :port           => '587',
+      :authentication => :plain,
+      :user_name      => Rails.application.secrets.gmail_smtp_username,
+      :password       => Rails.application.secrets.gmail_smtp_password,
+      :domain         => 'gmail.com',
+      :enable_starttls_auto => true
+  }  
 end

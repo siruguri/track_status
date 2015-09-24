@@ -7,6 +7,8 @@ class EmailController < ApplicationController
     if params[:mandrill_events]
       r=ReceivedEmail.new(source: 'mandrill', payload: params[:mandrill_events])
       r.save
+
+      GeneralMailer.notification_email(payload: params[:mandrill_events].inspect).deliver_later
       render 'pages/success'
     else
       render 'pages/fail', status: 400
