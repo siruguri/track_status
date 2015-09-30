@@ -8,7 +8,7 @@ class ReadabilityParserWrapper
   end
   
   def initialize
-    @_key = ENV['READABILITY_API_KEY']
+    @_key = Rails.application.secrets.readability_api_key
   end
 
   def parse(uri_string)
