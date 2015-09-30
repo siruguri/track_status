@@ -20,7 +20,7 @@ class EmailControllerTest < ActionController::TestCase
     init_re_count = ReceivedEmail.count
     init_wa_count = WebArticle.count
     assert_enqueued_with(job: ActionMailer::DeliveryJob) do
-      post :transform, JSON.parse(mandrill_request)
+      post :transform, {mandrill_events: mandrill_request}
     end
 
     assert_equal init_wa_count + 1, WebArticle.count

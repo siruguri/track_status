@@ -5,6 +5,7 @@ require 'simplecov'
 require 'rails/test_help'
 require 'mocha/mini_test'
 
+require 'capybara/poltergeist'
 require 'minitest/rails/capybara'
 
 Dir[Rails.root.join('test/support/**/*.rb')].each { |f| require f }
@@ -15,6 +16,7 @@ class ActiveSupport::TestCase
   include FixtureFiles
   fixtures :all
 end
+Capybara.javascript_driver = :poltergeist
 
 class ActionController::TestCase
   # Let controller test cases open files

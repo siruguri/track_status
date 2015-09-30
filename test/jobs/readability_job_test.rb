@@ -4,7 +4,7 @@ require 'webmock/minitest'
 class ReadabilityJobTest < ActiveSupport::TestCase
   def setup
     stub_request(:get, "https://www.readability.com/api/content/v1/parser").
-      with(query: hash_including({format: 'json', token: '476680056d0053eed25ebd46d9b40a72975cdb1b', url: /^http/})).
+      with(query: hash_including({format: 'json', token: 'testreadabilityapikey', url: /^http/})).
       to_return(status: 200, body: fixture_file('readability-aldaily-file-1.html'),
                 headers: {'Content-Type' => 'application/json; charset=utf-8'})
   end

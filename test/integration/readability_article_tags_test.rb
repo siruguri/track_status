@@ -4,7 +4,8 @@ class ReadabilityArticlesTagsTest < Capybara::Rails::TestCase
   include Rack::Test::Methods
 
   def setup
-    Capybara.default_driver = :selenium
+    Capybara.current_driver = :webkit
+    page.driver.allow_url("fonts.googleapis.com")
   end
   
   test 'can see tags list' do

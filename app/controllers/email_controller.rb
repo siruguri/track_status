@@ -5,20 +5,22 @@ class EmailController < ApplicationController
 
   def transform
     if params[:mandrill_events]
-      r=ReceivedEmail.new(source: 'mandrill', payload: params[:mandrill_events])
-      r.save
+      mandrill_hash = JSON.parse params[:mandrill_events]
 
-      GeneralMailer.notification_email(payload: params[:mandrill_events].inspect).deliver_later
+      r=ReceivedEmail.create(source: 'mandrill', payload: params[:mandrill_events])
+      GeneralMailer.notification_email(payload: params[:mandrill_events]).deliver_later
 
-      body = params[:mandrill_events][0]['msg']['raw_msg']
-      m = /(http.?:\/\/[^\s]+)/.match body
-      uri = m[1]
-      if uri
-        parser = ReadabilityParserWrapper.new
-        resp = parser.parse uri
-        w = WebArticle.create(original_url: resp.url, body: resp.content)
+      if mandrill_hash.size > 0 and mandrill_hash[0]['msg'] and
+        mandrill_hash[0]['msg']['raw_msg']
+        body = mandrill_hash[0]['msg']['raw_msg']
+        m = /(http.?:\/\/[^\s]+)/.match body
+        uri = m[1]
+        if uri
+          parser = ReadabilityParserWrapper.new
+          resp = parser.parse uri
+          w = WebArticle.create(original_url: resp.url, body: resp.content)
+        end
       end
-
       render 'pages/success'
     else
       render 'pages/fail', status: 400
