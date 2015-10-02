@@ -1,14 +1,19 @@
-.tagbox
-  %input.form-control.another-test-class#tags-list{name: 'tags-list'}
+= form_tag '/readability/tag_article', class: 'tagbox', id: 'tags-form' do
+  = hidden_field_tag 'token_list', nil, id: 'token-list'
+  = hidden_field_tag 'article_id_tag', @article.id.to_s, id: 'article-id-tag'
+  %input.form-control#tags-list{name: 'tags-list'}
   %input.btn.btn-default#tags-list-submit{type: 'submit', value: 'Add tags'}
+
 .next-link
   = link_to 'Next', readability_list_path(start: @offset + 1), id: 'next'
-#article-id-tag{display: 'none'}
-  = @article.id
+.prev-link
+  = link_to 'Prev', readability_list_path(start: @offset - 1), id: 'prev'
 .original-link
   %a{href: @article.original_url}
     Original Article
   %span.uppercase
     = "(#{domain_name(@article.original_url)})"
+.tags-display
+  = @article.tags.pluck(:label).join ", "
 .readability-wrapper
   = raw(@article.body)

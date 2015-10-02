@@ -7,7 +7,20 @@ class ReadabilityController < ApplicationController
       render json: w.top_grams(sort_score)
     end
   end
+  def tag_article
+    tag_list = params[:token_list].split(/,/)
+    tag_list.each do |t|
+      t = ArticleTag.find_or_create_by label: t
+      a = WebArticle.find params[:article_id_tag].to_i
+      
+      unless a.tags.where(label: t.label).count != 0
+        a.tags << t
+      end
+    end
 
+    redirect_to readability_list_path
+  end
+  
   def run_scrape
     # All jobs in Sidekiq queue run in the last 24 hours - use 23 as a buffer for cron jobs
     # To work.
@@ -30,6 +43,9 @@ class ReadabilityController < ApplicationController
     @offset = params[:start] ? params[:start].to_i : 0
     @article = WebArticle.order(created_at: :desc).offset(@offset).limit(1).first
 
+    unless @article
+      @article = WebArticle.new original_url: 'no uri', body: 'no body'
+    end
     render :list
   end
 end

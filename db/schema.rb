@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150503004645) do
+ActiveRecord::Schema.define(version: 20151001232721) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -24,6 +24,19 @@ ActiveRecord::Schema.define(version: 20150503004645) do
   create_table "account_entries_tags", force: :cascade do |t|
     t.integer  "transaction_tag_id"
     t.integer  "account_entry_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "article_taggings", force: :cascade do |t|
+    t.integer  "article_tag_id"
+    t.integer  "web_article_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "article_tags", force: :cascade do |t|
+    t.string   "label"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -117,6 +130,43 @@ ActiveRecord::Schema.define(version: 20150503004645) do
     t.string   "request_referer"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "rt_critic_ratings", force: :cascade do |t|
+    t.float   "original_score"
+    t.integer "original_score_base"
+    t.integer "rt_movie_entry_id"
+    t.string  "tomato"
+    t.integer "rt_critic_id"
+  end
+
+  add_index "rt_critic_ratings", ["rt_movie_entry_id", "rt_critic_id"], name: "index_rt_critic_ratings_on_rt_movie_entry_id_and_rt_critic_id", unique: true
+
+  create_table "rt_critics", force: :cascade do |t|
+    t.string "name"
+  end
+
+  create_table "rt_movie_entries", force: :cascade do |t|
+    t.string   "original_uri"
+    t.string   "movie_title"
+    t.string   "ratings"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "movie_name"
+  end
+
+  create_table "scraper_registrations", force: :cascade do |t|
+    t.string   "db_model"
+    t.string   "scraper_class"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "scraper_requests", force: :cascade do |t|
+    t.string   "uri"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "scraper_registration_id"
   end
 
   create_table "statuses", force: :cascade do |t|

@@ -64,7 +64,8 @@ class ReadabilityControllerTest < ActionController::TestCase
       assert_template :list
       assert_match /Combines all/, response.body
 
-      assert_select('a', 2) do |link|
+      # 3 links - next, prev and orig
+      assert_select('a', 3) do |link|
         if link.attribute('id').value == 'next'
           assert_match /\?start=1/, link.attribute('href').value
         else
@@ -76,6 +77,11 @@ class ReadabilityControllerTest < ActionController::TestCase
     it 'works when there is no original URL' do
       get :list_articles, site: 'aldaily', start: 2
       assert_template :list
+      assert_select('a', 3) do |link|
+        if link.attribute('id').value == 'prev'
+          assert_match /\?start=0/, link.attribute('href').value
+        end
+      end      
     end
   end
 
@@ -101,6 +107,32 @@ class ReadabilityControllerTest < ActionController::TestCase
       exp_bigrams_json = "[{\"id\":0,\"name\":\"value memo\"},{\"id\":1,\"name\":\"initial value\"},{\"id\":2,\"name\":\"accumulator value\"},{\"id\":3,\"name\":\"return value\"},{\"id\":4,\"name\":\"final value\"}]"     
 
       assert_equal exp_bigrams_json, response.body
+    end
+  end
+
+  describe 'Tagging' do
+    before do
+      @article = web_articles(:web_article_1)
+      @avlb_tag = article_tags(:tag_1)      
+    end
+    it 'tags correctly with new tags' do
+      init_tag_count = ArticleTag.count
+      assert_difference('ArticleTagging.count', 2) do
+        post :tag_article, {article_id_tag: @article.id, token_list: @avlb_tag.label+',will be a new label'}
+      end
+      assert_redirected_to readability_list_path
+      
+      assert_equal init_tag_count + 1, ArticleTag.count
+    end
+
+    it 'tags correctly with a new tag' do
+      init_tag_count = ArticleTag.count
+      assert_difference('ArticleTagging.count', 1) do
+        post :tag_article, {article_id_tag: @article.id, token_list: article_tags(:article_tag_existing).label+
+                                                         ',will be a new label'}
+      end
+
+      assert_equal init_tag_count + 1, ArticleTag.count
     end
   end
 end

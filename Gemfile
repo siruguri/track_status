@@ -43,9 +43,11 @@ gem 'twitter'
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  
   gem 'sqlite3'
+  gem 'pry'
+  gem 'pry-remote'
+  gem 'pry-stack_explorer'
+  gem 'pry-byebug'
   
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug'
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
 
@@ -63,6 +65,7 @@ end
 
 group :test do
   gem 'poltergeist'
+  gem 'selenium-webdriver'
   gem 'mocha'
   gem 'simplecov'
   gem 'webmock'

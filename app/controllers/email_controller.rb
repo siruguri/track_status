@@ -14,8 +14,8 @@ class EmailController < ApplicationController
         mandrill_hash[0]['msg']['raw_msg']
         body = mandrill_hash[0]['msg']['raw_msg']
         m = /(http.?:\/\/[^\s]+)/.match body
-        uri = m[1]
-        if uri
+        if m
+          uri = m[1]
           parser = ReadabilityParserWrapper.new
           resp = parser.parse uri
           w = WebArticle.create(original_url: resp.url, body: resp.content)

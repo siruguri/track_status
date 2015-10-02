@@ -16,7 +16,6 @@ class ActiveSupport::TestCase
   include FixtureFiles
   fixtures :all
 end
-Capybara.javascript_driver = :poltergeist
 
 class ActionController::TestCase
   # Let controller test cases open files

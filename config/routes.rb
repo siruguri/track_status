@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   get '/readability/run_scrape' => 'readability#run_scrape'
   get '/readability/list' => 'readability#list_articles'
   get '/readability/tag_words' => 'readability#tag_words'
+  post '/readability/tag_article' => 'readability#tag_article'
   
   resources 'channel_posts', only: [:index, :create, :new]
   resources 'account_entries', only: [:new, :create] do
