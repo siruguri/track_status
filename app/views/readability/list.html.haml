@@ -1,4 +1,4 @@
-= form_tag '/readability/tag_article', class: 'tagbox', id: 'tags-form' do
+= form_tag readability_tag_article_path, class: 'tagbox', id: 'tags-form' do
   = hidden_field_tag 'token_list', nil, id: 'token-list'
   = hidden_field_tag 'article_id_tag', @article.id.to_s, id: 'article-id-tag'
   %input.form-control#tags-list{name: 'tags-list'}
