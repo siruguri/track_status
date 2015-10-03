@@ -8,17 +8,24 @@ class ReadabilityController < ApplicationController
     end
   end
   def tag_article
+    offset = params[:start] ? params[:start].to_i : 0
+    
     tag_list = params[:token_list].split(/,/)
+    a = nil
     tag_list.each do |t|
       t = ArticleTag.find_or_create_by label: t
-      a = WebArticle.find params[:article_id_tag].to_i
+      begin 
+        a = WebArticle.find params[:article_id_tag].to_i
+      rescue ActiveRecord::RecordNotFound => e
+        a = WebArticle.first
+      end
       
       unless a.tags.where(label: t.label).count != 0
         a.tags << t
       end
     end
 
-    redirect_to readability_list_path
+    redirect_to readability_list_path(start: offset)
   end
   
   def run_scrape
@@ -41,11 +48,20 @@ class ReadabilityController < ApplicationController
 
   def list_articles
     @offset = params[:start] ? params[:start].to_i : 0
-    @article = WebArticle.order(created_at: :desc).offset(@offset).limit(1).first
+    @articles = WebArticle.order(created_at: :desc).offset(@offset > 0 ? @offset - 1 : @offset).limit(
+      @offset > 0 ? 3 : 2)
 
-    unless @article
+    @prev = @offset == 0 ? -1 : @offset - 1
+    @next = @articles.count > 1 ? @offset + 1 : -1
+    
+    if @articles.count == 0
       @article = WebArticle.new original_url: 'no uri', body: 'no body'
+    elsif @offset == 0
+      @article = @articles[0]
+    else
+      @article = @articles[1]
     end
+    
     render :list
   end
 end

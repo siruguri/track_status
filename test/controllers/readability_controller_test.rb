@@ -64,8 +64,8 @@ class ReadabilityControllerTest < ActionController::TestCase
       assert_template :list
       assert_match /Combines all/, response.body
 
-      # 3 links - next, prev and orig
-      assert_select('a', 3) do |link|
+      # 3 links - next, and orig because start offset is 0 by default
+      assert_select('a', 2) do |link|
         if link.attribute('id').value == 'next'
           assert_match /\?start=1/, link.attribute('href').value
         else
@@ -81,7 +81,7 @@ class ReadabilityControllerTest < ActionController::TestCase
         if link.attribute('id').value == 'prev'
           assert_match /\?start=0/, link.attribute('href').value
         end
-      end      
+      end
     end
   end
 
@@ -117,10 +117,11 @@ class ReadabilityControllerTest < ActionController::TestCase
     end
     it 'tags correctly with new tags' do
       init_tag_count = ArticleTag.count
+      start_offset = 545
       assert_difference('ArticleTagging.count', 2) do
-        post :tag_article, {article_id_tag: @article.id, token_list: @avlb_tag.label+',will be a new label'}
+        post :tag_article, {article_id_tag: @article.id, token_list: @avlb_tag.label+',will be a new label', start: start_offset}
       end
-      assert_redirected_to readability_list_path
+      assert_redirected_to readability_list_path(start: start_offset)
       
       assert_equal init_tag_count + 1, ArticleTag.count
     end
@@ -133,6 +134,16 @@ class ReadabilityControllerTest < ActionController::TestCase
       end
 
       assert_equal init_tag_count + 1, ArticleTag.count
+    end
+    
+    it 'tags correctly with fallback to first article' do
+      init_tag_count = WebArticle.first.tags.count
+      assert_difference('ArticleTag.count', 1) do
+        post :tag_article, {token_list: article_tags(:article_tag_existing).label+
+                            ',will be a new label'}
+      end
+
+      assert_equal init_tag_count + 2, WebArticle.first.tags.count
     end
   end
 end
