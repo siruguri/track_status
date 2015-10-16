@@ -8,3 +8,15 @@ reanalysis_2:
   source: MyString
   payload: <%= [{'msg': {'raw_msg': "http://www.reanalysis_2.com/uri1\ntags:newtag, existing 1"} } ].to_json %>
 
+reanalysis_3:
+  source: MyString
+  payload: <%= [{'msg' => {'raw_msg' => "http://www.reanalysis_1.com/uri1\nno tagolas here move on"} } ].to_json %>
+
+veryblank_1:
+  source: MyString
+  payload: <%= [] %>
+
+veryblank_2:
+  source: MyString
+  payload: <%= [{'someother mesg' => 1} ].to_json %>
+

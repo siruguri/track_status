@@ -10,14 +10,16 @@ class ReanalyzeEmailsJob < ActiveJob::Base
 
   def perform
     ReceivedEmail.all.map do |email|
-      payload = email.payload[0]['msg']['raw_msg']
+      if email.payload and email.payload.size > 0 and email.payload[0].keys.include?('msg')
+        payload = email.payload[0]['msg']['raw_msg']
 
-      uri_tag = uri_and_tags(payload)
-      uri_tag[:tags].each do |t|
-        if w = WebArticle.find_by_original_url(uri_tag[:uri])
-          unless ArticleTagging.joins(:article_tag).where(web_article: w, article_tags: {label: t}).count > 0
-            t = ArticleTag.find_or_create_by(label: t)
-            ArticleTagging.create web_article: w, article_tag: t
+        uri_tag = uri_and_tags(payload)
+        uri_tag[:tags].each do |t|
+          if w = WebArticle.find_by_original_url(uri_tag[:uri])
+            unless ArticleTagging.joins(:article_tag).where(web_article: w, article_tags: {label: t}).count > 0
+              t = ArticleTag.find_or_create_by(label: t)
+              ArticleTagging.create web_article: w, article_tag: t
+            end
           end
         end
       end
