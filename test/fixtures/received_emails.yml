@@ -1,9 +1,10 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
+reanalysis_1:
   source: MyString
-  payload: MyText
+  payload: <%= [{'msg' => {'raw_msg' => "http://www.reanalysis_1.com/uri1\ntags:newtag1, newtag,existing 1"} } ].to_json %>
 
-two:
+reanalysis_2:
   source: MyString
-  payload: MyText
+  payload: <%= [{'msg': {'raw_msg': "http://www.reanalysis_2.com/uri1\ntags:newtag, existing 1"} } ].to_json %>
+

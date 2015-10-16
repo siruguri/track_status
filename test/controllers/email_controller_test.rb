@@ -15,6 +15,12 @@ class EmailControllerTest < ActionController::TestCase
   test 'has processing route' do
     assert_routing({method: 'post', path: '/process_email'}, {controller: 'email', action: 'transform'})
   end
+
+  test 'reanalysis works' do
+    assert_enqueued_with(job: ReanalyzeEmailsJob) do
+      post :reanalyze
+    end
+  end
   
   test 'responds to mandrill request' do
     init_re_count = ReceivedEmail.count
@@ -25,7 +31,8 @@ class EmailControllerTest < ActionController::TestCase
 
     assert_equal init_wa_count + 1, WebArticle.count
     assert_equal init_re_count + 1, ReceivedEmail.count
-
+    assert_equal Array, ReceivedEmail.last.payload.class
+    
     assert_match 'success', response.body
   end
 end

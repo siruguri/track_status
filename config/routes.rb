@@ -6,12 +6,9 @@ Rails.application.routes.draw do
   
   delete '/statuses' => 'statuses#destroy'
   
-  post '/bindb/add/:bin' => 'bindb#add'
-  get '/bindb/index' => 'bindb#index'
-  get '/bindb/dump' => 'bindb#dump'
-
   post '/process_email' => 'email#transform'
-
+  post '/reanalyze_email' => 'email#reanalyze'
+  
   # Various things this app does
   get '/reddits/userinfo/:user' => 'reddits#userinfo'
   get '/readability/run_scrape' => 'readability#run_scrape'

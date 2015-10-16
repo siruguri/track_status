@@ -3,17 +3,22 @@ class EmailController < ApplicationController
 
   skip_before_filter :verify_authenticity_token
 
+  def reanalyze
+    ReanalyzeEmailsJob.perform_later
+    render 'pages/success'
+  end
+
   def transform
     if params[:mandrill_events]
       mandrill_hash = JSON.parse params[:mandrill_events]
 
-      r=ReceivedEmail.create(source: 'mandrill', payload: params[:mandrill_events])
+      r=ReceivedEmail.create(source: 'mandrill', payload: JSON.parse(params[:mandrill_events]))
       GeneralMailer.notification_email(payload: params[:mandrill_events]).deliver_later
 
       if mandrill_hash.size > 0 and mandrill_hash[0]['msg'] and
         mandrill_hash[0]['msg']['raw_msg']
         body = mandrill_hash[0]['msg']['raw_msg']
-        m = /(http.?:\/\/[^\s]+)/.match body
+        m = DataProcessHelpers.hyperlink_pattern.match body
         if m
           uri = m[1]
           parser = ReadabilityParserWrapper.new
