@@ -2,21 +2,20 @@
 
 reanalysis_1:
   source: MyString
-  payload: <%= [{'msg' => {'raw_msg' => "http://www.reanalysis_1.com/uri1\ntags:newtag1, newtag,existing 1"} } ].to_json %>
+  payload: <%= ([{'msg' => {'raw_msg' => "http://www.reanalysis_1.com/uri1\ntags:newtag1, newtag,existing 1"} } ]).to_yaml.inspect %>
 
 reanalysis_2:
   source: MyString
-  payload: <%= [{'msg': {'raw_msg': "http://www.reanalysis_2.com/uri1\ntags:newtag, existing 1"} } ].to_json %>
+  payload: <%= [{'msg': {'raw_msg': "http://www.reanalysis_2.com/uri1\ntags:newtag, existing 1"} } ].to_yaml.inspect %>
 
 reanalysis_3:
   source: MyString
-  payload: <%= [{'msg' => {'raw_msg' => "http://www.reanalysis_1.com/uri1\nno tagolas here move on"} } ].to_json %>
+  payload: <%= [{'msg' => {'raw_msg' => "http://www.reanalysis_1.com/uri1\nno tagolas here move on"} } ].to_yaml.inspect %>
 
 veryblank_1:
   source: MyString
-  payload: <%= [] %>
+  payload: <%= [].to_yaml.inspect %>
 
 veryblank_2:
   source: MyString
-  payload: <%= [{'someother mesg' => 1} ].to_json %>
-
+  payload: <%= [{'someother mesg' => 1} ].to_yaml.inspect %>
