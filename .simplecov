@@ -7,7 +7,8 @@ unless defined?(Spring)
     add_filter 'bundle'
     add_filter 'bin'
     add_filter 'Rakefile'
-
+    coverage_dir 'simple_coverage'
+    
     minimum_coverage 95
   end
 

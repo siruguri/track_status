@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151001232721) do
+ActiveRecord::Schema.define(version: 20151025002747) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -132,43 +132,6 @@ ActiveRecord::Schema.define(version: 20151001232721) do
     t.datetime "updated_at"
   end
 
-  create_table "rt_critic_ratings", force: :cascade do |t|
-    t.float   "original_score"
-    t.integer "original_score_base"
-    t.integer "rt_movie_entry_id"
-    t.string  "tomato"
-    t.integer "rt_critic_id"
-  end
-
-  add_index "rt_critic_ratings", ["rt_movie_entry_id", "rt_critic_id"], name: "index_rt_critic_ratings_on_rt_movie_entry_id_and_rt_critic_id", unique: true
-
-  create_table "rt_critics", force: :cascade do |t|
-    t.string "name"
-  end
-
-  create_table "rt_movie_entries", force: :cascade do |t|
-    t.string   "original_uri"
-    t.string   "movie_title"
-    t.string   "ratings"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "movie_name"
-  end
-
-  create_table "scraper_registrations", force: :cascade do |t|
-    t.string   "db_model"
-    t.string   "scraper_class"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "scraper_requests", force: :cascade do |t|
-    t.string   "uri"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "scraper_registration_id"
-  end
-
   create_table "statuses", force: :cascade do |t|
     t.string   "source"
     t.string   "description"
@@ -181,6 +144,30 @@ ActiveRecord::Schema.define(version: 20151001232721) do
     t.string   "tag_name"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "twitter_profiles", force: :cascade do |t|
+    t.string   "handle"
+    t.string   "location"
+    t.string   "bio"
+    t.datetime "member_since"
+    t.string   "website"
+    t.integer  "num_followers"
+    t.integer  "num_following"
+    t.integer  "num_tweets"
+    t.integer  "num_favorites"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "twitter_request_records", force: :cascade do |t|
+    t.string   "handle"
+    t.integer  "cursor"
+    t.string   "request_type"
+    t.boolean  "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean  "ran_limit"
   end
 
   create_table "users", force: :cascade do |t|

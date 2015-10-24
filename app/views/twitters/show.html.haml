@@ -1,0 +1,12 @@
+%p
+  If you don't see the data you expected, try refreshing.
+
+%p
+- if @bio
+  %ul
+    %li
+      Handle: #{@bio.handle}
+    %li
+      Location: #{@bio.location}
+    %li
+      Bio: #{@bio.bio}

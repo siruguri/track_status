@@ -6,15 +6,22 @@ Rails.application.routes.draw do
   
   delete '/statuses' => 'statuses#destroy'
   
+  # Various things this app does
   post '/process_email' => 'email#transform'
   post '/reanalyze_email' => 'email#reanalyze'
   
-  # Various things this app does
   get '/reddits/userinfo/:user' => 'reddits#userinfo'
+  
   get '/readability/run_scrape' => 'readability#run_scrape'
   get '/readability/list' => 'readability#list_articles'
   get '/readability/tag_words' => 'readability#tag_words'
   post '/readability/tag_article' => 'readability#tag_article'
+
+  scope :twitter, as: 'twitter', controller: 'twitters' do
+    get :input_handle
+    post :bio
+    get '/:handle', action: :show
+  end
   
   resources 'channel_posts', only: [:index, :create, :new]
   resources 'account_entries', only: [:new, :create] do
