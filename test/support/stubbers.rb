@@ -1,4 +1,11 @@
-def valid_twitter_response
+def valid_twitter_plaintweets_response
+  fixture_file('twitter_plaintweets_array.json')
+end
+def valid_twitter_oldertweets_response
+  fixture_file('twitter_oldertweets_array.json')
+end
+
+def valid_twitter_profile_response
   {
     "contributors_enabled": false,
    "created_at": "Sat Dec 14 04:35:55 +0000 2013",
@@ -34,8 +41,14 @@ def set_net_stubs
 
 
   stub_request(:get, "https://api.twitter.com/1.1/users/show.json?screen_name=twitter_handle").
-    to_return(status: 200, body: valid_twitter_response)
+    to_return(status: 200, body: valid_twitter_profile_response)
   
   stub_request(:get, "https://api.twitter.com/1.1/users/show.json?screen_name=nota_twitter_handle").
     to_return(status: 404, body: invalid_twitter_response)
+  
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=false&screen_name=twitter_handle&trim_user=1").
+    to_return(status: 200, body: valid_twitter_plaintweets_response)
+
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=false&max_id=1212&screen_name=twitter_handle&trim_user=1").
+    to_return(status: 200, body: valid_twitter_oldertweets_response)
 end

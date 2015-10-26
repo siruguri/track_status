@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151025002747) do
+ActiveRecord::Schema.define(version: 20151025237115) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -142,6 +142,17 @@ ActiveRecord::Schema.define(version: 20151025002747) do
 
   create_table "transaction_tags", force: :cascade do |t|
     t.string   "tag_name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "tweet_packets", force: :cascade do |t|
+    t.text     "tweets_list"
+    t.datetime "newest_tweet_at"
+    t.datetime "oldest_tweet_at"
+    t.integer  "max_id",          limit: 8
+    t.integer  "since_id",        limit: 8
+    t.string   "handle"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

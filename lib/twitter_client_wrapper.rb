@@ -1,5 +1,7 @@
 class TwitterClientWrapper
   attr_reader :client
+  class TwitterClientArgumentException < Exception
+  end
   
   def initialize
     @client = Twitter::REST::Client.new do |config|
@@ -40,19 +42,39 @@ class TwitterClientWrapper
   def fetch_profile!(handle_rec)
     payload = get(handle_rec, :profile, {count: 100})
 
-    unless payload.keys.include? :errors
-      status = true
-      handle_rec.bio = payload[:description]
-      handle_rec.location = payload[:location]
+    if payload[:data] != ''
+      handle_rec.bio = payload[:data][:description]
+      handle_rec.location = payload[:data][:location]
 
       handle_rec.save
-    else
-      status = false
-      payload = {max_id: -1}
+    end
+  end
+
+  def fetch_tweets!(handle_rec, relative_to_packet = nil, direction = :older)
+    limiter = nil
+    unless relative_to_packet.nil?
+      case direction
+      when :newer
+        limiter = :since_id
+        limit_id = relative_to_packet.first[:id]
+      when :older
+        limiter = :max_id
+        limit_id = relative_to_packet.last[:id]
+      else
+        raise TwitterClientArgumentException.new("#{direction} is not a valid direction from :newer and :older")
+      end
     end
 
-    TwitterRequestRecord.create request_type: :profile, cursor: payload[:max_id], status: status,
-                                handle: handle_rec.handle
+    payload = get(handle_rec, :tweets, limiter.nil? ? {} : {limiter: limiter, limit_id: limit_id})
+
+    if payload[:data] != ''
+      data = payload[:data]
+      tweets_list = data.collect { |tweet| {mesg: tweet[:text], id: tweet[:id]} }
+
+      TweetPacket.create(handle: handle_rec.handle, tweets_list: tweets_list, max_id: data.last[:id],
+                         since_id: data.first[:id],
+                         newest_tweet_at: data.first[:created_at], oldest_tweet_at: data.last[:created_at])
+    end
   end
 
   def get(handle_rec, command = :profile, opts = {})
@@ -62,13 +84,38 @@ class TwitterClientWrapper
     when :profile
       req = Twitter::REST::Request.new(@client, :get, "/1.1/users/show.json", {screen_name: handle_rec.handle})
     when :tweets
-      req = Twitter::REST::Request.new(@client, :get, "/1.1/statuses/user_timeline.json", {screen_name: handle_rec.handle})
+      addl_opts = {}
+      unless opts.empty?
+        addl_opts = {opts[:limiter] => opts[:limit_id]}        
+      end
+      
+      req = Twitter::REST::Request.new(@client, :get, "/1.1/statuses/user_timeline.json", {
+                                         count: 200, include_rts: false, screen_name: handle_rec.handle, trim_user: 1,
+                                         exclude_replies: true}.merge(addl_opts))
     end
 
+    status = true
+    cursor = -1
+    Rails.logger.debug("Performing query to twitter: #{req.path} with option #{req.options}")
     begin
-      req.perform
+      Rails.logger.debug("Performing query to twitter: #{req.path} with option #{req.options}")
+      response = req.perform
     rescue Twitter::Error::NotFound => e
-      {errors: 'Handle not found'}
+      status = false
+    else
+      case command
+      when :tweets
+        Rails.logger.debug "Response is #{response}"
+        cursor = response.last[:max_id]
+      end
     end
+
+    TwitterRequestRecord.create request_type: command, cursor: cursor, status: status, handle: handle_rec.handle
+
+    if status
+      {data: response, errors: []}
+    else
+      {data: '', errors: 'Handle not found'}
+    end      
   end
 end

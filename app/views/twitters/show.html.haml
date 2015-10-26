@@ -2,11 +2,19 @@
   If you don't see the data you expected, try refreshing.
 
 %p
-- if @bio
-  %ul
-    %li
-      Handle: #{@bio.handle}
-    %li
-      Location: #{@bio.location}
-    %li
-      Bio: #{@bio.bio}
+  - if @bio
+    %ul
+      %li
+        Handle: #{@bio.handle}
+      %li
+        Location: #{@bio.location}
+      %li
+        Bio: #{@bio.bio}
+      - if @tweets_list && @tweets_list.count > 0
+        %li
+          Tweets retrieved: #{@tweets_list.count} (from
+          %b
+            #{@tweets_list.first.newest_tweet_at} to #{@tweets_list.last.oldest_tweet_at}
+          )
+        %li
+          Word cloud: #{@word_cloud}

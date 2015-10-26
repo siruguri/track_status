@@ -36,3 +36,4 @@ bower.json
 local/
 /simple_coverage/
 /coverage/
+.DS_Store

@@ -18,8 +18,9 @@ Rails.application.routes.draw do
   post '/readability/tag_article' => 'readability#tag_article'
 
   scope :twitter, as: 'twitter', controller: 'twitters' do
+    get :set_twitter_token
     get :input_handle
-    post :bio
+    post :twitter_call
     get '/:handle', action: :show
   end
   
