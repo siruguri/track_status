@@ -1,0 +1,5 @@
+oauth_token_1:
+  token: abcdefgh
+  secret: abcdefgh_secret
+  source: twitter
+  user: user_1

@@ -1,6 +1,6 @@
 tweet_packet_1:
   handle: twitter_handle
-  tweets_list: <%= [{mesg: 'a', id: 1}, {mesg: 'b', id: 2}, {mesg: 'c', id: 1212}].to_yaml.inspect %>
+  tweets_list: <%= [{mesg: 'rt @bobafett dog cat', id: 1, retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear http://t.co/gboESznVDm', id: 2}, {mesg: 'cheetah', id: 1212}].to_yaml.inspect %>
   since_id: 12981109201
   max_id: 9980921
   newest_tweet_at: <%= Time.now - 4.hours %>

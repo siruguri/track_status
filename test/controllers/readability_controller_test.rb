@@ -63,22 +63,28 @@ class ReadabilityControllerTest < ActionController::TestCase
       get :list_articles, site: 'aldaily'
       assert_template :list
       assert_match /Combines all/, response.body
-
-      # 3 links - next, and orig because start offset is 0 by default
-      assert_select('a', 2) do |link|
-        if link.attribute('id').value == 'next'
-          assert_match /\?start=1/, link.attribute('href').value
-        else
-          assert_equal 'http://www.origsource.com/article_3', link.attribute('href').value
+      
+      # 4 links - 2 header, next, and orig because start offset is 0 by default
+      all_hrefs = ''
+      assert_select('a', 4) do |links|
+        links.each do |link|
+          if link.attribute('id') and link.attribute('id').value == 'next'
+            assert_match /\?start=1/, link.attribute('href').value
+          end
+          all_hrefs += link.attribute('href').value
         end
       end
+
+      assert_match /http...www.origsource.com.article.3/, all_hrefs
     end
 
     it 'works when there is no original URL' do
       get :list_articles, site: 'aldaily', start: 2
       assert_template :list
-      assert_select('a', 3) do |link|
-        if link.attribute('id').value == 'prev'
+
+      # 2 links in header
+      assert_select('a', 5) do |link|
+        if link.attribute('id') and link.attribute('id').value == 'prev'
           assert_match /\?start=0/, link.attribute('href').value
         end
       end

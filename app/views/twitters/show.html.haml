@@ -3,18 +3,21 @@
 
 %p
   - if @bio
-    %ul
-      %li
-        Handle: #{@bio.handle}
-      %li
-        Location: #{@bio.location}
-      %li
-        Bio: #{@bio.bio}
-      - if @tweets_list && @tweets_list.count > 0
-        %li
-          Tweets retrieved: #{@tweets_list.count} (from
-          %b
-            #{@tweets_list.first.newest_tweet_at} to #{@tweets_list.last.oldest_tweet_at}
-          )
-        %li
-          Word cloud: #{@word_cloud}
+    .twitter-box.row
+      .twitter-biobox
+        #{@bio.handle}
+      .twitter-biobox
+        #{@bio.location}
+      .twitter-biobox
+        #{@bio.bio}
+    - if @tweets_list && @tweets_list.count > 0
+      .paragraph
+        #{@tweets_count} Tweets retrieved (from
+        %b
+          #{nice_date(@tweets_list.first.newest_tweet_at)} to #{nice_date(@tweets_list.last.oldest_tweet_at)}
+        )
+      = twitter_cloud_box_partial(:all, 'All Tweets')
+      = twitter_cloud_box_partial(:orig, 'Original Tweets')
+      = twitter_cloud_box_partial(:hashtags, 'Hashtags')
+      = twitter_cloud_box_partial(:handles, 'Handles')
+              

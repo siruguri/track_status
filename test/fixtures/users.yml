@@ -1,0 +1,6 @@
+DEFAULTS: &DEFAULTS
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>
+
+user_1:
+  email: user1@valid.com
+  <<: *DEFAULTS

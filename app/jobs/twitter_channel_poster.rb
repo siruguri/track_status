@@ -11,8 +11,7 @@ class TwitterChannelPoster < ActiveJob::Base
 
     tweet = channel_post.message + " https://#{ENV['RAILS_REDIRECT_HOSTNAME']}#{ENV['RAILS_REDIRECT_PORT']?':'+ENV['RAILS_REDIRECT_PORT']:''}#{ENV['RAILS_REDIRECT_PATH_PREFIX']}/r/#{channel_post.redirect_maps[0].src}"
 
-    logger.info("Wrote #{tweet}")
-    a=@twitter_client.update(tweet) 
+    a=@twitter_client.update tweet
     channel_post.total_post_count +=1
     channel_post.media_records.build({channel_id: a.id, channel_name: 'twitter'})
 

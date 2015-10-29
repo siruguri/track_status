@@ -1,0 +1,28 @@
+@mixin box-common() {
+  border-radius: 3px;
+  border: solid 1px;
+}
+
+.twitter-box {
+  @include box-common();
+  border-color: blue;
+  padding: 10px;
+  margin-bottom: 5px;
+}
+
+.twitter-biobox {
+  @include box-common();
+  border-color: black;
+  padding: 2px;
+  float: left;
+  margin-top: 2px;
+  margin-right: 20px;
+}
+
+.twitter-wcbox {
+  @include box-common();
+  padding: 2px;
+  margin-top: 2px;
+  margin-right: 20px;
+  float: left;
+}

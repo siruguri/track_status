@@ -1,3 +1,11 @@
+def app_token_headers
+  {'Accept' => 'application/json', 'Authorization' => /cjCezt7cqCpk2c9XgtufSw9zh.*abcdefgh/}
+end
+
+def single_token_headers
+  {'Accept' => 'application/json', 'Authorization' => /cjCezt7cqCpk2c9XgtufSw9zh.*#{Rails.application.secrets.twitter_single_app_access_token}/}
+end
+
 def valid_twitter_plaintweets_response
   fixture_file('twitter_plaintweets_array.json')
 end
@@ -46,9 +54,19 @@ def set_net_stubs
   stub_request(:get, "https://api.twitter.com/1.1/users/show.json?screen_name=nota_twitter_handle").
     to_return(status: 404, body: invalid_twitter_response)
   
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=false&screen_name=twitter_handle&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
+    with(headers: app_token_headers).
     to_return(status: 200, body: valid_twitter_plaintweets_response)
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=false&max_id=1212&screen_name=twitter_handle&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=1212&screen_name=twitter_handle&trim_user=1").
+    with(headers: app_token_headers).    
     to_return(status: 200, body: valid_twitter_oldertweets_response)
+
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
+    with(headers: single_token_headers).
+    to_return(status: 200, body: valid_twitter_plaintweets_response)
+
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=1212&screen_name=twitter_handle&trim_user=1").
+    with(headers: single_token_headers).    
+    to_return(status: 200, body: valid_twitter_oldertweets_response)  
 end

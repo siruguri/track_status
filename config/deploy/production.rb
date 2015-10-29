@@ -6,7 +6,7 @@ remote_port = ENV['RAILS_REMOTE_PORT']
 
 server remote_server, user: "www-data", port: remote_port, roles: %w(web app db)
 
-set :branch, 'master'
+set :branch, 'twitter'
 set :rails_env, :production
 
 # Custom SSH Options

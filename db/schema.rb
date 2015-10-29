@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151025237115) do
+ActiveRecord::Schema.define(version: 20151026195949) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -97,6 +97,15 @@ ActiveRecord::Schema.define(version: 20151025237115) do
     t.string   "channel_id"
     t.string   "channel_name"
     t.integer  "channel_post_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "oauth_token_hashes", force: :cascade do |t|
+    t.string   "source"
+    t.string   "token"
+    t.string   "secret"
+    t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
