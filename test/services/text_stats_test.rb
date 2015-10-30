@@ -8,6 +8,5 @@ class TextStatsTest < ActiveSupport::TestCase
   test 'basic doc parsing' do
     assert_equal [["good", 3], ["isnt", 2], ["ogabaga1", 1]], TextStats::DocumentModel.new(@doc).sorted_counts
     assert_equal [["good", 3], ["isnt", 2]], TextStats::DocumentModel.new(@doc, twitter: true).sorted_counts
-    assert_match /ogabaga1/, WebArticle.last.original_url
   end
 end

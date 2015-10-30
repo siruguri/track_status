@@ -7,6 +7,11 @@ Rails.application.routes.draw do
   delete '/statuses' => 'statuses#destroy'
   
   # Various things this app does
+  scope :document_analyses, controller: 'analysis' do
+    get :task_page
+    post :execute_task
+  end
+  
   post '/process_email' => 'email#transform'
   post '/reanalyze_email' => 'email#reanalyze'
   

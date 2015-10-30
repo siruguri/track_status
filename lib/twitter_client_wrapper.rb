@@ -39,6 +39,10 @@ class TwitterClientWrapper
   end
 
   private
+  def twitter_regex
+    # http://t.co/gboESznVDm
+    /https?...t\.co.[^\s]+/
+  end
 
   def fetch_profile!(handle_rec)
     payload = get(handle_rec, :profile, {count: 100})
@@ -75,9 +79,23 @@ class TwitterClientWrapper
       tweets_list = data.collect { |tweet| {mesg: tweet[:text], id: tweet[:id],
                                             retweeted_status: tweet[:retweeted_status]} }
 
-      TweetPacket.create(handle: handle_rec.handle, tweets_list: tweets_list, max_id: data.last[:id],
+      tp = TweetPacket.create(handle: handle_rec.handle, max_id: data.last[:id],
                          since_id: data.first[:id],
                          newest_tweet_at: data.first[:created_at], oldest_tweet_at: data.last[:created_at])
+
+      # Scan and store all the URLs into web article models; remove them from the tweets
+      tweets_list.each do |t|
+        t[:mesg].scan(twitter_regex).each do |s|
+          w = WebArticle.find_or_create_by(original_url: s) do |j|
+            j.source = 'twitter'
+            j.tweet_packet = tp
+            j.save
+          end
+        end
+        t[:mesg].gsub! twitter_regex, ''
+      end
+
+      tp.tweets_list = tweets_list; tp.save
     end
 
     payload

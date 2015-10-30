@@ -1,22 +1,25 @@
-%p
-  If you don't see the data you expected, try refreshing.
+.paragraph
+  If you don't see the data you expected, try #{link_to('refreshing this page', twitter_path(handle: @handle))}.
 
 %p
   - if @bio
     .twitter-box.row
-      .twitter-biobox
-        #{@bio.handle}
+      .twitter-biobox.handlebox
+        = link_to @bio.handle, "https://www.twitter.com/#{@bio.handle}", target: '_blank'
       .twitter-biobox
         #{@bio.location}
       .twitter-biobox
         #{@bio.bio}
     - if @tweets_list && @tweets_list.count > 0
       .paragraph
-        #{@tweets_count} Tweets retrieved (from
-        %b
+        #{@tweets_count} Tweets retrieved (from&nbsp;
+        %b><
           #{nice_date(@tweets_list.first.newest_tweet_at)} to #{nice_date(@tweets_list.last.oldest_tweet_at)}
-        )
-      = twitter_cloud_box_partial(:all, 'All Tweets')
+        ) Retweet Percentage #{sprintf("%0g", 100-@orig_tweets_count*100.0/@tweets_count)}
+        = form_tag '/twitter/twitter_call', class: 'inline-block' do
+          = hidden_field_tag :handle, @bio.handle
+          = submit_tag "Get more tweets"
+      = twitter_cloud_box_partial(:retweets, 'Re-Tweets')
       = twitter_cloud_box_partial(:orig, 'Original Tweets')
       = twitter_cloud_box_partial(:hashtags, 'Hashtags')
       = twitter_cloud_box_partial(:handles, 'Handles')

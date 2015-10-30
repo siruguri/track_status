@@ -22,6 +22,7 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
   end
 
   test 'plain tweets fetching works' do
+    wa_ct = WebArticle.count
     assert_difference('TweetPacket.count', 1) do
       h = @handle
       @c.rate_limited do
@@ -29,6 +30,8 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
        end
     end
 
+    assert_equal 2 + wa_ct, WebArticle.count
+    assert_equal 'twitter', WebArticle.last.source
     assert_equal 2, TweetPacket.last.tweets_list.size
   end
 

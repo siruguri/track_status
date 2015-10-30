@@ -4,6 +4,7 @@ class WebArticle < ActiveRecord::Base
 
   has_many :article_taggings
   has_many :tags, through: :article_taggings, class_name: 'ArticleTag', source: :article_tag
+  belongs_to :tweet_packet
   
   validate :original_url, :valid_uri?
   

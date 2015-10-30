@@ -82,13 +82,6 @@ module TextStats
       end
 
       if opts[:twitter]
-        b = @body
-        b.scan(twitter_regex).each do |s|
-          w = WebArticle.find_or_create_by(original_url: Regexp.last_match(0)) do |j|
-            j.source = 'twitter'
-          end
-        end
-        @body.gsub! twitter_regex, ''
         @body.gsub(/[^@#'a-zA-Z0-9]/, ' ').strip.split(/\s+/).map(&:downcase) - stop_words
       else
         @body.gsub(/[^'a-zA-Z0-9]/, ' ').strip.split(/\s+/).map(&:downcase) - stop_words
@@ -139,11 +132,6 @@ module TextStats
     end
 
     private
-    def twitter_regex
-      # http://t.co/gboESznVDm
-      /https?...t\.co.[^\s]+/
-    end
-    
     def generate_frequencies(term_size)
       @tf[term_size] = @counts[term_size].keys.inject({}) do |memo, k|
         memo[k] = @counts[term_size][k]
@@ -196,6 +184,8 @@ module TextStats
         @_counts[k] ||= 0
         @_counts[k] += 1
       end
+
+      self
     end
 
     def universe_count(term)

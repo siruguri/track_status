@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151026195949) do
+ActiveRecord::Schema.define(version: 20151030033218) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -81,6 +81,12 @@ ActiveRecord::Schema.define(version: 20151026195949) do
     t.integer  "user_id"
     t.string   "secret_for"
     t.text     "secrets_hash"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "document_universes", force: :cascade do |t|
+    t.text     "universe"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -215,6 +221,7 @@ ActiveRecord::Schema.define(version: 20151026195949) do
     t.datetime "updated_at"
     t.string   "author"
     t.string   "original_url"
+    t.integer  "tweet_packet_id"
   end
 
 end

@@ -12,9 +12,7 @@ class TwittersControllerTest < ActionController::TestCase
   end
 
   test '#show' do
-    assert_difference('WebArticle.count') do
-      get :show, {handle: twitter_profiles(:twitter_profile_1).handle}
-    end
+    get :show, {handle: twitter_profiles(:twitter_profile_1).handle}
     
     assert_match /ee bee/, response.body
     assert_match /3.*retrieved/i, response.body
