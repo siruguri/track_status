@@ -66,19 +66,10 @@ module TextStats
       counts(term_size).keys
     end
     
-    def tfs(term_size=1)
-      counts(term_size) if @counts[term_size].nil?
-
-      unless @tf[term_size]
-        generate_frequencies(term_size)
-      end
-
-      @tf[term_size]
-    end
-
     def word_array(opts = {})
       if opts[:as_html]
         @body.gsub!(/<\/?[^>]+>/, ' ')
+        @body.gsub!(/\&\#x[\dABCDEF]+/, ' ')
       end
 
       if opts[:twitter]
@@ -132,13 +123,6 @@ module TextStats
     end
 
     private
-    def generate_frequencies(term_size)
-      @tf[term_size] = @counts[term_size].keys.inject({}) do |memo, k|
-        memo[k] = @counts[term_size][k]
-        memo
-      end
-    end
-
     def ngramify(term_size)
       # Convert term list into array of ordered n grams
       # 1gram means the term list itself
@@ -150,20 +134,6 @@ module TextStats
       (0..@term_list.size - term_size).map do |index|
         (0..term_size - 1).map { |rep| @term_list[index+rep] }.join ' '
       end
-    end
-
-    def raw_count_score(a, b)
-      b[:count] <=> a[:count]
-    end
-
-    def boosted_count_score(a, b)
-      words_a = a[:value].split(' ')
-      words_b = b[:value].split(' ')
-
-      ct1 = a[:count] * @gram_counts[words_a[0]] * @gram_counts[words_a[1]]
-      ct2 = b[:count] * @gram_counts[words_b[0]] * @gram_counts[words_b[1]]
-
-      ct2 <=> ct1
     end
 
     def stop_words

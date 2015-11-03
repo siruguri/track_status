@@ -8,6 +8,9 @@ module TwitterHelper
   def twitter_cloud_box_partial(type, title_text)
     word_list =
       case type
+      when :webdocs
+        divisor = @webdocs_count
+        @webdocs_word_cloud
       when :retweets
         divisor = @tweets_count - @orig_tweets_count
         @retweets_word_cloud.select { |w| !(/^\#/.match(w[0]) || /^\@/.match(w[0]))}

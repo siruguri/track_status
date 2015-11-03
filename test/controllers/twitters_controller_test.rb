@@ -11,6 +11,12 @@ class TwittersControllerTest < ActionController::TestCase
     assert_routing '/twitter/input_handle', {controller: 'twitters', action: 'input_handle'}
   end
 
+  test 'errors' do
+    post :twitter_call, {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
+    
+    assert_redirected_to twitter_path(handle: 'twitter_handle')
+  end
+
   test '#show' do
     get :show, {handle: twitter_profiles(:twitter_profile_1).handle}
     

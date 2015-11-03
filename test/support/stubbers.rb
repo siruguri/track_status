@@ -45,7 +45,7 @@ end
 def set_net_stubs
   stub_request(:get, "https://www.readability.com/api/content/v1/parser?format=json&token=testreadabilityapikey&url=https://medium.com/bolt-blog/who-invests-in-hardware-startups-d1612895a31a").
     with(:headers => {'Accept'=>'*/*'}).
-    to_return(:status => 200, :body => fixture_file('readability-aldaily-file-1.html'), :headers => {})
+    to_return(:status => 200, :body => fixture_file('readability-aldaily-file-1.html'), :headers => {'Content-Type' => 'UTF-8'})
 
 
   stub_request(:get, "https://api.twitter.com/1.1/users/show.json?screen_name=twitter_handle").
@@ -68,5 +68,16 @@ def set_net_stubs
 
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=1212&screen_name=twitter_handle&trim_user=1").
     with(headers: single_token_headers).    
-    to_return(status: 200, body: valid_twitter_oldertweets_response)  
+    to_return(status: 200, body: valid_twitter_oldertweets_response)
+
+  stub_request(:get, "https://t.co/MjJ8xAnT").
+    with(:headers => {'Accept'=>'*/*',  'Host'=>'t.co'}).
+    to_return(:status => 200, :body => "hello")
+
+  stub_request(:get, "https://t.co/p5bOzH0k").
+    with(:headers => {'Accept'=>'*/*',  'Host'=>'t.co'}).
+    to_return(:status => 301, :body => "", :headers => {'location' => 'http://redirected.to/1'})
+
+  stub_request(:get, 'https://www.readability.com/api/content/v1/parser?format=json&token=testreadabilityapikey&url=http://redirected.to/1').
+    to_return(status: 200, body: fixture_file('readability-aldaily-file-1.html'), headers: {'Content-Type' => 'UTF-8'})
 end

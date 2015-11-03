@@ -21,10 +21,22 @@ class ReadabilityParserWrapper
       request = Net::HTTP::Get.new uri
       response = http.request request
     end
+    
+    encoding = response.header['Content-Type']
+    readability_data = JSON.parse(response.body)
+    Rails.logger.debug ">>> #{response.header['Content-Type']}"
+    body =
+      case encoding
+      when /iso.8859.1/i
+        readability_data['content'].force_encoding(Encoding::ISO_8859_1)
+      when /utf\-8/i
+        readability_data['content'].force_encoding(Encoding::UTF_8)
+      else
+        raise Exception.new("Cannot understand content type #{response.header['Content-Type']}")
+      end
 
-    unless /error...true/.match(response.body)
-      body = JSON.parse response.body
-      ReadabilityBody.new(content: body['content'], url: body['url'])
+    unless /error...true/.match(response.body)    
+      ReadabilityBody.new(content: body, url: readability_data['url'])
     else
       nil
     end

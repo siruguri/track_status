@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151030033218) do
+ActiveRecord::Schema.define(version: 20151102232522) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -222,6 +222,7 @@ ActiveRecord::Schema.define(version: 20151030033218) do
     t.string   "author"
     t.string   "original_url"
     t.integer  "tweet_packet_id"
+    t.boolean  "fetch_failed"
   end
 
 end

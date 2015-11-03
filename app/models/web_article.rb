@@ -7,7 +7,7 @@ class WebArticle < ActiveRecord::Base
   belongs_to :tweet_packet
   
   validate :original_url, :valid_uri?
-  
+
   def valid_uri?
     if original_url =~ /\A#{URI::regexp(['http', 'https'])}\z/
       return true

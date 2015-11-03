@@ -31,7 +31,7 @@ class TwitterClientWrapper
         t = TwitterRequestRecord.last
         t.ran_limit = true
         t.save
-        sleep 60
+        sleep 60 unless Rails.env.test?
       end
     end
     
@@ -42,6 +42,22 @@ class TwitterClientWrapper
   def twitter_regex
     # http://t.co/gboESznVDm
     /https?...t\.co.[^\s]+/
+  end
+
+  def make_web_article(entity_hash, tp)
+    entity_hash[:urls].each do |s|
+      unless s[:expanded_url].match '.twitter.com'
+        w = WebArticle.find_or_create_by(original_url: s[:expanded_url]) do |j|
+          j.source = 'twitter'
+          j.tweet_packet = tp
+          j.save
+        end
+
+        if w.persisted?
+          TwitterRedirectFetchJob.perform_later w
+        end
+      end
+    end
   end
 
   def fetch_profile!(handle_rec)
@@ -76,7 +92,7 @@ class TwitterClientWrapper
 
     if payload[:data] != ''
       data = payload[:data]
-      tweets_list = data.collect { |tweet| {mesg: tweet[:text], id: tweet[:id],
+      tweets_list = data.collect { |tweet| {mesg: tweet[:text], id: tweet[:id], entities: tweet[:entities],
                                             retweeted_status: tweet[:retweeted_status]} }
 
       tp = TweetPacket.create(handle: handle_rec.handle, max_id: data.last[:id],
@@ -85,14 +101,11 @@ class TwitterClientWrapper
 
       # Scan and store all the URLs into web article models; remove them from the tweets
       tweets_list.each do |t|
-        t[:mesg].scan(twitter_regex).each do |s|
-          w = WebArticle.find_or_create_by(original_url: s) do |j|
-            j.source = 'twitter'
-            j.tweet_packet = tp
-            j.save
-          end
-        end
         t[:mesg].gsub! twitter_regex, ''
+        make_web_article t[:entities], tp
+        unless t[:retweeted_status].nil?
+          t[:retweeted_status][:text].gsub! twitter_regex, ''
+        end
       end
 
       tp.tweets_list = tweets_list; tp.save

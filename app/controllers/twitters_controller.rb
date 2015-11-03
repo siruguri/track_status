@@ -15,7 +15,9 @@ class TwittersController < ApplicationController
   def twitter_call
     if params[:commit] and params[:handle]
       @app_token = set_app_tokens
-      @t = TwitterProfile.find_or_create_by handle: params[:handle]
+      handle = params[:handle].strip
+      
+      @t = TwitterProfile.find_or_create_by handle: handle
       case params[:commit].downcase
       when 'get bio'
         bio
@@ -23,10 +25,8 @@ class TwittersController < ApplicationController
         # Let's get the bio too, if we never did, when asking for tweets
         bio if !@t.member_since.present?
         tweets
-      when 'word cloud'
-        word_cloud
       end
-      redirect_to twitter_path(handle: params[:handle])
+      redirect_to twitter_path(handle: handle)
     else
       flash[:error] = 'Something went wrong.'
       redirect_to twitter_input_handle_path
@@ -34,9 +34,9 @@ class TwittersController < ApplicationController
   end
   def show
     if params[:handle]
-      @handle = params[:handle]
-      @bio = TwitterProfile.find_by_handle params[:handle]
-      @tweets_list = TweetPacket.where(handle: params[:handle]).order(newest_tweet_at: :desc)
+      @handle = params[:handle].strip
+      @bio = TwitterProfile.find_by_handle @handle
+      @tweets_list = TweetPacket.where(handle: @handle).order(newest_tweet_at: :desc)
       word_cloud if @tweets_list.count > 0
     end
   end
@@ -53,7 +53,8 @@ class TwittersController < ApplicationController
   def word_cloud
     @tweets_count = 0
 
-    doc_sets = separated_docs TweetPacket.where(handle: params[:handle]).all
+    tps = TweetPacket.where(handle: @handle)
+    doc_sets = separated_docs tps.all
     @tweets_count = doc_sets[:tweets_count]
     @orig_tweets_count = doc_sets[:orig_tweets_count]
     
@@ -62,16 +63,31 @@ class TwittersController < ApplicationController
     o_dm = TextStats::DocumentModel.new(doc_sets[:orig_doc], twitter: true)
     a_dm = TextStats::DocumentModel.new(doc_sets[:all_doc], twitter: true)
     r_dm = TextStats::DocumentModel.new(doc_sets[:retweet_doc], twitter: true)
+    w_dm = TextStats::DocumentModel.new(crawled_web_documents(tps), as_html: true)
+    
     o_dm.universe = du
     a_dm.universe = du
     r_dm.universe = du
+    w_dm.universe = du
     
     @orig_word_cloud = o_dm.sorted_counts
     @all_word_cloud = a_dm.sorted_counts
     @retweets_word_cloud = r_dm.sorted_counts
+    @webdocs_word_cloud = w_dm.sorted_counts
   end
     
   def set_app_tokens
     current_user ? current_user.token_hash : nil
+  end
+
+  def crawled_web_documents(tweet_packets)
+    @webdocs_count = 0
+    tweet_packets.joins(:web_articles).includes(:web_articles).
+      where('web_articles.body is not null').map do |tp|
+      tp.web_articles.map do |article|
+        @webdocs_count += 1
+        article.body
+      end
+    end.flatten.join ' '
   end
 end

@@ -8,7 +8,7 @@
 	"entities": {
 	    "urls": [
 		{
-		    "expanded_url": "https://dev.twitter.com/blog/twitter-certified-products",
+		    "expanded_url": "https://dev.witter.com/blog/twitter-certified-products",
 		    "url": "https://t.co/MjJ8xAnT",
 		    "indices": [
 			52,
@@ -51,8 +51,8 @@
 		"url": {
 		    "urls": [
 			{
-			    "expanded_url": null,
-			    "url": "http://dev.twitter.com",
+			    "expanded_url": "http://dev.witter.com",
+			    "url": "http://dev.witter.com",
 			    "indices": [
 				0,
 				22
@@ -107,7 +107,7 @@
 	"entities": {
 	    "urls": [
 		{
-		    "expanded_url": "https://dev.twitter.com/issues/485",
+		    "expanded_url": "https://dev.witter.com/issues/485",
 		    "url": "https://t.co/p5bOzH0k",
 		    "indices": [
 			97,

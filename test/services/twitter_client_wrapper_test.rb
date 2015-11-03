@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class TwitterClientWrapperTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+  
   def setup
     set_net_stubs
     @c = TwitterClientWrapper.new
@@ -30,8 +32,11 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
        end
     end
 
+    assert_equal 2, enqueued_jobs.size
     assert_equal 2 + wa_ct, WebArticle.count
     assert_equal 'twitter', WebArticle.last.source
+
+    assert_equal TweetPacket.last.id, WebArticle.last.tweet_packet_id
     assert_equal 2, TweetPacket.last.tweets_list.size
   end
 
