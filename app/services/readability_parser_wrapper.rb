@@ -31,6 +31,8 @@ class ReadabilityParserWrapper
         readability_data['content'].force_encoding(Encoding::ISO_8859_1)
       when /utf\-8/i
         readability_data['content'].force_encoding(Encoding::UTF_8)
+      when /text.plain/i
+        # This is probably when readability threw an error
       else
         raise Exception.new("Cannot understand content type #{response.header['Content-Type']}")
       end

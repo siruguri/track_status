@@ -45,6 +45,7 @@ class TwitterClientWrapper
   end
 
   def make_web_article(entity_hash, tp)
+
     entity_hash[:urls].each do |s|
       unless s[:expanded_url].match '.twitter.com'
         w = WebArticle.find_or_create_by(original_url: s[:expanded_url]) do |j|

@@ -35,9 +35,12 @@ class TwittersController < ApplicationController
   def show
     if params[:handle]
       @handle = params[:handle].strip
-      @bio = TwitterProfile.find_by_handle @handle
-      @tweets_list = TweetPacket.where(handle: @handle).order(newest_tweet_at: :desc)
-      word_cloud if @tweets_list.count > 0
+      @latest_tps = TweetPacket.where(handle: @handle)
+      unless @latest_tps.empty?
+        @bio = TwitterProfile.find_by_handle @handle
+        @tweets_list = TweetPacket.where(handle: @handle).order(newest_tweet_at: :desc)
+        word_cloud if @tweets_list.count > 0
+      end
     end
   end
 
@@ -53,8 +56,7 @@ class TwittersController < ApplicationController
   def word_cloud
     @tweets_count = 0
 
-    tps = TweetPacket.where(handle: @handle)
-    doc_sets = separated_docs tps.all
+    doc_sets = separated_docs @latest_tps.all
     @tweets_count = doc_sets[:tweets_count]
     @orig_tweets_count = doc_sets[:orig_tweets_count]
     
@@ -63,7 +65,7 @@ class TwittersController < ApplicationController
     o_dm = TextStats::DocumentModel.new(doc_sets[:orig_doc], twitter: true)
     a_dm = TextStats::DocumentModel.new(doc_sets[:all_doc], twitter: true)
     r_dm = TextStats::DocumentModel.new(doc_sets[:retweet_doc], twitter: true)
-    w_dm = TextStats::DocumentModel.new(crawled_web_documents(tps), as_html: true)
+    w_dm = TextStats::DocumentModel.new(crawled_web_documents(@latest_tps), as_html: true)
     
     o_dm.universe = du
     a_dm.universe = du

@@ -78,6 +78,7 @@ def set_net_stubs
     with(:headers => {'Accept'=>'*/*',  'Host'=>'t.co'}).
     to_return(:status => 301, :body => "", :headers => {'location' => 'http://redirected.to/1'})
 
-  stub_request(:get, 'https://www.readability.com/api/content/v1/parser?format=json&token=testreadabilityapikey&url=http://redirected.to/1').
-    to_return(status: 200, body: fixture_file('readability-aldaily-file-1.html'), headers: {'Content-Type' => 'UTF-8'})
+  stub_request(:get, /.*token=testreadabilityapikey.*url=.*dev.witter/).
+    with(:headers => {'Accept'=>'*/*'}).
+    to_return(:status => 200, body: fixture_file('readability-aldaily-file-1.html'), headers: {'Content-Type' => 'UTF-8'})
 end

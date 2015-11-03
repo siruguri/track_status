@@ -4,37 +4,47 @@ class TwitterRedirectFetchJob < ActiveJob::Base
   def perform(web_article)
     # Twitter URLs have a 301 redirect
     return if web_article.body.present?
-    
-    u = URI(web_article.original_url)
-
-    request = Net::HTTP::Get.new u
-    body = ''
-    resp = nil
-    conn = Net::HTTP.new(u.host, u.port)
-    conn.use_ssl = true if u.scheme == 'https'
-
+    actual_url = ''
     begin
-      conn.start do
-        resp = conn.request request
+      u = URI(web_article.original_url)
+
+      # Handle redirects if necessary
+      if u.host == 't.co'
+        request = Net::HTTP::Get.new u
+        request.add_field('Accept-Encoding', 'none')
+        resp = nil
+        conn = Net::HTTP.new(u.host, u.port)
+        conn.use_ssl = true if u.scheme == 'https'
+
+        conn.start do
+          resp = conn.request request
+        end
+
+        if resp.code == '301'
+          actual_url = resp.header['location']
+        end
+      else
+        actual_url = web_article.original_url
       end
 
-      if resp.code == '301'
+      # Abort if we didn't get a redirect from Twitter
+      unless actual_url.blank?
         parser = ReadabilityParserWrapper.new
-        body = parser.parse(resp.header['location']).try(:content)
+        body = parser.parse(actual_url).try(:content)
+        
+        if !body.blank?
+          # We only save the body when it's retrieved from Readability - sometimes Readability fails
+          Rails.logger.debug "--- Retrieved #{body.size} bytes of data"
+          web_article.body = body
+          web_article.save!
+          
+          # Rate limit this job if it saves a new body
+          sleep 3
+        end
       end
     rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, Timeout::Error, Errno::ECONNRESET, SocketError,
            Errno::EINVAL, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e2
       web_article.update_attribute fetch_failed: false
-    end
-    
-    if !body.blank?
-      # We only save the body when it's retrieved
-      Rails.logger.debug "--- Retrieved #{body.size} bytes of data"
-      web_article.body = body
-      web_article.save!
-
-      # Rate limit this job if it saves a new body
-      sleep 2
     end
   end
 end
