@@ -7,10 +7,7 @@ class TwittersController < ApplicationController
 
   def index
     @handles_by_tweets = TweetPacket.group(:handle).count
-    @all_profiles = TwitterProfile.where(handle: @handles_by_tweets.keys).all.inject({}) do |memo, profile|
-      memo[profile[:handle]] = profile[:last_tweet]
-      memo
-    end
+    @all_profiles = TwitterProfile.includes(:profile_stat)
   end
   
   def set_twitter_token
@@ -39,6 +36,7 @@ class TwittersController < ApplicationController
       redirect_to twitter_input_handle_path
     end
   end
+  
   def show
     @latest_tps = TweetPacket.where(handle: @handle)
     unless @latest_tps.empty?

@@ -1,4 +1,20 @@
 module TwitterHelper
+  def last_tweet_safe(rec)
+    rec.last_tweet[:created_at] || 'Mon Jan 01 00:01:00 +0000 2005'    
+  end 
+
+  def last_tweet_time(rec)
+    DateTime.now - DateTime.strptime(last_tweet_safe(rec), '%a %b %d %H:%M:%S %z %Y')
+  end
+  
+  def number_of_tweets_message(profile)
+    if profile.profile_stat
+      ": #{profile.profile_stat.stats_hash[:total_tweets]} tweets retrieved, in #{(@handles_by_tweets[profile.handle])} attempts"
+    else
+      ": No tweets retrieved"
+    end
+  end
+  
   def nice_date(dt)
     dt.strftime "%Y-%m-%d %H:%M"
   end

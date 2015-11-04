@@ -17,13 +17,17 @@ class TwittersControllerTest < ActionController::TestCase
 
     post :twitter_call, {commit: 'Hack it'}
     assert_equal 422, response.status
+
+    post :twitter_call, {handle: twitter_profiles(:twitter_profile_1).handle}
+    assert_redirected_to twitter_input_handle_path
+    assert_match /went.wrong/i, flash[:error]
   end
 
   test '#index' do
     get :index
-    assert_select('li', 7) do |lis|
+    assert_select('li', 1 + TwitterProfile.count * 2) do |lis|
       # The first one's in the nav bar
-      assert_match /Thu Jan 03 12:17:04 .0000 2015/, lis[3].text
+      assert_operator lis.select { |l| /Tue Mar 03 12:17:04/.match l.text}.size, :>, 0
     end
   end
   

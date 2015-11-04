@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151103235039) do
+ActiveRecord::Schema.define(version: 20151104010527) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -114,6 +114,11 @@ ActiveRecord::Schema.define(version: 20151103235039) do
     t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "profile_stats", force: :cascade do |t|
+    t.text    "stats_hash"
+    t.integer "twitter_profile_id"
   end
 
   create_table "received_emails", force: :cascade do |t|

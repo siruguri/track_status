@@ -12,4 +12,10 @@ class AnalysisControllerTest < ActionController::TestCase
       post :execute_task, {commit: 'Compute Document Universe'}
     end
   end
+
+  test 'update profile stats' do
+    assert_difference('ProfileStat.count', 4) do
+      post :execute_task, {commit: 'Update Profile Stats'}
+    end
+  end
 end
