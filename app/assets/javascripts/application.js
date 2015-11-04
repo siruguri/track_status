@@ -12,7 +12,8 @@
 //
 //= require js-routes
 //= require jquery
+//= require jquery-ui
 //= require bootstrap-sprockets
-//= require jquery_ujs
 //= require jquery.tokeninput
 //= require channel_post
+//= require twitter_index

@@ -30,6 +30,7 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     end
 
     assert_equal "Fri Jun 12 19:50:18 +0000 2015", twitter_profiles(:twitter_profile_1).last_tweet[:created_at]
+    assert_equal 4242, twitter_profiles(:twitter_profile_1).tweets_count
   end
   
   test 'plain tweets fetching works' do

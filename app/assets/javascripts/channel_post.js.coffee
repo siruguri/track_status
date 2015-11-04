@@ -1,9 +1,10 @@
 $(document).ready ->
-  article_id = $('#article-id-tag').val().trim()
-  var_dummy = 1
-  api_path = Routes.readability_tag_words_path() + '?id=' + article_id
-  $("#tags-list").tokenInput(api_path,
-    {hintText: '', insertionPoint: 'after', preventDuplicates: true, selectFirst: false})
+  if $('#article-id-tag').val()
+    article_id = $('#article-id-tag').val().trim()
+    var_dummy = 1
+    api_path = Routes.readability_tag_words_path() + '?id=' + article_id
+    $("#tags-list").tokenInput(api_path,
+      {hintText: '', insertionPoint: 'after', preventDuplicates: true, selectFirst: false})
   null
 
   $("#tags-list-submit").click (evt) ->

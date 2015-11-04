@@ -1,3 +1,7 @@
+h3 {
+  margin: 5px 0px;
+}
+
 @mixin box-common() {
   border-radius: 3px;
   border: solid 1px;
@@ -33,3 +37,19 @@
   margin-right: 20px;
   float: left;
 }
+
+.selection-box {
+  float: left;
+  margin-right: 10px;
+  border: solid 1px black;
+  background: lightgreen;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.profile-list {
+  display: block;
+
+  border-top: solid 2px black;
+}
+

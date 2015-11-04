@@ -43,7 +43,7 @@ def valid_twitter_profile_response
                     }]
                 }
              },
-   "statuses_count": 1279,
+   "statuses_count": 4242,
    "time_zone": "Pacific Time (US & Canada)",
    "url": "https://t.co/66w26cua1O",
   }.to_json

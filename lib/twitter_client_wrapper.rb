@@ -68,6 +68,7 @@ class TwitterClientWrapper
       handle_rec.bio = payload[:data][:description]
       handle_rec.location = payload[:data][:location]
       handle_rec.last_tweet = payload[:data][:status]
+      handle_rec.tweets_count = payload[:data][:statuses_count]
       
       handle_rec.save
     end

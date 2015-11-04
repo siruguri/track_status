@@ -44,7 +44,7 @@ class TwitterRedirectFetchJob < ActiveJob::Base
       end
     rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, Timeout::Error, Errno::ECONNRESET, SocketError,
            Errno::EINVAL, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e2
-      web_article.update_attribute fetch_failed: false
+      web_article.update_attributes({fetch_failed: false}.permit(:fetch_failed))
     end
   end
 end

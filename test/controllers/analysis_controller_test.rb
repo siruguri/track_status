@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class AnalysisControllerTest < ActionController::TestCase
+  include ActiveJob::TestHelper
+  
   test 'routing works' do
     assert_routing({method: :post, path: "/document_analyses/execute_task"},
                    {controller: 'analysis', action: 'execute_task'})
@@ -17,5 +19,14 @@ class AnalysisControllerTest < ActionController::TestCase
     assert_difference('ProfileStat.count', 4) do
       post :execute_task, {commit: 'Update Profile Stats'}
     end
+  end
+
+  test 'reprocess all profiles' do
+    assert_enqueued_with(job: TwitterFetcherJob) do
+      post :execute_task, {commit: "Reprocess All Profiles"}
+    end
+
+    assert_equal TwitterProfile.count, enqueued_jobs.size
+    assert_match /: processed/i, flash[:notice]
   end
 end
