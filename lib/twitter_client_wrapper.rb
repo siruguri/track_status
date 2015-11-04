@@ -67,7 +67,8 @@ class TwitterClientWrapper
     if payload[:data] != ''
       handle_rec.bio = payload[:data][:description]
       handle_rec.location = payload[:data][:location]
-
+      handle_rec.last_tweet = payload[:data][:status]
+      
       handle_rec.save
     end
 

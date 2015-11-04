@@ -1,9 +1,18 @@
 class TwittersController < ApplicationController
   include TwitterAnalysis
+  before_action :set_handle_or_return, except: [:input_handle, :index]
   
   def input_handle
   end
 
+  def index
+    @handles_by_tweets = TweetPacket.group(:handle).count
+    @all_profiles = TwitterProfile.where(handle: @handles_by_tweets.keys).all.inject({}) do |memo, profile|
+      memo[profile[:handle]] = profile[:last_tweet]
+      memo
+    end
+  end
+  
   def set_twitter_token
     params.each do |k, v|
       Rails.logger.debug("params[#{k}] is #{v}")
@@ -13,11 +22,9 @@ class TwittersController < ApplicationController
   end
   
   def twitter_call
-    if params[:commit] and params[:handle]
+    if params[:commit]
       @app_token = set_app_tokens
-      handle = params[:handle].strip
-      
-      @t = TwitterProfile.find_or_create_by handle: handle
+      @t = TwitterProfile.find_or_create_by handle: @handle
       case params[:commit].downcase
       when 'get bio'
         bio
@@ -26,25 +33,26 @@ class TwittersController < ApplicationController
         bio if !@t.member_since.present?
         tweets
       end
-      redirect_to twitter_path(handle: handle)
+      redirect_to twitter_path(handle: @handle)
     else
       flash[:error] = 'Something went wrong.'
       redirect_to twitter_input_handle_path
     end
   end
   def show
-    if params[:handle]
-      @handle = params[:handle].strip
-      @latest_tps = TweetPacket.where(handle: @handle)
-      unless @latest_tps.empty?
-        @bio = TwitterProfile.find_by_handle @handle
-        @tweets_list = TweetPacket.where(handle: @handle).order(newest_tweet_at: :desc)
-        word_cloud if @tweets_list.count > 0
-      end
+    @latest_tps = TweetPacket.where(handle: @handle)
+    unless @latest_tps.empty?
+      @bio = TwitterProfile.find_by_handle @handle
+      @tweets_list = TweetPacket.where(handle: @handle).order(newest_tweet_at: :desc)
+      word_cloud if @tweets_list.count > 0
     end
   end
 
   private
+  def set_handle_or_return
+    !(@handle = params[:handle]).nil? or render nothing: true, status: 422
+  end
+  
   def bio
     TwitterFetcherJob.perform_later @t, 'bio', token: @app_token
   end

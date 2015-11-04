@@ -48,6 +48,7 @@ module TextStats
     attr_accessor :universe
     
     def initialize(body, opts={})
+      body = body || ''
       if File.exists? body
         @body = File.open(body, 'r').readlines.join(' ').gsub /’/, '\''
         @source_name = body

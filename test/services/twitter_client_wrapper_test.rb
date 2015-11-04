@@ -23,6 +23,15 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     assert_equal 1, TwitterRequestRecord.where('created_at >= ? and ran_limit = ?', now, true).count
   end
 
+  test 'profile fetching works' do
+    h = @handle
+    @c.rate_limited do
+      fetch_profile! h
+    end
+
+    assert_equal "Fri Jun 12 19:50:18 +0000 2015", twitter_profiles(:twitter_profile_1).last_tweet[:created_at]
+  end
+  
   test 'plain tweets fetching works' do
     wa_ct = WebArticle.count
     assert_difference('TweetPacket.count', 1) do

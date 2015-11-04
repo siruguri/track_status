@@ -13,10 +13,20 @@ class TwittersControllerTest < ActionController::TestCase
 
   test 'errors' do
     post :twitter_call, {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
-    
     assert_redirected_to twitter_path(handle: 'twitter_handle')
+
+    post :twitter_call, {commit: 'Hack it'}
+    assert_equal 422, response.status
   end
 
+  test '#index' do
+    get :index
+    assert_select('li', 7) do |lis|
+      # The first one's in the nav bar
+      assert_match /Thu Jan 03 12:17:04 .0000 2015/, lis[3].text
+    end
+  end
+  
   test '#show' do
     get :show, {handle: twitter_profiles(:twitter_profile_1).handle}
     

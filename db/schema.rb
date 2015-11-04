@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151102232522) do
+ActiveRecord::Schema.define(version: 20151103235039) do
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -184,6 +184,7 @@ ActiveRecord::Schema.define(version: 20151102232522) do
     t.integer  "num_favorites"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "last_tweet"
   end
 
   create_table "twitter_request_records", force: :cascade do |t|

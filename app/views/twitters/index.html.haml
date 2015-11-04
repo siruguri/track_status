@@ -1,0 +1,15 @@
+%h2
+  Sorted by last tweet
+- if @handles_by_tweets
+  .paragraph
+    %ol
+      - @all_profiles.sort_by { |handle, status_h| (DateTime.now - DateTime.strptime(status_h[:created_at], '%a %b %d %H:%M:%S %z %Y'))}.each do |handle, status_h|
+        %li
+          = link_to handle, twitter_path(handle: handle)
+          =": last tweet at #{status_h[:created_at]}"
+  .paragraph
+    %ol
+      - @handles_by_tweets.sort_by { |k, v| -v}.each do |handle, ct|
+        %li
+          = link_to handle, twitter_path(handle: handle)
+          =": #{ct*200} tweets retrieved"

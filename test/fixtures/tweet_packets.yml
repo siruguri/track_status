@@ -5,3 +5,19 @@ tweet_packet_1:
   max_id: 9980921
   newest_tweet_at: <%= Time.now - 4.hours %>
   oldest_tweet_at: <%= Time.now - 40.hours %>
+
+tweet_packet_2:
+  handle: bobcostas
+  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', id: 1, retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', id: 2}, {entities: {urls: []}, mesg: 'cheetah', id: 1212}].to_yaml.inspect %>
+  since_id: 12981109201
+  max_id: 9980921
+  newest_tweet_at: <%= Time.now - 4.hours %>
+  oldest_tweet_at: <%= Time.now - 40.hours %>
+
+tweet_packet_3:
+  handle: alimawali
+  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', id: 1, retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', id: 2}, {entities: {urls: []}, mesg: 'cheetah', id: 1212}].to_yaml.inspect %>
+  since_id: 12981109201
+  max_id: 9980921
+  newest_tweet_at: <%= Time.now - 4.hours %>
+  oldest_tweet_at: <%= Time.now - 40.hours %>

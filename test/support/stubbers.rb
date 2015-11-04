@@ -28,6 +28,21 @@ def valid_twitter_profile_response
    "location": "Oakland",
    "name": "TwitterDev",
    "screen_name": "TwitterDev",
+   "status": {"contributors": nil,
+              "coordinates": nil,
+              "created_at": "Fri Jun 12 19:50:18 +0000 2015",
+              "entities":
+                {"hashtags": [],
+                 "symbols": [],
+                 "urls":
+                   [{
+                      "display_url": "github.com/twitterdev/twi\u2026",
+                     "expanded_url": "https://github.com/twitterdev/twitter-for-bigquery",
+                     "indices": [36,39],
+                     "url": "https://t.co/K5orgXzhOM"
+                    }]
+                }
+             },
    "statuses_count": 1279,
    "time_zone": "Pacific Time (US & Canada)",
    "url": "https://t.co/66w26cua1O",
