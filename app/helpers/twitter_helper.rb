@@ -1,4 +1,8 @@
 module TwitterHelper
+  def remove_entities_and_numbers(w)
+    !(/\A\d+\Z/.match(w[0]) || /^\#/.match(w[0]) || /^\@/.match(w[0]))
+  end
+  
   def last_tweet_safe(rec)
     rec.last_tweet[:created_at] || 'Mon Jan 01 00:01:00 +0000 2005'    
   end 
@@ -19,7 +23,7 @@ module TwitterHelper
     dt.strftime "%Y-%m-%d %H:%M"
   end
   def word_display(w, divisor)
-    "#{w[0]}: #{sprintf("%0.3g", w[1]*100/divisor)}"
+    "#{w[0]}: #{sprintf("%0.3g", w[1]*100/divisor)} [#{sprintf("%0.3g", (@orig_word_explanations[w[0]+'.tf']||1)*100)}, #{sprintf("%0.3g", (@orig_word_explanations[w[0]+'.idf']||1)*100)}]"
   end
   def twitter_cloud_box_partial(type, title_text)
     word_list =
@@ -29,13 +33,14 @@ module TwitterHelper
         @webdocs_word_cloud
       when :retweets
         divisor = @tweets_count - @orig_tweets_count
-        @retweets_word_cloud.select { |w| !(/^\#/.match(w[0]) || /^\@/.match(w[0]))}
+        @retweets_word_cloud.select { |w| remove_entities_and_numbers w }
       when :all
         divisor = @tweets_count
-        @all_word_cloud.select { |w| !(/^\#/.match(w[0]) || /^\@/.match(w[0]))}
+        @all_word_cloud.select { |w| remove_entities_and_numbers w }
       when :orig
         divisor = @orig_tweets_count
-        @orig_word_cloud.select { |w| !(/^\#/.match(w[0]) || /^\@/.match(w[0]))}
+        words = @orig_word_cloud.select { |w| remove_entities_and_numbers w }
+        words
       when :hashtags
         divisor = @tweets_count
         (@orig_word_cloud + @all_word_cloud).select { |w| /^\#/.match(w[0])}.sort_by { |p| -p[1]}.uniq { |i| i[0] }
@@ -45,7 +50,7 @@ module TwitterHelper
       end
 
     render partial: 'twitter_cloud_box',
-           locals: {word_list: word_list.slice(0..15),
+           locals: {word_list: word_list.slice(0..25),
                     list_type_title: title_text, divisor: divisor}
   end
 end

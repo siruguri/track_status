@@ -23,12 +23,16 @@ class TwittersController < ApplicationController
       @app_token = set_app_tokens
       @t = TwitterProfile.find_or_create_by handle: @handle
       case params[:commit].downcase
+      when 'get followers'
+        followers
       when 'get bio'
         bio
-      when /get .*tweets/i
+      when /get older tweets/i
         # Let's get the bio too, if we never did, when asking for tweets
         bio if !@t.member_since.present?
         tweets
+      when /get newer tweets/i
+        tweets(direction: 'newer')
       end
       redirect_to twitter_path(handle: @handle)
     else
@@ -39,8 +43,8 @@ class TwittersController < ApplicationController
   
   def show
     @latest_tps = TweetPacket.where(handle: @handle)
+    @bio = TwitterProfile.find_by_handle @handle
     unless @latest_tps.empty?
-      @bio = TwitterProfile.find_by_handle @handle
       @tweets_list = TweetPacket.where(handle: @handle).order(newest_tweet_at: :desc)
       word_cloud if @tweets_list.count > 0
     end
@@ -51,12 +55,15 @@ class TwittersController < ApplicationController
     !(@handle = params[:handle]).nil? or render nothing: true, status: 422
   end
   
+  def followers
+    TwitterFetcherJob.perform_later @t, 'followers', token: @app_token
+  end
   def bio
     TwitterFetcherJob.perform_later @t, 'bio', token: @app_token
   end
   
-  def tweets
-    TwitterFetcherJob.perform_later @t, 'tweets', token: @app_token
+  def tweets(opts = {})
+    TwitterFetcherJob.perform_later @t, 'tweets', ({token: @app_token}.merge(opts))
   end
 
   def word_cloud
@@ -79,6 +86,7 @@ class TwittersController < ApplicationController
     w_dm.universe = du
     
     @orig_word_cloud = o_dm.sorted_counts
+    @orig_word_explanations = o_dm.explanations
     @all_word_cloud = a_dm.sorted_counts
     @retweets_word_cloud = r_dm.sorted_counts
     @webdocs_word_cloud = w_dm.sorted_counts

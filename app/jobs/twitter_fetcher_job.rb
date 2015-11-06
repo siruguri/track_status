@@ -5,11 +5,18 @@ class TwitterFetcherJob < ActiveJob::Base
     token = opts[:token]
     TwitterClientWrapper.new(token: token).rate_limited do
       case command
+      when 'followers'
+        fetch_followers! handle_rec
       when 'bio'
         fetch_profile! handle_rec
       when 'tweets'
-        t = TweetPacket.where(handle: handle_rec.handle).order(oldest_tweet_at: :asc).limit(1)
-        fetch_tweets! handle_rec, t.first
+        if opts[:direction].nil? or opts[:direction].to_sym == :older
+          order_logic = {oldest_tweet_at: :asc}
+        else
+          order_logic = {newest_tweet_at: :desc}
+        end
+        t = TweetPacket.where(handle: handle_rec.handle).order(order_logic).limit(1)
+        fetch_tweets! handle_rec, t.first, opts
       end
     end
   end

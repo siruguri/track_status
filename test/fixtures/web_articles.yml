@@ -28,3 +28,7 @@ reanalysis_1:
 reanalysis_2:
   source: some_source
   original_url: http://www.reanalysis_2.com/uri1
+
+t_co_1:
+  source: twitter
+  original_url: http://t.co/123

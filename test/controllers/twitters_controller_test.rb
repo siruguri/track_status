@@ -35,10 +35,10 @@ class TwittersControllerTest < ActionController::TestCase
     get :show, {handle: twitter_profiles(:twitter_profile_1).handle}
     
     assert_match /ee bee/, response.body
-    assert_match /3.*retrieved/i, response.body
+    assert_match /\d.*retrieved/i, response.body
 
-    assert_equal [["bear", 1], ["cheetah", 1]], assigns(:orig_word_cloud)
-    assert_equal [["dog", 1], ["cat", 1], ["bear", 1], ["cheetah", 1]], assigns(:all_word_cloud)
+    assert_equal [["bear", 2], ["cheetah", 2]], assigns(:orig_word_cloud)
+    assert_equal [["cheetah", 2], ["bear", 2], ["cat", 2.0/1.042], ["dog", 2.0/1.042]], assigns(:all_word_cloud)
   end
 
   test '#input_handle' do
@@ -68,7 +68,7 @@ class TwittersControllerTest < ActionController::TestCase
 
       it 'uses access tokens' do
         perform_enqueued_jobs do
-          post :twitter_call, {commit: 'Get tweets', handle: 'twitter_handle'}
+          post :twitter_call, {commit: 'Get older tweets', handle: 'twitter_handle'}
         end
       end
     end
@@ -78,11 +78,16 @@ class TwittersControllerTest < ActionController::TestCase
         devise_sign_out users(:user_1)
       end
 
-      it 'uses access tokens' do
+      it 'uses single app access tokens' do
         perform_enqueued_jobs do
-          post :twitter_call, {commit: 'Get tweets', handle: 'twitter_handle'}
+          post :twitter_call, {commit: 'Get older tweets', handle: 'twitter_handle'}
         end
+
+        perform_enqueued_jobs do
+          post :twitter_call, {commit: 'Get newer tweets', handle: 'twitter_handle'}
+        end
+        assert_equal 'newer_response_id', TweetPacket.last.tweets_list[0][:id]
       end
-    end    
-  end  
+    end  
+  end
 end

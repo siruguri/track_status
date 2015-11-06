@@ -44,7 +44,7 @@ module TextStats
   end
   
   class DocumentModel
-    attr_reader :term_list, :body, :source_name, :document_length
+    attr_reader :term_list, :body, :source_name, :document_length, :explanations
     attr_accessor :universe
     
     def initialize(body, opts={})
@@ -61,6 +61,7 @@ module TextStats
       @document_length = @term_list.size.to_f
       @tf = {}
       @counts = {}
+      @explanations = {}
     end
 
     def terms(term_size=1)
@@ -97,6 +98,10 @@ module TextStats
         multiplier *= (@universe.nil? ? 1 : 1.0/@universe.df(pair[0]))
         
         memo[pair[0]] = pair[1].size * multiplier
+
+        @explanations[pair[0] + ".idf"] = (@universe.nil? ? 1 : 1.0/@universe.df(pair[0]))
+        @explanations[pair[0] + ".tf"] = pair[1].size
+        
         memo
       end
     end
@@ -163,7 +168,7 @@ module TextStats
       if @_counts[term]
         @_counts[term]
       else
-        1
+        1.042
       end
     end
 

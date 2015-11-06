@@ -33,14 +33,11 @@ class ReadabilityParserWrapper
         readability_data['content'].force_encoding(Encoding::UTF_8)
       when /text.plain/i
         # This is probably when readability threw an error
+        response.body
       else
         raise Exception.new("Cannot understand content type #{response.header['Content-Type']}")
       end
 
-    unless /error...true/.match(response.body)    
-      ReadabilityBody.new(content: body, url: readability_data['url'])
-    else
-      nil
-    end
+    ReadabilityBody.new(content: body, url: readability_data['url'])
   end
 end

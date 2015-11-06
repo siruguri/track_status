@@ -53,7 +53,7 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
   test 'cursored tweets fetching works' do
     assert_difference('TweetPacket.count', 1) do
       h = @handle
-      pks = tweet_packets(:tweet_packet_1)
+      pks = tweet_packets(:tweet_packet_1_1)
       
       @c.rate_limited do
         fetch_tweets! h, pks

@@ -45,7 +45,6 @@ class TwitterClientWrapper
   end
 
   def make_web_article(entity_hash, tp)
-
     entity_hash[:urls].each do |s|
       unless s[:expanded_url].match '.twitter.com'
         w = WebArticle.find_or_create_by(original_url: s[:expanded_url]) do |j|
@@ -61,6 +60,14 @@ class TwitterClientWrapper
     end
   end
 
+  def fetch_followers!(handle_rec)
+    payload = get(handle_rec, :followers)
+    if payload[:data] != ''
+      list = payload[:data].join ','
+      post(handle_rec)
+    end
+  end
+  
   def fetch_profile!(handle_rec)
     payload = get(handle_rec, :profile, {count: 100})
 
@@ -76,9 +83,10 @@ class TwitterClientWrapper
     payload
   end
 
-  def fetch_tweets!(handle_rec, relative_to_packet = nil, direction = :older)
+  def fetch_tweets!(handle_rec, relative_to_packet = nil, opts = {})
     limiter = nil
-    unless relative_to_packet.nil?
+    direction = opts[:direction] ? opts[:direction].to_sym : :older
+    unless relative_to_packet.blank?
       case direction
       when :newer
         limiter = :since_id
@@ -93,8 +101,8 @@ class TwitterClientWrapper
 
     payload = get(handle_rec, :tweets, limiter.nil? ? {} : {limiter: limiter, limit_id: limit_id})
 
-    if payload[:data] != ''
-      data = payload[:data]
+    # Sometimes, there are no new tweets
+    if payload[:data] != '' and ((data = payload[:data]).size > 0)
       tweets_list = data.collect { |tweet| {mesg: tweet[:text], id: tweet[:id], entities: tweet[:entities],
                                             retweeted_status: tweet[:retweeted_status]} }
 
@@ -118,18 +126,27 @@ class TwitterClientWrapper
   end
 
   def get(handle_rec, command = :profile, opts = {})
-    return nil unless [:profile, :tweets].include? command
+    base_request(:get, handle_rec, command, opts)
+  end
+  def post(handle_rec, command = :profile, opts = {})
+    base_request(:post, handle_rec, command, opts)
+  end
+  
+  def base_request(method, handle_rec, command = :profile, opts = {})
+    return nil unless [:followers, :profile, :tweets].include? command
 
     case command
+    when :follower_ids
+      req = Twitter::REST::Request.new(@client, method, "/1.1/followers/ids.json", {screen_name: handle_rec.handle})
     when :profile
-      req = Twitter::REST::Request.new(@client, :get, "/1.1/users/show.json", {screen_name: handle_rec.handle})
+      req = Twitter::REST::Request.new(@client, method, "/1.1/users/show.json", {screen_name: handle_rec.handle})
     when :tweets
       addl_opts = {}
       unless opts.empty?
         addl_opts = {opts[:limiter] => opts[:limit_id]}        
       end
       
-      req = Twitter::REST::Request.new(@client, :get, "/1.1/statuses/user_timeline.json", {
+      req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/user_timeline.json", {
                                          count: 200, include_rts: true, screen_name: handle_rec.handle, trim_user: 1,
                                          exclude_replies: true}.merge(addl_opts))
     end
@@ -139,7 +156,6 @@ class TwitterClientWrapper
     errors = {}
     body = ''
     
-    Rails.logger.debug("Performing query to twitter: #{req.path} with option #{req.options}")
     begin
       Rails.logger.debug("Performing query to twitter: #{req.path} with option #{req.options}")
       response = req.perform
@@ -151,10 +167,11 @@ class TwitterClientWrapper
         Rails.logger.debug "Headers are: #{response[:headers].inspect}"
       else
         body = response
+        Rails.logger.debug "Body is: #{body}"
       end
       case command
       when :tweets
-        cursor = body.last[:max_id]
+        cursor = body.blank? ? opts[:limit_id] : (opts[:limiter] == :since_id ? body.first[:id] : body.last[:id])
       end
     end
 

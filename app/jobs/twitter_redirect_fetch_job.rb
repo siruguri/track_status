@@ -31,8 +31,10 @@ class TwitterRedirectFetchJob < ActiveJob::Base
       unless actual_url.blank?
         parser = ReadabilityParserWrapper.new
         body = parser.parse(actual_url).try(:content)
+        # Hourly allowance = 1000
+        sleep 4 unless Rails.env.test?
         
-        if !body.blank?
+        if !body.blank? and !(body.is_a? Hash)
           # We only save the body when it's retrieved from Readability - sometimes Readability fails
           Rails.logger.debug "--- Retrieved #{body.size} bytes of data"
           web_article.body = body
@@ -40,6 +42,9 @@ class TwitterRedirectFetchJob < ActiveJob::Base
           
           # Rate limit this job if it saves a new body
           sleep 3
+        else
+          web_article.body = body[:failure_message]
+          web_article.save!
         end
       end
     rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, Timeout::Error, Errno::ECONNRESET, SocketError,
