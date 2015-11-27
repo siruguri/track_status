@@ -1,13 +1,14 @@
 class TwittersController < ApplicationController
   include TwitterAnalysis
-  before_action :set_handle_or_return, except: [:input_handle, :index]
+  before_action :set_handle_or_return, except: [:input_handle, :index, :batch_call]
   
   def input_handle
+    @uncrawled_profiles = TwitterProfile.where('twitter_id is not null and handle is null').count
   end
 
   def index
-    @handles_by_tweets = TweetPacket.group(:handle).count
-    @all_profiles = TwitterProfile.includes(:profile_stat)
+    @handles_by_tweets = TweetPacket.joins(:user).group('twitter_profiles.handle').count
+    @all_profiles = TwitterProfile.includes(:profile_stat).where('handle is not null')
   end
   
   def set_twitter_token
@@ -17,13 +18,24 @@ class TwittersController < ApplicationController
 
     render nothing: true
   end
+
+  def batch_call
+    if !params["uncrawled-profiles"].nil?
+      TwitterProfile.where('twitter_id is not null and handle is null').all.each do |profile|
+        @t = profile
+        bio
+        tweets
+      end
+    end
+    render :input_handle    
+  end
   
   def twitter_call
     if params[:commit]
       @app_token = set_app_tokens
       @t = TwitterProfile.find_or_create_by handle: @handle
       case params[:commit].downcase
-      when 'get followers'
+      when 'populate followers'
         followers
       when 'get bio'
         bio
@@ -42,17 +54,21 @@ class TwittersController < ApplicationController
   end
   
   def show
-    @latest_tps = TweetPacket.where(handle: @handle)
+    @latest_tps = TweetPacket.where(twitter_id: @twitter_id).order(newest_tweet_at: :desc)
     @bio = TwitterProfile.find_by_handle @handle
     unless @latest_tps.empty?
-      @tweets_list = TweetPacket.where(handle: @handle).order(newest_tweet_at: :desc)
-      word_cloud if @tweets_list.count > 0
+      word_cloud
     end
   end
 
   private
   def set_handle_or_return
-    !(@handle = params[:handle]).nil? or render nothing: true, status: 422
+    if params[:handle].nil?
+      render nothing: true, status: 422
+    else
+      @handle = params[:handle]
+      @twitter_id = (tmp = TwitterProfile.find_by_handle(@handle)).nil? ? nil : tmp.twitter_id
+    end
   end
   
   def followers

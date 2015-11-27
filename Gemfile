@@ -66,11 +66,9 @@ end
 
 group :test do
   gem 'poltergeist'
-  gem 'selenium-webdriver'
   gem 'mocha'
   gem 'simplecov'
   gem 'webmock'
   gem 'minitest-spec-rails'
   gem 'minitest-rails-capybara'
-  gem 'capybara-webkit'
 end

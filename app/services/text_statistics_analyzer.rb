@@ -5,7 +5,7 @@ module TextStatisticsAnalyzer
 
   included do
     def word_array
-      body.gsub(/<\/?[^>]+>/, ' ').gsub(/[^'a-zA-Z]/, ' ').strip.split(/\s+/).map(&:downcase)
+      (body||'').gsub(/<\/?[^>]+>/, ' ').gsub(/[^'a-zA-Z]/, ' ').strip.split(/\s+/).map(&:downcase)
     end
 
     def top_grams(sort_by_function_name)

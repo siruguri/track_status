@@ -15,5 +15,4 @@ class WebArticle < ActiveRecord::Base
       errors.add(:base, 'Invalid URI supplied for source')
     end
   end
-  
 end

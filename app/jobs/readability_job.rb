@@ -15,7 +15,16 @@ class ReadabilityJob < ActiveJob::Base
 
       readability_resps.each do |resp|
         w = WebArticle.new(original_url: resp.url, source: site_key, body: resp.content)
-        w.save!
+        saved = false
+        while !saved
+          begin
+            w.save!
+          rescue SQLite3::BusyException => e
+            sleep 5
+          else
+            saved = true
+          end
+        end
       end
 
       status = 'finished'

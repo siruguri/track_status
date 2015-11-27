@@ -23,3 +23,8 @@ status_too_old:
   description: too old
   message: too old
   created_at: <%= Time.now - 10.days %>
+status_too_old_goaway:
+  source: status_1
+  description: too old go away
+  message: too old 2
+  created_at: <%= Time.now - 20.days %>

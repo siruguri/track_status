@@ -27,6 +27,7 @@ Rails.application.routes.draw do
     get :set_twitter_token
     get :input_handle
     post :twitter_call
+    post :batch_call
     get '/:handle', action: :show
   end
   

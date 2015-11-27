@@ -1,6 +1,16 @@
-= form_tag '/twitter/twitter_call' do
-  = text_field_tag :handle, '', autofocus: true
-  = submit_tag "Get bio", class: 'btn'
-  = submit_tag "Get older tweets", class: 'btn'
+.paragraph
+  = form_tag '/twitter/twitter_call' do
+    = text_field_tag :handle, '', autofocus: true, id: 'twitter-handle'
+    = submit_tag "Get bio", class: 'btn btn-default'
+    = submit_tag "Get older tweets", class: 'btn btn-default'
+    = submit_tag "Populate followers", class: 'btn btn-default', id: 'populate-followers'
 
-  
+.topborder
+  %h3
+    To-Do List of Tasks
+  %ol
+    = form_tag '/twitter/batch_call' do
+      - if @uncrawled_profiles != 0
+        %li 
+          = "#{@uncrawled_profiles} profiles only have Twitter IDs"
+          = submit_tag "Process them!", name: 'uncrawled-profiles', class: 'btn btn-default', id: 'uncrawled-profiles'

@@ -2,6 +2,7 @@ twitter_profile_1:
   handle: twitter_handle
   location: Bee bee gun
   last_tweet: <%= {created_at: "Tue Nov 03 12:17:04 +0000 2015"}.to_yaml.inspect %>
+  twitter_id: 1
   
 nota_twitter_profile:
   handle: nota_twitter_handle
@@ -12,8 +13,16 @@ bobcostas:
   handle: bobcostas
   location: Bee bee gun
   last_tweet: <%= {created_at: "Thu Jan 03 12:17:04 +0000 2015"}.to_yaml.inspect %>
-
+  twitter_id: 2
+  
 alimawali:
   handle: alimawali
   location: Bee bee gun
   last_tweet: <%= {created_at: "Tue Mar 03 12:17:04 +0000 2015"}.to_yaml.inspect %>
+  twitter_id: 3
+  
+only_id_1:
+  twitter_id: 90879087
+
+only_id_2:
+  twitter_id: 10241024

@@ -1,30 +1,30 @@
 tweet_packet_1:
-  handle: twitter_handle
-  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', id: 'latest_tweet_id', retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', id: 2}, {entities: {urls: []}, mesg: 'cheetah', id: 1212}].to_yaml.inspect %>
+  twitter_id: 1
+  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', retweet_count: 2, id: 'latest_tweet_id', retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', id: 2, retweet_count: 2}, {entities: {urls: []}, mesg: 'cheetah', id: 2232, retweet_count: 3}].to_yaml.inspect %>
   since_id: 12981109201
   max_id: 9980921
   newest_tweet_at: <%= Time.now - 4.hours %>
   oldest_tweet_at: <%= Time.now - 40.hours %>
 
 tweet_packet_1_1:
-  handle: twitter_handle
-  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', id: 'latest_tweet_id', retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', id: 2}, {entities: {urls: []}, mesg: 'cheetah', id: 'oldest_tweet_id'}].to_yaml.inspect %>
+  twitter_id: 1
+  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', retweet_count: 2, id: 'latest_tweet_id', retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', retweet_count: 2, id: 2}, {entities: {urls: []}, mesg: 'cheetah', retweet_count: 2, id: 'oldest_tweet_id'}].to_yaml.inspect %>
   since_id: 12981109201
   max_id: 9980921
   newest_tweet_at: <%= Time.now - 41.hours %>
   oldest_tweet_at: <%= Time.now - 80.hours %>
 
 tweet_packet_2:
-  handle: bobcostas
-  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', id: 1, retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', id: 2}, {entities: {urls: []}, mesg: 'cheetah', id: 1212}].to_yaml.inspect %>
+  twitter_id: 2
+  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', retweet_count: 2, id: 1, retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', retweet_count: 2, id: 2}, {entities: {urls: []}, mesg: 'cheetah', retweet_count: 2, id: 1252}].to_yaml.inspect %>
   since_id: 12981109201
   max_id: 9980921
   newest_tweet_at: <%= Time.now - 41.hours %>
   oldest_tweet_at: <%= Time.now - 80.hours %>
 
 tweet_packet_3:
-  handle: alimawali
-  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', id: 1, retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', id: 2}, {entities: {urls: []}, mesg: 'cheetah', id: 1212}].to_yaml.inspect %>
+  twitter_id: 3
+  tweets_list: <%= [{entities: {urls: []}, mesg: 'rt @bobafett dog cat', retweet_count: 2, id: 1, retweeted_status: {text: 'dog cat', id: 5}}, {mesg: 'bear ', retweet_count: 2, id: 2}, {entities: {urls: []}, mesg: 'cheetah', retweet_count: 2, id: 5212}].to_yaml.inspect %>
   since_id: 12981109201
   max_id: 9980921
   newest_tweet_at: <%= Time.now - 81.hours %>

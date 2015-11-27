@@ -6,8 +6,8 @@ require 'rails/test_help'
 require 'mocha/mini_test'
 require 'webmock/minitest'
 
-require 'capybara/poltergeist'
 require 'minitest/rails/capybara'
+require 'capybara/poltergeist'
 
 Dir[Rails.root.join('test/support/**/*.rb')].each { |f| require f }
 WebMock.disable_net_connect!(:allow_localhost => true)

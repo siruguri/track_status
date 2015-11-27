@@ -7,7 +7,7 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
   test ':bio job works with valid handle' do
     refute_match /Oakland/, twitter_profiles(:twitter_profile_1).location
     TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1)
-    assert_match /Oakland/, twitter_profiles(:twitter_profile_1).location
+    assert_match /Oakland/, twitter_profiles(:twitter_profile_1).location    
   end
 
   test 'job fails gracefully with invalid handle' do
@@ -23,6 +23,16 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
 
     t = TweetPacket.last
     assert_equal 3, t.tweets_list.size
-    assert_equal twitter_profiles(:twitter_profile_1).handle, t.handle    
+    assert_equal twitter_profiles(:twitter_profile_1).twitter_id, t.twitter_id
+  end
+
+  test ":followers works" do
+    assert_difference('TwitterProfile.count', 2) do
+      TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'followers'
+    end
+    t = TwitterProfile.last
+    assert_equal 8400, t.twitter_id
+
+    assert_equal 2, ProfileFollower.count
   end
 end

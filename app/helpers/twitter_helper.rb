@@ -12,8 +12,8 @@ module TwitterHelper
   end
   
   def number_of_tweets_message(profile)
-    if profile.profile_stat
-      ": #{profile.profile_stat.stats_hash[:total_tweets]} tweets retrieved, in #{(@handles_by_tweets[profile.handle])} attempts"
+    if (stat = profile.profile_stat)
+      ": #{stat.stats_hash[:total_tweets]} tweets retrieved, total retweets = #{stat.stats_hash[:retweet_aggregate]}, in #{(@handles_by_tweets[profile.handle])} attempts"
     else
       ": No tweets retrieved"
     end

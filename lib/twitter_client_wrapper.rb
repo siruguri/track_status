@@ -61,10 +61,12 @@ class TwitterClientWrapper
   end
 
   def fetch_followers!(handle_rec)
-    payload = get(handle_rec, :followers)
+    payload = get(handle_rec, :follower_ids)
     if payload[:data] != ''
-      list = payload[:data].join ','
-      post(handle_rec)
+      payload[:data][:ids].each do |id|
+        t = TwitterProfile.find_or_create_by(twitter_id: id)
+        handle_rec.followers << t
+      end
     end
   end
   
@@ -72,11 +74,13 @@ class TwitterClientWrapper
     payload = get(handle_rec, :profile, {count: 100})
 
     if payload[:data] != ''
+      handle_rec.handle ||= payload[:data][:screen_name]
       handle_rec.bio = payload[:data][:description]
       handle_rec.location = payload[:data][:location]
       handle_rec.last_tweet = payload[:data][:status]
       handle_rec.tweets_count = payload[:data][:statuses_count]
-      
+      handle_rec.num_following = payload[:data][:friends_count]
+      handle_rec.num_followers = payload[:data][:followers_count]
       handle_rec.save
     end
 
@@ -103,13 +107,25 @@ class TwitterClientWrapper
 
     # Sometimes, there are no new tweets
     if payload[:data] != '' and ((data = payload[:data]).size > 0)
-      tweets_list = data.collect { |tweet| {mesg: tweet[:text], id: tweet[:id], entities: tweet[:entities],
-                                            retweeted_status: tweet[:retweeted_status]} }
+      tweets_list = data.collect do |tweet|
+        {mesg: tweet[:text], id: tweet[:id], entities: tweet[:entities],
+         retweeted_status: tweet[:retweeted_status], retweet_count: tweet[:retweet_count]
+        }
+      end
 
-      tp = TweetPacket.create(handle: handle_rec.handle, max_id: data.last[:id],
-                         since_id: data.first[:id],
-                         newest_tweet_at: data.first[:created_at], oldest_tweet_at: data.last[:created_at])
-
+      saved = false
+      while !saved
+        begin
+          tp = TweetPacket.create(twitter_id: handle_rec.twitter_id, max_id: data.last[:id],
+                                  since_id: data.first[:id],
+                                  newest_tweet_at: data.first[:created_at], oldest_tweet_at: data.last[:created_at])
+        rescue SQLite3::BusyException => e
+          sleep 5
+        else
+          saved = true
+        end
+      end
+      
       # Scan and store all the URLs into web article models; remove them from the tweets
       tweets_list.each do |t|
         t[:mesg].gsub! twitter_regex, ''
@@ -133,13 +149,20 @@ class TwitterClientWrapper
   end
   
   def base_request(method, handle_rec, command = :profile, opts = {})
-    return nil unless [:followers, :profile, :tweets].include? command
-
+    return nil if handle_rec.handle.nil? and handle_rec.twitter_id.nil? or
+      !([:follower_ids, :profile, :tweets].include? command)
+    
+    if handle_rec.handle
+      twitter_pk_hash = {screen_name: handle_rec.handle}
+    else
+      twitter_pk_hash = {user_id: handle_rec.twitter_id}
+    end
+    
     case command
     when :follower_ids
-      req = Twitter::REST::Request.new(@client, method, "/1.1/followers/ids.json", {screen_name: handle_rec.handle})
+      req = Twitter::REST::Request.new(@client, method, "/1.1/followers/ids.json", twitter_pk_hash)
     when :profile
-      req = Twitter::REST::Request.new(@client, method, "/1.1/users/show.json", {screen_name: handle_rec.handle})
+      req = Twitter::REST::Request.new(@client, method, "/1.1/users/show.json", twitter_pk_hash)
     when :tweets
       addl_opts = {}
       unless opts.empty?
@@ -147,8 +170,8 @@ class TwitterClientWrapper
       end
       
       req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/user_timeline.json", {
-                                         count: 200, include_rts: true, screen_name: handle_rec.handle, trim_user: 1,
-                                         exclude_replies: true}.merge(addl_opts))
+                                         count: 200, include_rts: true, trim_user: 1,
+                                         exclude_replies: true}.merge(twitter_pk_hash).merge(addl_opts))
     end
 
     status = true

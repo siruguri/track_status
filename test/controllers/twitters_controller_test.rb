@@ -25,7 +25,7 @@ class TwittersControllerTest < ActionController::TestCase
 
   test '#index' do
     get :index
-    assert_select('li', 1 + TwitterProfile.count * 3) do |lis|
+    assert_select('li', 1 + TwitterProfile.where('handle is not null').count * 3) do |lis|
       # The first one's in the nav bar
       assert_operator lis.select { |l| /Tue Mar 03 12:17:04/.match l.text}.size, :>, 0
     end

@@ -6,50 +6,8 @@ def single_token_headers
   {'Accept' => 'application/json', 'Authorization' => /cjCezt7cqCpk2c9XgtufSw9zh.*#{Rails.application.secrets.twitter_single_app_access_token}/}
 end
 
-def valid_twitter_plaintweets_response
-  fixture_file('twitter_plaintweets_array.json')
-end
-def valid_twitter_oldertweets_response
-  fixture_file('twitter_oldertweets_array.json')
-end
-def valid_twitter_newertweets_response
-  fixture_file('twitter_newertweets_array.json')
-end
-
-def valid_twitter_profile_response
-  {
-    "contributors_enabled": false,
-   "created_at": "Sat Dec 14 04:35:55 +0000 2013",
-   "description": "Developer and Platform Relations @Twitter. We are developer advocates. We can't answer all your questions, but we listen to all of them!",
-   "favourites_count": 757,
-   "followers_count": 143916,
-   "following": false,
-   "friends_count": 1484,
-   "geo_enabled": true,
-   "id": 2244994945,
-   "id_str": "2244994945",
-   "location": "Oakland",
-   "name": "TwitterDev",
-   "screen_name": "TwitterDev",
-   "status": {"contributors": nil,
-              "coordinates": nil,
-              "created_at": "Fri Jun 12 19:50:18 +0000 2015",
-              "entities":
-                {"hashtags": [],
-                 "symbols": [],
-                 "urls":
-                   [{
-                      "display_url": "github.com/twitterdev/twi\u2026",
-                     "expanded_url": "https://github.com/twitterdev/twitter-for-bigquery",
-                     "indices": [36,39],
-                     "url": "https://t.co/K5orgXzhOM"
-                    }]
-                }
-             },
-   "statuses_count": 4242,
-   "time_zone": "Pacific Time (US & Canada)",
-   "url": "https://t.co/66w26cua1O",
-  }.to_json
+def valid_twitter_response(type)
+  fixture_file("twitter_#{type}_array.json")
 end
 
 def invalid_twitter_response
@@ -67,30 +25,38 @@ def set_net_stubs
 
 
   stub_request(:get, "https://api.twitter.com/1.1/users/show.json?screen_name=twitter_handle").
-    to_return(status: 200, body: valid_twitter_profile_response)
+    to_return(status: 200, body: valid_twitter_response(:profile))
   
   stub_request(:get, "https://api.twitter.com/1.1/users/show.json?screen_name=nota_twitter_handle").
     to_return(status: 404, body: invalid_twitter_response)
   
+             
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
     with(headers: app_token_headers).
-    to_return(status: 200, body: valid_twitter_plaintweets_response)
+    to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=oldest_tweet_id&screen_name=twitter_handle&trim_user=1").
     with(headers: app_token_headers).    
-    to_return(status: 200, body: valid_twitter_oldertweets_response)
+    to_return(status: 200, body: valid_twitter_response(:oldertweets))
 
+  # "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=1212&screen_name=twitter_handle&trim_user=1")
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
     with(headers: single_token_headers).
-    to_return(status: 200, body: valid_twitter_plaintweets_response)
+    to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=oldest_tweet_id&screen_name=twitter_handle&trim_user=1").
     with(headers: single_token_headers).    
-    to_return(status: 200, body: valid_twitter_oldertweets_response)
+    to_return(status: 200, body: valid_twitter_response(:oldertweets))
+
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=latest_tweet_id&trim_user=1").
     with(headers: single_token_headers).
-    to_return(status: 200, body: valid_twitter_newertweets_response)
+    to_return(status: 200, body: valid_twitter_response(:newertweets))
   
+  # Followers
+  stub_request(:get, "https://api.twitter.com/1.1/followers/ids.json?screen_name=twitter_handle").
+    with(headers: single_token_headers).    
+    to_return(status: 200, body: valid_twitter_response(:followers))
+
   stub_request(:get, "https://t.co/MjJ8xAnT").
     with(:headers => {'Accept'=>'*/*',  'Host'=>'t.co'}).
     to_return(:status => 200, :body => "hello")

@@ -4,16 +4,18 @@ class ReadabilityArticlesTagsTest < Capybara::Rails::TestCase
   include Rack::Test::Methods
 
   def setup
-    Capybara.current_driver = :selenium
-    #page.driver.allow_url("fonts.googleapis.com")
+    Capybara.default_driver = :poltergeist
+
   end
   
   test 'can see tags list' do
     visit '/readability/list'
-    page.find('#token-input-tags-list').set('a')
-
+    page.find('#token-input-tags-list').native.send_keys('a')
+    page.find('#token-input-tags-list')
     assert page.has_css?('.token-input-dropdown ul li', count: 5)
-    assert_equal 'value memo', page.find('.token-input-dropdown ul li:first-child').text
+
+    suggested_value = page.find('.token-input-dropdown ul li:first-child')
+    assert_equal 'value memo', suggested_value.text
   end
 
   test 'can tag article' do

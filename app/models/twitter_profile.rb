@@ -1,5 +1,5 @@
 class TwitterProfile < ActiveRecord::Base
-  has_many :tweet_packets, foreign_key: :handle, primary_key: :handle
+  has_many :tweet_packets, foreign_key: :twitter_id, primary_key: :twitter_id
   has_one :profile_stat
 
   has_many :profile_followers, foreign_key: :leader_id

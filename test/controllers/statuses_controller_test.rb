@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class StatusesControllerTest < ActionController::TestCase
+  self.use_transactional_fixtures = true
+  
   test 'routes exist' do
     assert_routing '/statuses', {controller: 'statuses', action: 'index'}
     assert_routing({method: :delete, path: '/statuses'}, {controller: 'statuses', action: 'destroy'})
@@ -50,11 +52,11 @@ class StatusesControllerTest < ActionController::TestCase
 
   test 'can delete old statuses' do
     # Status exists before deletion
-    empty_statuses = Status.where(description: 'too old')
+    empty_statuses = Status.where(description: 'too old go away')
     assert_equal 1, empty_statuses.count
 
     post :destroy, {method: :default}
-    empty_statuses = Status.where(description: 'too old')
+    empty_statuses = Status.where(description: 'too old go away')
     assert_equal 0, empty_statuses.count
 
     assert_template :index

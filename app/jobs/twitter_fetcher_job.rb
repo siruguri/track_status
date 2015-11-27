@@ -15,7 +15,7 @@ class TwitterFetcherJob < ActiveJob::Base
         else
           order_logic = {newest_tweet_at: :desc}
         end
-        t = TweetPacket.where(handle: handle_rec.handle).order(order_logic).limit(1)
+        t = handle_rec.tweet_packets.order(order_logic).limit(1)
         fetch_tweets! handle_rec, t.first, opts
       end
     end

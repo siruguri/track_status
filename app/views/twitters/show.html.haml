@@ -10,11 +10,11 @@
         #{@bio.location}
       .twitter-biobox
         #{@bio.bio}
-    - if @tweets_list && @tweets_list.count > 0
+    - if @latest_tps && @latest_tps.count > 0
       .paragraph
         #{@tweets_count} Tweets retrieved (from&nbsp;
         %b><
-          #{nice_date(@tweets_list.first.newest_tweet_at)} to #{nice_date(@tweets_list.last.oldest_tweet_at)}
+          #{nice_date(@latest_tps.first.newest_tweet_at)} to #{nice_date(@latest_tps.last.oldest_tweet_at)}
         ) Retweet Percentage #{sprintf("%0g", 100-@orig_tweets_count*100.0/@tweets_count)}
         = form_tag '/twitter/twitter_call', class: 'inline-block' do
           = hidden_field_tag :handle, @bio.handle
