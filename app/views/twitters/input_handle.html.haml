@@ -1,5 +1,5 @@
 .paragraph
-  = form_tag '/twitter/twitter_call' do
+  = form_tag twitter_twitter_call_path do
     = text_field_tag :handle, '', autofocus: true, id: 'twitter-handle'
     = submit_tag "Get bio", class: 'btn btn-default'
     = submit_tag "Get older tweets", class: 'btn btn-default'
@@ -9,7 +9,7 @@
   %h3
     To-Do List of Tasks
   %ol
-    = form_tag '/twitter/batch_call' do
+    = form_tag twitter_batch_call_path do
       - if @uncrawled_profiles != 0
         %li 
           = "#{@uncrawled_profiles} profiles only have Twitter IDs"
