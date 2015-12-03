@@ -27,7 +27,7 @@ class TwittersController < ApplicationController
         tweets
       end
     end
-    render :input_handle    
+    redirect_to twitter_input_handle_path
   end
   
   def twitter_call
