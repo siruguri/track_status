@@ -4,6 +4,7 @@ class ReadabilityJob < ActiveJob::Base
 
   def perform(site_key)
     # Only works for site_key = 'aldaily'
+
     payload = Scrapers::AldailyScraper.new.payload()
 
     if payload[:status] == 'success'
@@ -20,7 +21,7 @@ class ReadabilityJob < ActiveJob::Base
           begin
             w.save!
           rescue SQLite3::BusyException => e
-            sleep 5
+            sleep 5 unless Rails.env.test?
           else
             saved = true
           end

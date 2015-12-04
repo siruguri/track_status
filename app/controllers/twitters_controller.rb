@@ -33,7 +33,7 @@ class TwittersController < ApplicationController
   def twitter_call
     if params[:commit]
       @app_token = set_app_tokens
-      @t = TwitterProfile.find_or_create_by handle: @handle
+
       case params[:commit].downcase
       when 'populate followers'
         followers
@@ -46,7 +46,7 @@ class TwittersController < ApplicationController
       when /get newer tweets/i
         tweets(direction: 'newer')
       end
-      redirect_to twitter_path(handle: @handle)
+      redirect_to twitter_path(handle: @t.handle)
     else
       flash[:error] = 'Something went wrong.'
       redirect_to twitter_input_handle_path
@@ -54,9 +54,15 @@ class TwittersController < ApplicationController
   end
   
   def show
-    @latest_tps = TweetPacket.where(twitter_id: @twitter_id).order(newest_tweet_at: :desc)
-    @bio = TwitterProfile.find_by_handle @handle
-    unless @latest_tps.empty?
+    @bio = @t
+
+    if @t.twitter_id.present?
+      @latest_tps = TweetPacket.where(twitter_id: @t.twitter_id).order(newest_tweet_at: :desc)
+    else
+      @latest_tps = []
+    end
+    
+    unless @latest_tps.size == 0
       word_cloud
     end
   end
@@ -66,8 +72,15 @@ class TwittersController < ApplicationController
     if params[:handle].nil?
       render nothing: true, status: 422
     else
-      @handle = params[:handle]
-      @twitter_id = (tmp = TwitterProfile.find_by_handle(@handle)).nil? ? nil : tmp.twitter_id
+      @t = TwitterProfile.find_or_create_by handle: params[:handle]
+
+      if @t.twitter_id.present?
+        @identifier_fk_hash = {twitter_id: @t.twitter_id}
+        @identifier = @t.twitter_id
+      else
+        @identifier_fk_hash = {handle: @t.handle}
+        @identifier = @t.handle
+      end
     end
   end
   
@@ -77,7 +90,6 @@ class TwittersController < ApplicationController
   def bio
     TwitterFetcherJob.perform_later @t, 'bio', token: @app_token
   end
-  
   def tweets(opts = {})
     TwitterFetcherJob.perform_later @t, 'tweets', ({token: @app_token}.merge(opts))
   end

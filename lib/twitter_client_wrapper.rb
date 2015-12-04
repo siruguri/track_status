@@ -7,15 +7,14 @@ class TwitterClientWrapper
     token_hash = opts[:token]
     
     @client = Twitter::REST::Client.new do |config|
-      config.consumer_key    = ENV['TWITTER_CONSUMER_KEY']
-      config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']
+      config.consumer_key    = Rails.application.secrets.twitter_consumer_key
+      config.consumer_secret = Rails.application.secrets.twitter_consumer_secret
       if token_hash.nil?
-        config.access_token    = ENV['TWITTER_SINGLE_APP_ACCESS_TOKEN']
-        config.access_token_secret = ENV['TWITTER_SINGLE_APP_ACCESS_TOKEN_SECRET']
+        config.access_token    = Rails.application.secrets.twitter_single_app_access_token
+        config.access_token_secret = Rails.application.secrets.twitter_single_app_access_token_secret
       else
         config.access_token = token_hash[:token]
         config.access_token_secret = token_hash[:secret]
-        Rails.logger.debug("Using token #{token_hash[:token]}")
       end
     end
   end

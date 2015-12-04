@@ -21,12 +21,12 @@ class ReadabilityParserWrapper
       request = Net::HTTP::Get.new uri
       response = http.request request
       # Free API is 1000 a day
-      sleep 80
+      sleep 80 unless Rails.env.test?
     end
     
     encoding = response.header['Content-Type']
     readability_data = JSON.parse(response.body)
-    Rails.logger.debug ">>> #{response.header['Content-Type']}"
+
     body =
       case encoding
       when /iso.8859.1/i
