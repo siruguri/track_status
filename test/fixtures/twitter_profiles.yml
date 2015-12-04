@@ -26,3 +26,7 @@ only_id_1:
 
 only_id_2:
   twitter_id: 10241024
+
+no_id_profile:
+  handle: no_id_here
+  

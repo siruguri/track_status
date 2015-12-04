@@ -46,13 +46,12 @@ class TwitterClientWrapper
   def make_web_article(entity_hash, tp)
     entity_hash[:urls].each do |s|
       unless s[:expanded_url].match '.twitter.com'
-        w = WebArticle.find_or_create_by(original_url: s[:expanded_url]) do |j|
-          j.source = 'twitter'
-          j.tweet_packet = tp
-          j.save
-        end
-
-        if w.persisted?
+        w = WebArticle.find_or_create_by(original_url: s[:expanded_url])
+        # Ignore this article if someone already tweeted about it.
+        unless w.source == 'twitter'
+          w.source = 'twitter'
+          w.tweet_packet = tp
+          w.save
           TwitterRedirectFetchJob.perform_later w
         end
       end
@@ -74,6 +73,8 @@ class TwitterClientWrapper
 
     if payload[:data] != ''
       handle_rec.handle ||= payload[:data][:screen_name]
+      handle_rec.twitter_id ||= payload[:data][:id]
+      
       handle_rec.bio = payload[:data][:description]
       handle_rec.location = payload[:data][:location]
       handle_rec.last_tweet = payload[:data][:status]
@@ -112,19 +113,17 @@ class TwitterClientWrapper
         }
       end
 
-      saved = false
-      while !saved
-        begin
-          tp = TweetPacket.create(twitter_id: handle_rec.twitter_id, max_id: data.last[:id],
-                                  since_id: data.first[:id],
-                                  newest_tweet_at: data.first[:created_at], oldest_tweet_at: data.last[:created_at])
-        rescue SQLite3::BusyException => e
-          sleep 5
-        else
-          saved = true
-        end
+      # This app is designed to create profiles using handles, but requires Twitter IDs to match
+      # tweets to users. So we have to grab the twitter id from the Twitter API response sometimes.
+      if handle_rec.twitter_id
+        fk = handle_rec.twitter_id
+      else
+        fk = data.first[:user][:id]
       end
       
+      tp = TweetPacket.new(twitter_id: fk, max_id: data.last[:id],
+                           since_id: data.first[:id],
+                           newest_tweet_at: data.first[:created_at], oldest_tweet_at: data.last[:created_at])
       # Scan and store all the URLs into web article models; remove them from the tweets
       tweets_list.each do |t|
         t[:mesg].gsub! twitter_regex, ''
@@ -135,6 +134,17 @@ class TwitterClientWrapper
       end
 
       tp.tweets_list = tweets_list; tp.save
+
+      saved = false
+      while !saved
+        begin
+          tp.save!
+        rescue SQLite3::BusyException => e
+          sleep 5
+        else
+          saved = true
+        end
+      end      
     end
 
     payload

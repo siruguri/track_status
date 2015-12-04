@@ -50,8 +50,8 @@ class StatusesControllerTest < ActionController::TestCase
     assert_no_match 'general', response.body
   end
 
-  describe 'deletion' do
-    it 'can delete old statuses' do
+  fixtures :statuses
+  test 'deletion can delete old statuses' do
       # Status exists before deletion
       empty_statuses = Status.where(description: 'too old go away')
       assert_equal 1, empty_statuses.count
@@ -63,7 +63,7 @@ class StatusesControllerTest < ActionController::TestCase
       assert_template :index
     end
 
-    it 'can delete old statuses with window' do
+  test 'can delete old statuses with window' do
       # Status exists before deletion
       empty_statuses = Status.where(description: 'sorta old')
       assert_equal 1, empty_statuses.count
@@ -76,5 +76,5 @@ class StatusesControllerTest < ActionController::TestCase
 
       assert_template :index
     end
-  end
+
 end

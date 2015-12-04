@@ -63,6 +63,7 @@ class TwittersController < ApplicationController
     end
     
     unless @latest_tps.size == 0
+      @universe_size = DocumentUniverse.count
       word_cloud
     end
   end
@@ -101,17 +102,18 @@ class TwittersController < ApplicationController
     @tweets_count = doc_sets[:tweets_count]
     @orig_tweets_count = doc_sets[:orig_tweets_count]
     
-    du = DocumentUniverse.last.universe
-
     o_dm = TextStats::DocumentModel.new(doc_sets[:orig_doc], twitter: true)
     a_dm = TextStats::DocumentModel.new(doc_sets[:all_doc], twitter: true)
     r_dm = TextStats::DocumentModel.new(doc_sets[:retweet_doc], twitter: true)
     w_dm = TextStats::DocumentModel.new(crawled_web_documents(@latest_tps), as_html: true)
     
-    o_dm.universe = du
-    a_dm.universe = du
-    r_dm.universe = du
-    w_dm.universe = du
+    if @universe_size > 0
+      du = DocumentUniverse.last.universe
+      o_dm.universe = du
+      a_dm.universe = du
+      r_dm.universe = du
+      w_dm.universe = du
+    end
     
     @orig_word_cloud = o_dm.sorted_counts
     @orig_word_explanations = o_dm.explanations

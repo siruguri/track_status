@@ -20,9 +20,13 @@
           = hidden_field_tag :handle, @bio.handle
           = submit_tag "Get older tweets"
           = submit_tag "Get newer tweets"
-      = twitter_cloud_box_partial(:retweets, 'Re-Tweets')
-      = twitter_cloud_box_partial(:orig, 'Original Tweets')
-      = twitter_cloud_box_partial(:webdocs, 'Web Documents')
-      = twitter_cloud_box_partial(:hashtags, 'Hashtags')
-      = twitter_cloud_box_partial(:handles, 'Handles')
-              
+      - if @universe_size != 0
+        = twitter_cloud_box_partial(:retweets, 'Re-Tweets')
+        = twitter_cloud_box_partial(:orig, 'Original Tweets')
+        = twitter_cloud_box_partial(:webdocs, 'Web Documents')
+        = twitter_cloud_box_partial(:hashtags, 'Hashtags')
+        = twitter_cloud_box_partial(:handles, 'Handles')
+      - else
+        No universe was calculated. Go to
+        = link_to 'Site Tasks', task_page_path
+        to create one.

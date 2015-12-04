@@ -39,14 +39,17 @@ def set_net_stubs
     with(headers: app_token_headers).    
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
 
-  # "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=1212&screen_name=twitter_handle&trim_user=1")
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=oldest_tweet_id&screen_name=twitter_handle&trim_user=1").
-    with(headers: single_token_headers).    
+    with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
+
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=no_id_here&trim_user=1").
+    with(headers: single_token_headers).
+    to_return(status: 200, body: valid_twitter_response(:oldertweets_noid))
 
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=latest_tweet_id&trim_user=1").
     with(headers: single_token_headers).

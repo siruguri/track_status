@@ -16,7 +16,7 @@ class AnalysisControllerTest < ActionController::TestCase
   end
 
   test 'update profile stats' do
-    assert_difference('ProfileStat.count', 4) do
+    assert_difference('ProfileStat.count', TwitterProfile.where('handle is not null').count) do
       post :execute_task, {commit: 'Update Profile Stats'}
     end
   end
