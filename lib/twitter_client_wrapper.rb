@@ -20,18 +20,13 @@ class TwitterClientWrapper
   end
 
   def rate_limited(&block)
-    limited = true
-    if limited
-      curr_time = Time.now
-      ct = TwitterRequestRecord.where('created_at > ?', curr_time - 1.minute).count
-      if ct < 12
-        limited = false
-      else
-        t = TwitterRequestRecord.last
-        t.ran_limit = true
-        t.save
-        sleep 60 unless Rails.env.test?
-      end
+    curr_time = Time.now
+    ct = TwitterRequestRecord.where('created_at > ?', curr_time - 1.minute).count
+    if ct >= 12
+      t = TwitterRequestRecord.last
+      t.ran_limit = true
+      t.save
+      sleep 60 unless Rails.env.test?
     end
     
     instance_eval(&block) if block_given?
@@ -59,12 +54,20 @@ class TwitterClientWrapper
   end
 
   def fetch_followers!(handle_rec)
-    payload = get(handle_rec, :follower_ids)
+    unless (last_req = TwitterRequestRecord.where(user: handle_rec, request_type: 'follower_ids')).empty?
+      cursor = last_req[0].cursor
+    else
+      cursor = -1
+    end
+    
+    payload = get(handle_rec, :follower_ids, {cursor: cursor})
     if payload[:data] != ''
       payload[:data][:ids].each do |id|
         t = TwitterProfile.find_or_create_by(twitter_id: id)
         handle_rec.followers << t
       end
+
+      next_cursor = payload[:data][:next_cursor]
     end
   end
   
@@ -169,7 +172,8 @@ class TwitterClientWrapper
     
     case command
     when :follower_ids
-      req = Twitter::REST::Request.new(@client, method, "/1.1/followers/ids.json", twitter_pk_hash)
+      req = Twitter::REST::Request.new(@client, method, "/1.1/followers/ids.json",
+                                       twitter_pk_hash.merge(opts.select { |k, v| k == :cursor }))
     when :profile
       req = Twitter::REST::Request.new(@client, method, "/1.1/users/show.json", twitter_pk_hash)
     when :tweets
@@ -189,21 +193,23 @@ class TwitterClientWrapper
     body = ''
     
     begin
-      Rails.logger.debug("Performing query to twitter: #{req.path} with option #{req.options}")
       response = req.perform
     rescue Twitter::Error::NotFound => e
       errors = {errors: 'Handle not found'}
     else
       if response.is_a? Hash and response.keys.size == 2 and response.keys.include?(:headers)
+        # At one point I was mucking with the Twitter gem to force it to return the actual HTTP
+        # response, so I could look at its headers
         body = response[:body]
         Rails.logger.debug "Headers are: #{response[:headers].inspect}"
       else
         body = response
-        Rails.logger.debug "Body is: #{body}"
       end
       case command
       when :tweets
         cursor = body.blank? ? opts[:limit_id] : (opts[:limiter] == :since_id ? body.first[:id] : body.last[:id])
+      when :follower_ids
+        cursor = body[:next_cursor]
       end
     end
 

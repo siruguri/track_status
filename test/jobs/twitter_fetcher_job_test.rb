@@ -35,13 +35,24 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
     end
   end
   
-  test ":followers works" do
-    assert_difference('TwitterProfile.count', 2) do
-      TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'followers'
-    end
-    t = TwitterProfile.last
-    assert_equal 8400, t.twitter_id
+  describe ":followers" do
+    it 'works without existing followers' do
+      assert_difference('TwitterProfile.count', 2) do
+        TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'followers'
+      end
+      t = TwitterProfile.last
+      assert_equal 8400, t.twitter_id
+      
+      assert_equal 2, ProfileFollower.count
 
-    assert_equal 2, ProfileFollower.count
+      assert_equal 1479414865424994218, TwitterRequestRecord.last.cursor
+      assert_equal "follower_ids", TwitterRequestRecord.last.request_type
+    end
+    
+    it 'works with existing followers' do
+      assert_difference('TwitterProfile.count', 3) do
+        TwitterFetcherJob.perform_now twitter_profiles(:existing_followers), 'followers'
+      end
+    end
   end
 end
