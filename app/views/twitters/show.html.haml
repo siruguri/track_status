@@ -16,7 +16,7 @@
         %b><
           #{nice_date(@latest_tps.first.newest_tweet_at)} to #{nice_date(@latest_tps.last.oldest_tweet_at)}
         ) Retweet Percentage #{sprintf("%0g", 100-@orig_tweets_count*100.0/@tweets_count)}
-        = form_tag '/twitter/twitter_call', class: 'inline-block' do
+        = form_tag twitter_twitter_call_path, class: 'inline-block' do
           = hidden_field_tag :handle, @bio.handle
           = submit_tag "Get older tweets"
           = submit_tag "Get newer tweets"
