@@ -18,6 +18,7 @@ gem 'devise'
 
 gem 'js-routes'
 
+gem 'newrelic_rpm'
 group :production do
   gem 'pg'
   gem 'execjs'
