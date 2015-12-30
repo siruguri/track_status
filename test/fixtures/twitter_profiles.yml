@@ -1,24 +1,28 @@
 twitter_profile_1:
   handle: twitter_handle
   location: Bee bee gun
-  last_tweet: <%= {created_at: "Tue Nov 03 12:17:04 +0000 2015"}.to_yaml.inspect %>
+  last_tweet_time: <%= DateTime.strptime("Tue Nov 03 12:17:04 +0000 2015", '%a %b %d %H:%M:%S %z %Y') %>
+  last_tweet: hello there 1
   twitter_id: 1
   
 nota_twitter_profile:
   handle: nota_twitter_handle
   location: Bee bee gun
-  last_tweet: <%= {created_at: "Mon Sep 03 12:17:04 +0000 2015"}.to_yaml.inspect %>
+  last_tweet_time: <%= DateTime.strptime("Mon Sep 03 12:17:04 +0000 2015", '%a %b %d %H:%M:%S %z %Y') %>
+  last_tweet: hello there 2
 
 bobcostas:
   handle: bobcostas
   location: Bee bee gun
-  last_tweet: <%= {created_at: "Thu Jan 03 12:17:04 +0000 2015"}.to_yaml.inspect %>
+  last_tweet_time: <%= DateTime.strptime("Thu Jan 03 12:17:04 +0000 2015", '%a %b %d %H:%M:%S %z %Y') %>
   twitter_id: 2
+  last_tweet: hello there 3
   
 alimawali:
   handle: alimawali
   location: Bee bee gun
-  last_tweet: <%= {created_at: "Tue Mar 03 12:17:04 +0000 2015"}.to_yaml.inspect %>
+  last_tweet_time: <%= DateTime.strptime("Tue Mar 03 12:17:04 +0000 2015", '%a %b %d %H:%M:%S %z %Y')%>
+  last_tweet: hello there 4
   twitter_id: 3
   
 only_id_1:

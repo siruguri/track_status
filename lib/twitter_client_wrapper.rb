@@ -81,6 +81,8 @@ class TwitterClientWrapper
       handle_rec.bio = payload[:data][:description]
       handle_rec.location = payload[:data][:location]
       handle_rec.last_tweet = payload[:data][:status]
+      handle_rec.last_tweet_time = DateTime.strptime(payload[:data][:status][:created_at],
+                                                     '%a %b %d %H:%M:%S %z %Y')
       handle_rec.tweets_count = payload[:data][:statuses_count]
       handle_rec.num_following = payload[:data][:friends_count]
       handle_rec.num_followers = payload[:data][:followers_count]

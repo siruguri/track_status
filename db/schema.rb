@@ -11,11 +11,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151130164713) do
+ActiveRecord::Schema.define(version: 20160102053347) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "hstore"
+  enable_extension "citext"
 
   create_table "account_entries", force: :cascade do |t|
     t.float    "entry_amount"
@@ -126,9 +127,11 @@ ActiveRecord::Schema.define(version: 20151130164713) do
   end
 
   create_table "profile_stats", force: :cascade do |t|
-    t.text    "stats_hash"
     t.integer "twitter_profile_id"
+    t.jsonb   "stats_hash_v2",      default: {}, null: false
   end
+
+  add_index "profile_stats", ["stats_hash_v2"], name: "index_profile_stats_on_stats_hash_v2", using: :gin
 
   create_table "received_emails", force: :cascade do |t|
     t.string   "source"
@@ -200,7 +203,8 @@ ActiveRecord::Schema.define(version: 20151130164713) do
     t.datetime "updated_at"
     t.text     "last_tweet"
     t.integer  "tweets_count"
-    t.integer  "twitter_id",    limit: 8
+    t.integer  "twitter_id",      limit: 8
+    t.datetime "last_tweet_time"
   end
 
   create_table "twitter_request_records", force: :cascade do |t|

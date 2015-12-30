@@ -13,6 +13,7 @@ gem 'jquery-ui-rails'
 
 # No issue found that references possible bug in update to 3, possibly interacting with something else.
 gem 'sprockets', '~> 2'
+gem 'thin'
 
 gem 'devise'
 

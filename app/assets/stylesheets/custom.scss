@@ -2,7 +2,7 @@ body {
  height: auto;
  width: 100%;
  font-family: 'Cabin', sans-serif;
- font-size: 18px;
+ font-size: $base-font;
 }
 
 .top {
@@ -90,4 +90,8 @@ input#token-input-tags-list {
 
 .form-element-row {
   margin-bottom: 10px;
+}
+
+.small-font {
+  font-size: $small-font;
 }

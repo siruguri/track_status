@@ -1,9 +1,13 @@
 class ProfileStat < ActiveRecord::Base
   belongs_to :twitter_profile
-  serialize :stats_hash, Hash
+
+  def stats_hash
+    # Backwards compatibility
+    stats_hash_v2
+  end
   
   def self.update_all
-    TwitterProfile.where('handle is not null').includes(:tweet_packets, :profile_stat).each do |profile|
+    TwitterProfile.where('handle is not null').each do |profile|
       stat_rec = (profile.profile_stat || create(twitter_profile_id: profile.id))
       update_followers profile, stat_rec
       update_tweet_counts profile, stat_rec
@@ -22,14 +26,10 @@ class ProfileStat < ActiveRecord::Base
 
     # Count total tweets in db, and total retweet count across all these
     # tweets.
-    profile.tweet_packets.inject(0) do |tweets_ct, tp_rec|
+    profile.tweet_packets.each do |tp_rec|
       tweets_ct += tp_rec.tweets_list.size
 
       retweet_agg += tp_rec.tweets_list.inject(0) do |retweet_count, tweet_hash|
-        if tweet_hash[:retweet_count].nil?
-          binding.pry
-        end
-        
         retweet_count += tweet_hash[:retweet_count]
       end
     end

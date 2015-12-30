@@ -8,7 +8,20 @@ class TwittersController < ApplicationController
 
   def index
     @handles_by_tweets = TweetPacket.joins(:user).group('twitter_profiles.handle').count
-    @all_profiles = TwitterProfile.includes(:profile_stat).where('handle is not null')
+
+    # Filter down if there's a filter parameter
+    if params[:followers_of] and !(leader = TwitterProfile.find_by_handle(params[:follower_of])).nil?
+      @profiles_list = TwitterProfile.joins(:profile_followers).
+                       where('handle is not null and profile_followers.leader_id = ?', leader.id)
+    else
+      @profiles_list = TwitterProfile.where('handle is not null')
+    end
+
+    @profiles_list = @profiles_list.joins(:profile_stat).includes(:profile_stat)
+    @profiles_list_sorts = {tweets_count: @profiles_list.order(tweets_count: :desc),
+                            tweets_retrieved: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'total_tweets\')::integer desc'),
+                            last_known_tweet_time: @profiles_list.order(last_tweet_time: :desc)
+                           }
   end
   
   def set_twitter_token
@@ -66,6 +79,8 @@ class TwittersController < ApplicationController
       @universe_size = DocumentUniverse.count
       word_cloud
     end
+
+    @g_set_title = @t.handle
   end
 
   private

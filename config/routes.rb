@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   delete '/statuses' => 'statuses#destroy'
   
   # Various things this app does
-  scope :document_analyses, controller: 'analysis' do
+  scope :document_analyses, controller: 'analysis', as: 'analyses' do
     get :task_page
     post :execute_task
   end

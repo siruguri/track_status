@@ -20,13 +20,18 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  adapter: sqlite3
-  database: db/test.sqlite3
-  timeout: 5000
-  pool: 5
+  adapter: postgresql
+  username: pg_dev
+  password: pg_dev_password
+  host: localhost
+  database: trackstatus_test
 
 production:
   adapter: postgresql
   encoding: unicode
+  username: pg_dev
+  password: pg_dev_password
   pool: 5
+  database: trackstatus_dev
+  host: localhost  
 

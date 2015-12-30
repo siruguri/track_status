@@ -15,6 +15,8 @@ WebMock.disable_net_connect!(:allow_localhost => true)
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   include FixtureFiles
+  include SetupConfig
+  
   fixtures :all
 end
 

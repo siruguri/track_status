@@ -1,0 +1,9 @@
+ps_1:
+  twitter_profile: twitter_profile_1
+  stats_hash_v2: <%= {a: 1, total_tweets: 4212, retweet_aggregate: 455}.to_json %>
+ps_2:
+  twitter_profile: bobcostas
+  stats_hash_v2: <%= {a: 1, total_tweets: 4213, retweet_aggregate: 192}.to_json %>
+ps_3:
+  twitter_profile: alimawali
+  stats_hash_v2: <%= {a: 1, total_tweets: 4214, retweet_aggregate: 112}.to_json %>

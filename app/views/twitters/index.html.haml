@@ -1,42 +1,43 @@
 %h3
   Sort By
+.paragraph.small-font
+  (empty? #{link_to "Try running a stats update", analyses_task_page_url})
 .paragraph.row
   .col-xs-12
-    .selection-box{'data-target' => 0}
+    .selection-box{'data-target' => 2}
       Time of latest tweet
     .selection-box{'data-target' => 1}
       Total tweets
-    .selection-box{'data-target' => 2}
+    .selection-box{'data-target' => 0}
       Tweets retrieved
 
 .profile-list
-  - if @all_profiles.count > 0
-    #databox-0.databox
-      %h4
-        Sorted by last tweet
-      .paragraph
-        %ol
-          - @all_profiles.sort_by { |rec| last_tweet_time(rec) }.each do |rec|
-            %li
-              = link_to rec.handle, twitter_path(handle: rec.handle)
-              = ": last tweet at #{last_tweet_safe(rec)}"
-    .databox#databox-2
-      %h4
-        Sorted by tweets retrieved
-      .paragraph
-        %ol
-          - @all_profiles.sort_by { |rec| rec.profile_stat.nil? ? 0: -rec.profile_stat.stats_hash[:total_tweets] }.each do |profile|
-            %li
-              = link_to profile.handle, twitter_path(handle: profile.handle)
-              = number_of_tweets_message(profile)
-
+  - if @profiles_list.count > 0
     .databox#databox-1
       %h4
         Sorted by total tweets
       .paragraph
         %ol
-          - @all_profiles.sort_by { |rec| rec.tweets_count.nil? ? 0 : -rec.tweets_count }.each do |profile|
-            %li
-              = link_to profile.handle, twitter_path(handle: profile.handle)
-              = "Total tweets: #{profile.tweets_count}"
+          - @profiles_list_sorts[:tweets_count].all.each do |rec|
+            %li.twitter-profile
+              = link_to rec.handle, twitter_path(handle: rec.handle)
+              = "Total tweets: #{rec.tweets_count}"
+    .databox#databox-0
+      %h4
+        Sorted by tweets retrieved
+      .paragraph
+        %ol
+          - @profiles_list_sorts[:tweets_retrieved].all.each do |rec|
+            %li.twitter-profile
+              = link_to rec.handle, twitter_path(handle: rec.handle)
+              = number_of_tweets_message(rec)
 
+    .databox#databox-2
+      %h4
+        Sorted by last tweet time
+      .paragraph
+        %ol
+          - @profiles_list_sorts[:last_known_tweet_time].all.each do |rec|
+            %li.twitter-profile
+              = link_to rec.handle, twitter_path(handle: rec.handle)
+              = ": last tweet #{rec.last_tweet_time.strftime('%a, %b %d, %H:%M:%S')}"

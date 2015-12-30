@@ -6,5 +6,10 @@ class TwitterProfile < ActiveRecord::Base
   has_many :followers, through: :profile_followers, class_name: 'TwitterProfile', primary_key: :leader_id,
            foreign_key: :follower_id
   
-  serialize :last_tweet, Hash
+  before_create :tweets_count_zero
+
+  private
+  def tweets_count_zero
+    self.tweets_count = 0
+  end
 end

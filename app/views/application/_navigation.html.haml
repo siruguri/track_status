@@ -10,6 +10,10 @@
         = t(:site_brand)
     .collapse.navbar-collapse{id: "bs-example-navbar-collapse-1"}
       %ul.nav.navbar-nav.navbar-right
+        %li
+          = link_to "Index page", twitter_index_url
+        %li
+          = link_to "Enter handle", twitter_input_handle_url
         - if current_user
           %li
             = link_to 'Sign Out', destroy_user_session_path, :method => :delete

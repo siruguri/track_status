@@ -4,18 +4,18 @@ class AnalysisController < ApplicationController
   
   def execute_task
     if params[:commit]
-      if ["Reprocess All Profiles", 'Update Profile Stats', 'Compute Document Universe'].include?(params[:commit])
+      if ["re-bio all handles", 'update profile stats', 'compute document universe'].include?(params[:commit].downcase)
         flash[:notice] = "Executed command #{params[:commit]}"
-        case params[:commit]
-        when 'Compute Document Universe'
+        case params[:commit].downcase
+        when 'compute document universe'
           DocumentUniverse.reanalyze
-        when 'Update Profile Stats'
+        when 'update profile stats'
           ProfileStat.update_all
-        when "Reprocess All Profiles"
+        when "re-bio all handles"
           @count = 0
           TwitterProfile.all.each do |t|
             @count += 1
-           TwitterFetcherJob.perform_later(t, 'bio')
+            TwitterFetcherJob.perform_later(t, 'bio')
           end
           flash[:notice] += ": Processed #{@count} profiles"
         end

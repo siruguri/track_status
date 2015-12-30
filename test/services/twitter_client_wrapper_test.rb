@@ -40,7 +40,8 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     end
 
     # See test/fixtures/files/twitter_profile_array.json for these data
-    assert_equal "Fri Nov 06 20:58:24 +0000 2015", twitter_profiles(:twitter_profile_1).last_tweet[:created_at]
+    assert_equal DateTime.strptime("Fri Nov 06 20:58:24 +0000 2015", '%a %b %d %H:%M:%S %z %Y'),
+                 twitter_profiles(:twitter_profile_1).last_tweet_time
     assert_equal 4242, twitter_profiles(:twitter_profile_1).tweets_count
     assert_equal 143916, twitter_profiles(:twitter_profile_1).num_followers
     assert_equal 145, twitter_profiles(:twitter_profile_1).num_following

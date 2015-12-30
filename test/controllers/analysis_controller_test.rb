@@ -16,14 +16,14 @@ class AnalysisControllerTest < ActionController::TestCase
   end
 
   test 'update profile stats' do
-    assert_difference('ProfileStat.count', TwitterProfile.where('handle is not null').count) do
+    assert_difference('ProfileStat.count', TwitterProfile.where('handle is not null').count - ProfileStat.count) do
       post :execute_task, {commit: 'Update Profile Stats'}
     end
   end
 
   test 'reprocess all profiles' do
     assert_enqueued_with(job: TwitterFetcherJob) do
-      post :execute_task, {commit: "Reprocess All Profiles"}
+      post :execute_task, {commit: "Re-bio All Handles"}
     end
 
     assert_equal TwitterProfile.count, enqueued_jobs.size

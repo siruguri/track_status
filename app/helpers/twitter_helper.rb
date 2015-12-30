@@ -2,18 +2,10 @@ module TwitterHelper
   def remove_entities_and_numbers(w)
     !(/\A\d+\Z/.match(w[0]) || /^\#/.match(w[0]) || /^\@/.match(w[0]))
   end
-  
-  def last_tweet_safe(rec)
-    rec.last_tweet[:created_at] || 'Mon Jan 01 00:01:00 +0000 2005'    
-  end 
-
-  def last_tweet_time(rec)
-    DateTime.now - DateTime.strptime(last_tweet_safe(rec), '%a %b %d %H:%M:%S %z %Y')
-  end
-  
+    
   def number_of_tweets_message(profile)
     if (stat = profile.profile_stat)
-      ": #{stat.stats_hash[:total_tweets]} tweets retrieved, total retweets = #{stat.stats_hash[:retweet_aggregate]}, in #{(@handles_by_tweets[profile.handle])} attempts"
+      ": #{stat.stats_hash['total_tweets']} tweets retrieved, total retweets = #{stat.stats_hash['retweet_aggregate']}, in #{(@handles_by_tweets[profile.handle])} attempts"
     else
       ": No tweets retrieved"
     end
