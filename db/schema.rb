@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160105170943) do
+ActiveRecord::Schema.define(version: 20160107002734) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -179,15 +179,14 @@ ActiveRecord::Schema.define(version: 20160105170943) do
     t.datetime "updated_at"
   end
 
-  create_table "tweet_packets", force: :cascade do |t|
-    t.text     "tweets_list"
-    t.datetime "newest_tweet_at"
-    t.datetime "oldest_tweet_at"
-    t.integer  "max_id",          limit: 8
-    t.integer  "since_id",        limit: 8
+  create_table "tweets", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "twitter_id",      limit: 8
+    t.integer  "twitter_id",    limit: 8
+    t.datetime "tweeted_at"
+    t.jsonb    "tweet_details",           default: {}, null: false
+    t.text     "mesg"
+    t.integer  "tweet_id",      limit: 8
   end
 
   create_table "twitter_profiles", force: :cascade do |t|
@@ -203,7 +202,7 @@ ActiveRecord::Schema.define(version: 20160105170943) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "last_tweet"
-    t.integer  "tweets_count"
+    t.integer  "tweets_count",              default: 0
     t.integer  "twitter_id",      limit: 8
     t.datetime "last_tweet_time"
     t.integer  "user_id"
@@ -211,13 +210,14 @@ ActiveRecord::Schema.define(version: 20160105170943) do
 
   create_table "twitter_request_records", force: :cascade do |t|
     t.string   "handle"
-    t.integer  "cursor",       limit: 8
+    t.integer  "cursor",         limit: 8
     t.string   "request_type"
     t.boolean  "status"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "ran_limit"
     t.string   "request_for"
+    t.string   "status_message"
   end
 
   create_table "users", force: :cascade do |t|
@@ -249,8 +249,10 @@ ActiveRecord::Schema.define(version: 20160105170943) do
     t.datetime "updated_at"
     t.string   "author"
     t.string   "original_url"
-    t.integer  "tweet_packet_id"
+    t.integer  "twitter_profile_id"
     t.boolean  "fetch_failed"
   end
+
+  add_index "web_articles", ["original_url"], name: "index_original_url_on_web_articles", unique: true, using: :btree
 
 end

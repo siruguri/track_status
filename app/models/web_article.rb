@@ -4,7 +4,9 @@ class WebArticle < ActiveRecord::Base
 
   has_many :article_taggings
   has_many :tags, through: :article_taggings, class_name: 'ArticleTag', source: :article_tag
-  belongs_to :tweet_packet
+  belongs_to :twitter_profile
+  
+  after_create :twitter_redirect_fetch
   
   validate :original_url, :valid_uri?
 
@@ -13,6 +15,13 @@ class WebArticle < ActiveRecord::Base
       return true
     else
       errors.add(:base, 'Invalid URI supplied for source')
+    end
+  end
+
+  private
+  def twitter_redirect_fetch
+    if self.source == 'twitter'
+      TwitterRedirectFetchJob.perform_later self
     end
   end
 end

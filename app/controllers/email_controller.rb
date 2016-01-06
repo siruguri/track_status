@@ -9,7 +9,10 @@ class EmailController < ApplicationController
   end
 
   def transform
-    if params[:mandrill_events]
+    if params[:dev_body]
+      GeneralMailer.notification_email(payload: params[:dev_body]).deliver_later
+      render 'pages/success'
+    elsif params[:mandrill_events]
       mandrill_hash = JSON.parse params[:mandrill_events]
 
       r=ReceivedEmail.create(source: 'mandrill', payload: JSON.parse(params[:mandrill_events]))

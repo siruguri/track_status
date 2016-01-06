@@ -1,3 +1,17 @@
+.paragraph.bottomborder
+  - if current_user
+    - if @user_has_profile.present?
+      = form_tag twitter_twitter_call_path do
+        = hidden_field_tag :your, 1
+        = text_field_tag :handle, @user_handle, autofocus: true, id: 'twitter-handle'
+        = submit_tag "Get your bio", class: 'btn btn-default'
+        = submit_tag "Get your older tweets", class: 'btn btn-default'
+        = submit_tag "Populate your followers", class: 'btn btn-default', id: 'populate-followers'
+    - else
+      You haven't registered your Twitter handle yet.
+      = link_to "Authorize with Twitter", twitter_authorize_twitter_url
+      to do so.
+      
 .paragraph
   = form_tag twitter_twitter_call_path do
     = text_field_tag :handle, '', autofocus: true, id: 'twitter-handle'

@@ -18,18 +18,16 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
 
   describe ":tweets job" do
     it 'works when profile has twitter id' do
-      assert_difference('TweetPacket.count', 1) do
+      assert_difference('Tweet.count', 3) do
         TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'tweets'
       end
 
-      t = TweetPacket.last
-      assert_equal 3, t.tweets_list.size
-      assert_equal twitter_profiles(:twitter_profile_1).twitter_id, t.twitter_id
-      assert_equal 1, t.twitter_id
+      assert_equal twitter_profiles(:twitter_profile_1).id, Tweet.last.user.id
+      assert_equal 239413543487819778, Tweet.last.tweet_id
     end
 
     it 'works when profile does not have twitter id' do
-      assert_difference('TweetPacket.count', 1) do
+      assert_difference('Tweet.count', 4) do
         TwitterFetcherJob.perform_now twitter_profiles(:no_id_profile), 'tweets'
       end
     end

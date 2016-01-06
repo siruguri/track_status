@@ -18,6 +18,7 @@ module Scrapers
     private
     def extract_top3_articles
       link_divs = []
+
       first_2_links = @_safe_d.try_css('.col-md-3 p:nth-child(2) a')
       first_2_links.each { |l| link_divs << l }
       link_divs << @_safe_d.try_css('.col-md-4 p:nth-child(2) a')[0]

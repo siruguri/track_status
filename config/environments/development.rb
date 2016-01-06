@@ -43,4 +43,14 @@ Rails.application.configure do
                                   :host => "localhost", :port => 3000}
     config.prefix = 'http://localhost:3000'
   end
+
+  config.action_mailer.smtp_settings = {
+    :address        => 'smtp.gmail.com',
+    :port           => '587',
+    :authentication => :plain,
+    :user_name      => 'siruguri@gmail.com',
+    :password       => Rails.application.secrets.gpwd,
+    :domain         => 'gmail.com',
+    :enable_starttls_auto => true
+  }
 end

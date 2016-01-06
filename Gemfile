@@ -11,6 +11,8 @@ gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.1.0'
 gem 'jquery-ui-rails'
 
+gem 'activerecord-import'
+
 # No issue found that references possible bug in update to 3, possibly interacting with something else.
 gem 'sprockets', '~> 2'
 gem 'thin'

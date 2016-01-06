@@ -1,13 +1,17 @@
 class TwittersController < ApplicationController
   include TwitterAnalysis
-  before_action :set_handle_or_return, except: [:input_handle, :index, :batch_call, :authorize_twitter, :set_twitter_token]
+  before_action :set_handle_or_return, only: [:twitter_call, :show]
   
   def input_handle
-    @uncrawled_profiles = TwitterProfile.where('twitter_id is not null and handle is null').count
+    @uncrawled_profiles = uncrawled_profiles_query.count
+    if current_user and (p = current_user.twitter_profile).present?
+      @user_has_profile = true
+      @user_handle = p.handle
+    end
   end
 
   def index
-    @handles_by_tweets = TweetPacket.joins(:user).group('twitter_profiles.handle').count
+    @handles_by_tweets = Tweet.joins(:user).group('twitter_profiles.handle').count
 
     # Filter down if there's a filter parameter
     if params[:followers_of] and !(leader = TwitterProfile.find_by_handle(params[:follower_of])).nil?
@@ -20,6 +24,8 @@ class TwittersController < ApplicationController
     @profiles_list = @profiles_list.joins(:profile_stat).includes(:profile_stat)
     @profiles_list_sorts = {tweets_count: @profiles_list.order(tweets_count: :desc),
                             tweets_retrieved: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'total_tweets\')::integer desc'),
+                            retweets_collected: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'retweet_aggregate\')::integer desc'),
+                            avg_retweets_collected: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'retweeted_avg\')::float desc'),
                             last_known_tweet_time: @profiles_list.order(last_tweet_time: :desc)
                            }
   end
@@ -31,8 +37,10 @@ class TwittersController < ApplicationController
         Rails.application.secrets.twitter_consumer_secret,
         site: 'https://api.twitter.com'
       )
-      
-      request_token = client.get_request_token(oauth_callback: "#{request.protocol}#{request.host}/twitter/set_twitter_token")
+
+      callback_str = "#{request.protocol}#{request.host}#{request.port == 80 ? '' : ':' + request.port.to_s}/twitter/set_twitter_token"
+      puts callback_str
+      request_token = client.get_request_token(oauth_callback: callback_str)
 
       o = OauthTokenHash.create(source: 'twitter', user: current_user, request_token: request_token.to_yaml)
       redirect_to request_token.authorize_url
@@ -71,8 +79,10 @@ class TwittersController < ApplicationController
   end
 
   def batch_call
-    if !params["uncrawled-profiles"].nil?
-      TwitterProfile.where('twitter_id is not null and handle is null').all.each do |profile|
+    @app_token = set_app_tokens
+    
+    unless params["uncrawled-profiles"].nil?
+      uncrawled_profiles_query.all.each do |profile|
         @t = profile
         bio
         tweets
@@ -86,15 +96,15 @@ class TwittersController < ApplicationController
       @app_token = set_app_tokens
 
       case params[:commit].downcase
-      when 'populate followers'
+      when /populate.*followers/
         followers
-      when 'get bio'
+      when /get.*bio/
         bio
-      when /get older tweets/i
+      when /get.*older tweets/
         # Let's get the bio too, if we never did, when asking for tweets
         bio if !@t.member_since.present?
-        tweets
-      when /get newer tweets/i
+        tweets(direction: 'older')
+      when /get newer tweets/
         tweets(direction: 'newer')
       end
       redirect_to twitter_path(handle: @t.handle)
@@ -106,14 +116,9 @@ class TwittersController < ApplicationController
   
   def show
     @bio = @t
-
-    if @t.twitter_id.present?
-      @latest_tps = TweetPacket.where(twitter_id: @t.twitter_id).order(newest_tweet_at: :desc)
-    else
-      @latest_tps = []
-    end
+    @latest_tweets = Tweet.where(user: @t).order(tweeted_at: :desc)
     
-    unless @latest_tps.size == 0
+    unless @latest_tweets.count == 0
       @universe_size = DocumentUniverse.count
       word_cloud
     end
@@ -122,6 +127,11 @@ class TwittersController < ApplicationController
   end
 
   private
+  def uncrawled_profiles_query
+    #TwitterProfile.where('twitter_id is not null and handle is null')
+    TwitterProfile.includes(:tweets).joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null')    
+  end
+  
   def set_handle_or_return
     if params[:handle].nil?
       render nothing: true, status: 422
@@ -151,14 +161,14 @@ class TwittersController < ApplicationController
   def word_cloud
     @tweets_count = 0
 
-    doc_sets = separated_docs @latest_tps.all
+    doc_sets = separated_docs @latest_tweets.all
     @tweets_count = doc_sets[:tweets_count]
     @orig_tweets_count = doc_sets[:orig_tweets_count]
-    
+
     o_dm = TextStats::DocumentModel.new(doc_sets[:orig_doc], twitter: true)
     a_dm = TextStats::DocumentModel.new(doc_sets[:all_doc], twitter: true)
     r_dm = TextStats::DocumentModel.new(doc_sets[:retweet_doc], twitter: true)
-    w_dm = TextStats::DocumentModel.new(crawled_web_documents(@latest_tps), as_html: true)
+    w_dm = TextStats::DocumentModel.new(crawled_web_documents(@t), as_html: true)
     
     if @universe_size > 0
       du = DocumentUniverse.last.universe
@@ -179,14 +189,11 @@ class TwittersController < ApplicationController
     current_user ? current_user.latest_token_hash('twitter') : nil
   end
 
-  def crawled_web_documents(tweet_packets)
+  def crawled_web_documents(profile)
     @webdocs_count = 0
-    tweet_packets.joins(:web_articles).includes(:web_articles).
-      where('web_articles.body is not null').map do |tp|
-      tp.web_articles.map do |article|
-        @webdocs_count += 1
-        article.body
-      end
-    end.flatten.join ' '
+    WebArticle.where('web_articles.body is not null and twitter_profile_id = ?', profile.id).all.map do |article|
+      @webdocs_count += 1
+      article.body
+    end.join ' '
   end
 end

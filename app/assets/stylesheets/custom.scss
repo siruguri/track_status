@@ -39,9 +39,14 @@ input#token-input-tags-list {
   margin-bottom: 10px;
 }
 
+.bottomborder {
+  padding-bottom: 5px;
+  border-bottom: solid 1px green;
+}
+
 .paragraph {
   margin-bottom: 10px;
-  display: block
+  display: block;
 }
 
 .topborder {
@@ -95,3 +100,4 @@ input#token-input-tags-list {
 .small-font {
   font-size: $small-font;
 }
+

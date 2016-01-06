@@ -9,13 +9,12 @@ class TwitterFetcherJob < ActiveJob::Base
       when 'bio'
         fetch_profile! handle_rec
       when 'tweets'
-        if opts[:direction].nil? or opts[:direction].to_sym == :older
-          order_logic = {oldest_tweet_at: :asc}
-        else
-          order_logic = {newest_tweet_at: :desc}
-        end
-        t = handle_rec.tweet_packets.order(order_logic).limit(1)
-        fetch_tweets! handle_rec, t.first, opts
+        t = if opts[:direction].nil? or opts[:direction].to_sym == :older
+              handle_rec.tweets.oldest
+            else
+              handle_rec.tweets.newest
+            end
+        fetch_tweets! handle_rec, t, opts
       end
     end
   end

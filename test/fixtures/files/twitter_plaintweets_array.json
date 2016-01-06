@@ -125,12 +125,15 @@
         },
 	"in_reply_to_user_id_str": null,
 	"contributors": null,
-	"text": "We are working to resolve issues with application management & logging in to the dev portal: https://t.co/p5bOzH0k ^TS",
+	"text": "plain We are working to resolve issues with application management & logging in to the dev portal: https://t.co/p5bOzH0k ^TS",
 	"retweet_count": 105,
 	"in_reply_to_status_id_str": null,
 	"id": 239413543487819778,
 	"geo": null,
-	"retweeted": false,
+	"retweeted": true,
+	"retweeted_status": {
+	    "text": "the original tweet in plain array"
+	},
 	"possibly_sensitive": false,
 	"in_reply_to_user_id": null,
 	"place": null,

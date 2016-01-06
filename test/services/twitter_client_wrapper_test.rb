@@ -33,50 +33,57 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     assert_equal 1, TwitterProfile.where(twitter_id: 8400).count
   end
   
-  test 'profile fetching works' do
-    h = @handle
-    @c.rate_limited do
-      fetch_profile! h
+  describe 'profile fetching' do
+    it 'works with a new profile' do
+      h = @handle
+      @c.rate_limited do
+        fetch_profile! h
+      end
+
+      # See test/fixtures/files/twitter_profile_array.json for these data
+      @handle.reload
+      assert_equal DateTime.strptime("Fri Nov 06 20:58:24 +0000 2015", '%a %b %d %H:%M:%S %z %Y'),                   
+                   twitter_profiles(:twitter_profile_1).last_tweet_time
+      assert_equal 4242, twitter_profiles(:twitter_profile_1).tweets_count
+      assert_equal 143916, twitter_profiles(:twitter_profile_1).num_followers
+      assert_equal 145, twitter_profiles(:twitter_profile_1).num_following
+      assert_match /allafarce/, @handle.last_tweet
     end
 
-    # See test/fixtures/files/twitter_profile_array.json for these data
-    assert_equal DateTime.strptime("Fri Nov 06 20:58:24 +0000 2015", '%a %b %d %H:%M:%S %z %Y'),
-                 twitter_profiles(:twitter_profile_1).last_tweet_time
-    assert_equal 4242, twitter_profiles(:twitter_profile_1).tweets_count
-    assert_equal 143916, twitter_profiles(:twitter_profile_1).num_followers
-    assert_equal 145, twitter_profiles(:twitter_profile_1).num_following
+    it 'ignores a fresh profile' do
+      @handle.bio = 'got a bio'
+      @handle.save
+      original = @handle.last_tweet
+      
+      h = @handle
+      @c.rate_limited do
+        fetch_profile! h
+      end
+
+      @handle.reload
+      assert_equal original, @handle.last_tweet
+    end
   end
   
   test 'plain tweets fetching works' do
     wa_ct = WebArticle.count
-    assert_difference('TweetPacket.count', 1) do
+    assert_difference('Tweet.count', 2) do
       h = @handle
       @c.rate_limited do
         fetch_tweets! h
        end
     end
 
-    assert_equal 2, enqueued_jobs.size
     assert_equal 2 + wa_ct, WebArticle.count
     assert_equal 'twitter', WebArticle.last.source
+    assert_equal 2, enqueued_jobs.size
 
-    assert_equal TweetPacket.last.id, WebArticle.last.tweet_packet_id
-    assert_equal 2, TweetPacket.last.tweets_list.size
+    assert_equal Tweet.last.user.id, WebArticle.last.twitter_profile_id
+
+    assert Tweet.last.is_retweet?
   end
 
   test 'cursored tweets fetching works' do
-    assert_difference('TweetPacket.count', 1) do
-      h = @handle
-      pks = tweet_packets(:tweet_packet_1_1)
-      
-      @c.rate_limited do
-        fetch_tweets! h, pks
-       end
-    end
-
-    tl = TweetPacket.last
-    assert_equal 3, tl.tweets_list.size
-    assert_equal @handle.twitter_id, tl.twitter_id
   end    
 end
 

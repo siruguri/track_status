@@ -4,9 +4,9 @@ class DocumentUniverse < ActiveRecord::Base
   
   def self.reanalyze
     du = TextStats::DocumentUniverse.new
-    TweetPacket.pluck(:tweets_list).each do |pkt|
-      if pkt and pkt.size > 0
-        du.add TextStats::DocumentModel.new(separated_docs(pkt)[:all_doc])
+    Tweet.pluck(:mesg).each do |mesg|
+      if mesg.present? and mesg.size > 0
+        du.add TextStats::DocumentModel.new(mesg)
       end
     end
     create universe: du

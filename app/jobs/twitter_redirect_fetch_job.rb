@@ -3,7 +3,11 @@ class TwitterRedirectFetchJob < ActiveJob::Base
 
   def perform(web_article)
     # Twitter URLs have a 301 redirect
-    return if web_article.body.present?
+    if web_article.is_a? String
+      web_article = WebArticle.find_by_original_url(web_article)
+    end
+    
+    return if !web_article.is_a?(WebArticle) or web_article.body.present?
     actual_url = ''
     begin
       u = URI(web_article.original_url)

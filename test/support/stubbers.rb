@@ -19,10 +19,6 @@ def invalid_twitter_response
 end
 
 def set_net_stubs
-  stub_request(:get, "https://www.readability.com/api/content/v1/parser?format=json&token=testreadabilityapikey&url=https://medium.com/bolt-blog/who-invests-in-hardware-startups-d1612895a31a").
-    with(:headers => {'Accept'=>'*/*'}).
-    to_return(:status => 200, :body => fixture_file('readability-aldaily-file-1.html'), :headers => {'Content-Type' => 'UTF-8'})
-
   stub_request(:post, "https://api.twitter.com/oauth/access_token").
     with(:headers => {'Accept'=>'*/*', 'Authorization'=>/oauth_token."reqsecret", oauth_verifier."oauth_verifier"/}).
     to_return(:status => 200, :body => "")
@@ -38,7 +34,7 @@ def set_net_stubs
     with(headers: app_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=oldest_tweet_id&screen_name=twitter_handle&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=9918575028735&screen_name=twitter_handle&trim_user=1").
     with(headers: app_token_headers).    
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
 
@@ -46,7 +42,7 @@ def set_net_stubs
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=oldest_tweet_id&screen_name=twitter_handle&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&max_id=9918575028735&screen_name=twitter_handle&trim_user=1").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
 
@@ -54,7 +50,7 @@ def set_net_stubs
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:oldertweets_noid))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=latest_tweet_id&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=240859602684612608&trim_user=1").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:newertweets))
   
@@ -81,10 +77,34 @@ def set_net_stubs
     with(:headers => {'Accept'=>'*/*',  'Host'=>'t.co'}).
     to_return(:status => 301, :body => "", :headers => {'location' => 'http://redirected.to/1'})
 
+  # Readability
+  stub_request(:get, "https://www.readability.com/api/content/v1/parser?format=json&token=testreadabilityapikey&url=https://medium.com/bolt-blog/who-invests-in-hardware-startups-d1612895a31a").
+    with(:headers => {'Accept'=>'*/*'}).
+    to_return(:status => 200, body: fixture_file('readability-aldaily-file-1.html'), headers: {'Content-Type' => 'UTF-8'})
+
   stub_request(:get, /.*token=testreadabilityapikey.*url=.*dev.witter/).
     with(:headers => {'Accept'=>'*/*'}).
     to_return(:status => 200, body: fixture_file('readability-aldaily-file-1.html'), headers: {'Content-Type' => 'UTF-8'})
+
   stub_request(:get, /.*token=testreadabilityapikey.*url=.*redirected\.to/).
     with(:headers => {'Accept'=>'*/*'}).
     to_return(:status => 200, body: fixture_file('readability-aldaily-file-1.html'), headers: {'Content-Type' => 'UTF-8'})
+
+  stub_request(:get, "https://www.readability.com/api/content/v1/parser?format=json&token=testreadabilityapikey&url=http://www.reanalysis_1.com/uri1").
+    with(:headers => {'Accept'=>'*/*'}).
+    to_return(:status => 200, :body => fixture_file('readability-aldaily-file-1.html'), :headers => {'Content-Type' => 'UTF-8'})
+
+  # Aldaily/readability
+  stub_request(:get, /.readability.com.*parser.*economist/).
+    to_return(status: 200, body: fixture_file('readability-aldaily-file-2.html'),
+              headers: {'Content-Type' => 'application/json; charset=utf-8'})
+  stub_request(:get, /.readability.com.*parser.*spectator/).
+    to_return(status: 200, body: fixture_file('readability-aldaily-file-1.html'),
+              headers: {'Content-Type' => 'application/json; charset=utf-8'})
+  stub_request(:get, /.readability.com.*parser.*aeon/).
+    to_return(status: 200, body: fixture_file('readability-aldaily-file-3.html'),
+              headers: {'Content-Type' => 'application/json; charset=utf-8'})
+
+  stub_request(:get, 'http://www.aldaily.com/').
+    to_return(body: fixture_file('aldaily-page.html'))
 end

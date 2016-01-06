@@ -39,6 +39,8 @@ class TwitterClientWrapper
       t = TwitterRequestRecord.last
       t.ran_limit = true
       t.save
+
+      # Enforce max of 12 requests per minute = 180 per 15 min window
       sleep 60 unless Rails.env.test?
     end
     
@@ -51,19 +53,37 @@ class TwitterClientWrapper
     /https?...t\.co.[^\s]+/
   end
 
-  def make_web_article(entity_hash, tp)
+  def save_articles!(article_list, handle)
+    return if article_list.empty?
+    
+    existing_urls = WebArticle.where(original_url: article_list).pluck :original_url
+    article_list -= existing_urls
+
+    # No callbacks
+    WebArticle.import(article_list.uniq.map do |new_url|
+                        WebArticle.new(original_url: new_url, source: 'twitter', twitter_profile: handle)
+                      end
+                     )
+    article_list.each do |url|
+      TwitterRedirectFetchJob.perform_later url
+    end
+  end
+  
+  def make_web_article_list(entity_hash)
+    # Return list of URLs found in tweets
+
+    return [] unless entity_hash
+    created_articles = []
     entity_hash[:urls].each do |s|
       unless s[:expanded_url].match '.twitter.com'
-        w = WebArticle.find_or_create_by(original_url: s[:expanded_url])
-        # Ignore this article if someone already tweeted about it.
-        unless w.source == 'twitter'
-          w.source = 'twitter'
-          w.tweet_packet = tp
-          w.save
-          TwitterRedirectFetchJob.perform_later w
+        w = WebArticle.new(original_url: s[:expanded_url])
+        if w.valid?
+          created_articles << s[:expanded_url]
         end
       end
     end
+
+    created_articles
   end
 
   def account_settings!(user_rec)
@@ -73,8 +93,15 @@ class TwitterClientWrapper
 
     t = TwitterProfile.new(user: user_rec)
     payload = get(t, :account_settings)
-    t.handle = payload[:data][:screen_name]
-    t.save!
+    handle = payload[:data][:screen_name]
+
+    if (prev = TwitterProfile.find_by_handle handle).present?
+      prev.user = user_rec
+      prev.save!
+    else
+      t.handle = handle
+      t.save!
+    end
   end
   
   def fetch_followers!(handle_rec)
@@ -86,16 +113,22 @@ class TwitterClientWrapper
     
     payload = get(handle_rec, :follower_ids, {cursor: cursor})
     if payload[:data] != ''
-      payload[:data][:ids].each do |id|
-        t = TwitterProfile.find_or_create_by(twitter_id: id)
-        handle_rec.followers << t
+      ts = TwitterProfile.where(twitter_id: payload[:data][:ids]).all
+      ts.each do |t|
+        handle_rec.followers << t unless handle_rec.followers.include? t
       end
 
-      next_cursor = payload[:data][:next_cursor]
+      new_ids = payload[:data][:ids] - ts.map { |t| t.twitter_id }
+      new_ids.each do |id|
+        handle_rec.followers <<  TwitterProfile.new(twitter_id: id)
+      end
     end
   end
   
   def fetch_profile!(handle_rec)
+    # Don't fetch if the data is relatively fresh
+    return if handle_rec.bio.present? and handle_rec.updated_at > Time.now - 2.days
+    
     payload = get(handle_rec, :profile, {count: 100})
 
     if payload[:data] != ''
@@ -105,8 +138,10 @@ class TwitterClientWrapper
       handle_rec.bio = payload[:data][:description]
       handle_rec.location = payload[:data][:location]
       handle_rec.last_tweet = payload[:data][:status]
-      handle_rec.last_tweet_time = DateTime.strptime(payload[:data][:status][:created_at],
-                                                     '%a %b %d %H:%M:%S %z %Y')
+      unless payload[:data][:status].nil?
+        handle_rec.last_tweet_time = DateTime.strptime(payload[:data][:status][:created_at],
+                                                       '%a %b %d %H:%M:%S %z %Y')
+      end
       handle_rec.tweets_count = payload[:data][:statuses_count]
       handle_rec.num_following = payload[:data][:friends_count]
       handle_rec.num_followers = payload[:data][:followers_count]
@@ -116,19 +151,20 @@ class TwitterClientWrapper
     payload
   end
 
-  def fetch_tweets!(handle_rec, relative_to_packet = nil, opts = {})
+  def fetch_tweets!(handle_rec, relative_to_tweet = nil, opts = {})
     limiter = nil
-    direction = opts[:direction] ? opts[:direction].to_sym : :older
-    unless relative_to_packet.blank?
+    direction = opts[:direction].try(:to_sym) || :older
+    
+    unless relative_to_tweet.blank?
       case direction
       when :newer
         limiter = :since_id
-        limit_id = relative_to_packet.first[:id]
+        limit_id = relative_to_tweet.tweet_id
       when :older
         limiter = :max_id
-        limit_id = relative_to_packet.last[:id]
+        limit_id = relative_to_tweet.tweet_id
       else
-        raise TwitterClientArgumentException.new("#{direction} is not a valid direction from :newer and :older")
+        raise TwitterClientArgumentException.new("#{direction} is not a valid direction (either :newer or :older)")
       end
     end
 
@@ -136,44 +172,32 @@ class TwitterClientWrapper
 
     # Sometimes, there are no new tweets
     if payload[:data] != '' and ((data = payload[:data]).size > 0)
-      tweets_list = data.collect do |tweet|
-        {mesg: tweet[:text], id: tweet[:id], entities: tweet[:entities],
-         retweeted_status: tweet[:retweeted_status], retweet_count: tweet[:retweet_count]
-        }
-      end
-
-      # This app is designed to create profiles using handles, but requires Twitter IDs to match
+      # This app is designed to create profiles even if only handles are avlbl, but requires Twitter IDs to match
       # tweets to users. So we have to grab the twitter id from the Twitter API response sometimes.
-      if handle_rec.twitter_id
+      if handle_rec.twitter_id.present?
         fk = handle_rec.twitter_id
       else
         fk = data.first[:user][:id]
-      end
-      
-      tp = TweetPacket.new(twitter_id: fk, max_id: data.last[:id],
-                           since_id: data.first[:id],
-                           newest_tweet_at: data.first[:created_at], oldest_tweet_at: data.last[:created_at])
-      # Scan and store all the URLs into web article models; remove them from the tweets
-      tweets_list.each do |t|
-        t[:mesg].gsub! twitter_regex, ''
-        make_web_article t[:entities], tp
-        unless t[:retweeted_status].nil?
-          t[:retweeted_status][:text].gsub! twitter_regex, ''
-        end
+        handle_rec.twitter_id = fk
+        handle_rec.save
       end
 
-      tp.tweets_list = tweets_list; tp.save
-
-      saved = false
-      while !saved
-        begin
-          tp.save!
-        rescue SQLite3::BusyException => e
-          sleep 5
-        else
-          saved = true
+      new_tweets = []
+      all_web_articles = []      
+      data.each do |tweet|
+        # Scan and store all the URLs into web article models; remove them from the tweets
+        unless tweet[:retweeted_status].nil?
+          tweet[:retweeted_status][:text].gsub! twitter_regex, ''
         end
-      end      
+
+        new_tweets << Tweet.new(tweet_details: tweet, tweet_id: tweet[:id], mesg: tweet[:text],
+                                tweeted_at: tweet[:created_at], user: handle_rec)
+        new_tweets.last.mesg.gsub! twitter_regex, ''
+        all_web_articles += make_web_article_list tweet[:entities]
+      end
+
+      Tweet.import new_tweets
+      save_articles! all_web_articles, handle_rec
     end
 
     payload
@@ -190,13 +214,13 @@ class TwitterClientWrapper
     return nil if (handle_rec.user.nil? and command == :account_settings) or
       (handle_rec.handle.nil? and handle_rec.twitter_id.nil? and
        [:follower_ids, :profile, :tweets].include? command)
-    
+
     if handle_rec.handle.present?
       twitter_pk_hash = {screen_name: handle_rec.handle}
     elsif handle_rec.twitter_id.present?
       twitter_pk_hash = {user_id: handle_rec.twitter_id}
     end
-    
+
     case command
     when :account_settings
       req = Twitter::REST::Request.new(@client, method, "/1.1/account/settings.json")
@@ -223,8 +247,8 @@ class TwitterClientWrapper
     
     begin
       response = req.perform
-    rescue Twitter::Error::NotFound => e
-      errors = {errors: 'Handle not found'}
+    rescue Twitter::Error, Twitter::Error::NotFound => e
+      errors = {errors: "handle db id: #{handle_rec.id}, error: #{e.message}"}
     else
       if response.is_a? Hash and response.keys.size == 2 and response.keys.include?(:headers)
         # At one point I was mucking with the Twitter gem to force it to return the actual HTTP
@@ -244,6 +268,7 @@ class TwitterClientWrapper
     end
 
     TwitterRequestRecord.create request_type: command, cursor: cursor, status: errors.empty?,
+                                status_message: errors.empty? ? '' : errors[:errors],
                                 request_for: config[:access_token],
                                 handle: (command == :account_settings ? body[:screen_name] : handle_rec.handle)
 

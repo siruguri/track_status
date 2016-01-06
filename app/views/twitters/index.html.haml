@@ -10,6 +10,8 @@
       Total tweets
     .selection-box{'data-target' => 0}
       Tweets retrieved
+    .selection-box{'data-target' => 3}
+      Avg Re-tweets
 
 .profile-list
   - if @profiles_list.count > 0
@@ -40,4 +42,13 @@
           - @profiles_list_sorts[:last_known_tweet_time].all.each do |rec|
             %li.twitter-profile
               = link_to rec.handle, twitter_path(handle: rec.handle)
-              = ": last tweet #{rec.last_tweet_time.strftime('%a, %b %d, %H:%M:%S')}"
+              = ": last tweet #{rec.last_tweet_time.try(:strftime, '%a, %b %d, %H:%M:%S')}"
+    .databox#databox-3
+      %h4
+        Sorted by retweet avg
+      .paragraph
+        %ol
+          - @profiles_list_sorts[:avg_retweets_collected].all.each do |rec|
+            %li.twitter-profile
+              = link_to rec.handle, twitter_path(handle: rec.handle)
+              = number_of_tweets_message(rec)

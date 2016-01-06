@@ -22,6 +22,7 @@ class TwitterJobsTest < Capybara::Rails::TestCase
       click_button 'uncrawled-profiles'
     end
 
-    assert_equal 4, enqueued_jobs.size
+    # Twice as many twitter_profiles that don't have tweets - right now, 7.
+    assert_equal 2 * 7, enqueued_jobs.size
   end
 end
