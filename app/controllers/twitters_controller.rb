@@ -1,6 +1,6 @@
 class TwittersController < ApplicationController
   include TwitterAnalysis
-  before_action :set_handle_or_return, except: [:input_handle, :index, :batch_call]
+  before_action :set_handle_or_return, except: [:input_handle, :index, :batch_call, :authorize_twitter, :set_twitter_token]
   
   def input_handle
     @uncrawled_profiles = TwitterProfile.where('twitter_id is not null and handle is null').count
@@ -23,13 +23,51 @@ class TwittersController < ApplicationController
                             last_known_tweet_time: @profiles_list.order(last_tweet_time: :desc)
                            }
   end
+
+  def authorize_twitter
+    if current_user
+      client = OAuth::Consumer.new(
+        Rails.application.secrets.twitter_consumer_key,
+        Rails.application.secrets.twitter_consumer_secret,
+        site: 'https://api.twitter.com'
+      )
+      
+      request_token = client.get_request_token(oauth_callback: "#{request.protocol}#{request.host}/twitter/set_twitter_token")
+
+      o = OauthTokenHash.create(source: 'twitter', user: current_user, request_token: request_token.to_yaml)
+      redirect_to request_token.authorize_url
+    else
+      redirect_to new_user_session_path, notice: 'Need to be signed in locally'
+    end      
+  end
   
   def set_twitter_token
-    params.each do |k, v|
-      Rails.logger.debug("params[#{k}] is #{v}")
-    end
+    if current_user
+      if params[:oauth_token].present? and
+        params[:oauth_verifier].present?
+        latest_tokenhash = current_user.latest_token_hash('twitter')
 
-    render nothing: true
+        req_token = YAML.load(latest_tokenhash.request_token)
+        client = OAuth::Consumer.new(
+          Rails.application.secrets.twitter_consumer_key,
+          Rails.application.secrets.twitter_consumer_secret,
+          site: 'https://api.twitter.com'
+        )
+
+        acc_token = client.get_access_token(req_token, oauth_verifier: params[:oauth_verifier])
+
+        latest_tokenhash.update_attributes(token: acc_token.token, secret: acc_token.secret)
+
+        x = current_user
+        TwitterClientWrapper.new(token: latest_tokenhash).rate_limited do
+          account_settings! x
+        end
+      else
+        render nothing: true
+      end
+    else
+      render nothing: true
+    end
   end
 
   def batch_call
@@ -138,7 +176,7 @@ class TwittersController < ApplicationController
   end
     
   def set_app_tokens
-    current_user ? current_user.token_hash : nil
+    current_user ? current_user.latest_token_hash('twitter') : nil
   end
 
   def crawled_web_documents(tweet_packets)

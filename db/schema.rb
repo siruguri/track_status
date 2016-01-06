@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160102053347) do
+ActiveRecord::Schema.define(version: 20160105170943) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -119,6 +119,7 @@ ActiveRecord::Schema.define(version: 20160102053347) do
     t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "request_token"
   end
 
   create_table "profile_followers", force: :cascade do |t|
@@ -205,6 +206,7 @@ ActiveRecord::Schema.define(version: 20160102053347) do
     t.integer  "tweets_count"
     t.integer  "twitter_id",      limit: 8
     t.datetime "last_tweet_time"
+    t.integer  "user_id"
   end
 
   create_table "twitter_request_records", force: :cascade do |t|
@@ -215,6 +217,7 @@ ActiveRecord::Schema.define(version: 20160102053347) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "ran_limit"
+    t.string   "request_for"
   end
 
   create_table "users", force: :cascade do |t|
@@ -230,6 +233,10 @@ ActiveRecord::Schema.define(version: 20160102053347) do
     t.string   "last_sign_in_ip"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "unconfirmed_email"
+    t.string   "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

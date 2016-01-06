@@ -15,4 +15,11 @@ class TwitterRedirectFetchJobTest < ActiveSupport::TestCase
   test 't.co redirects work' do
     TwitterRedirectFetchJob.perform_now web_articles(:t_co_1)
   end
+
+  test 'readability failure is handled' do
+    ReadabilityParserWrapper.any_instance.stubs(:parse).returns(ReadabilityParserWrapper::ReadabilityBody.new(content: {failure_message: 'failed'}, url: 'url'))
+
+    TwitterRedirectFetchJob.perform_now web_articles(:wa_uncrawled)
+    assert_equal 'failed', web_articles(:wa_uncrawled).body
+  end
 end

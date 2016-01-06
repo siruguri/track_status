@@ -23,6 +23,21 @@ class TwittersControllerTest < ActionController::TestCase
     assert_match /went.wrong/i, flash[:error]
   end
 
+  test '#set_twitter_token' do
+    devise_sign_in users(:user_2)
+
+    t =  OAuth::Token.new('accesstoken', 'accesssecret')
+    OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
+
+    assert_difference('TwitterProfile.count', 1) do
+      get :set_twitter_token, {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
+    end
+
+    assert_equal users(:user_2).id, TwitterProfile.last.user_id
+    # This is in the fixture file
+    assert_equal 'theSeanCook', TwitterProfile.last.handle
+  end
+  
   test '#index' do
     get :index
 

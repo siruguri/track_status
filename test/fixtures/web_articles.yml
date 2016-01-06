@@ -1,3 +1,7 @@
+wa_uncrawled:
+  source: xx
+  original_url: http://www.origsource.com/article_1
+  
 web_article_1:
   source: aldaily
   body: web article 1 content

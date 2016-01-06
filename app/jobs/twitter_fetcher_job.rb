@@ -2,8 +2,7 @@ class TwitterFetcherJob < ActiveJob::Base
   queue_as :twitter_fetches
 
   def perform(handle_rec, command='bio', opts = {})
-    token = opts[:token]
-    TwitterClientWrapper.new(token: token).rate_limited do
+    TwitterClientWrapper.new(token: opts[:token]).rate_limited do
       case command
       when 'followers'
         fetch_followers! handle_rec

@@ -1,18 +1,14 @@
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable,
+  devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :trackable, :validatable
 
   has_many :channel_secrets, dependent: :destroy
   has_many :token_hash_records, class_name: 'OauthTokenHash'
-
-  def token_hash
-    m = {}
-    if token_hash_records
-      t_rec = token_hash_records.order(created_at: :desc).limit(1).first
-      m = {token: t_rec.token, secret: t_rec.secret}
-    end
-    m
-  end    
+  has_one :twitter_profile
+  
+  def latest_token_hash(src)
+    token_hash_records.where(source: src).order(created_at: :desc).first
+  end
 end

@@ -1,5 +1,5 @@
-def app_token_headers
-  {'Accept' => 'application/json', 'Authorization' => /cjCezt7cqCpk2c9XgtufSw9zh.*abcdefgh/}
+def app_token_headers(app_token = 'abcdefgh')
+  {'Accept' => 'application/json', 'Authorization' => /#{app_token}/}
 end
 
 def single_token_headers
@@ -23,6 +23,9 @@ def set_net_stubs
     with(:headers => {'Accept'=>'*/*'}).
     to_return(:status => 200, :body => fixture_file('readability-aldaily-file-1.html'), :headers => {'Content-Type' => 'UTF-8'})
 
+  stub_request(:post, "https://api.twitter.com/oauth/access_token").
+    with(:headers => {'Accept'=>'*/*', 'Authorization'=>/oauth_token."reqsecret", oauth_verifier."oauth_verifier"/}).
+    to_return(:status => 200, :body => "")
 
   stub_request(:get, "https://api.twitter.com/1.1/users/show.json?screen_name=twitter_handle").
     to_return(status: 200, body: valid_twitter_response(:profile))
@@ -64,6 +67,11 @@ def set_net_stubs
     with(headers: single_token_headers).    
     to_return(status: 200, body: valid_twitter_response(:followers_with_cursor))
 
+  # Account settings
+  stub_request(:get, "https://api.twitter.com/1.1/account/settings.json").
+    with(:headers => app_token_headers("accesstoken")).
+    to_return(:status => 200, :body => valid_twitter_response(:account_settings))
+  
   # Twitter redirects
   stub_request(:get, "https://t.co/MjJ8xAnT").
     with(:headers => {'Accept'=>'*/*',  'Host'=>'t.co'}).

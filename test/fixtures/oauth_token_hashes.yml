@@ -3,3 +3,8 @@ oauth_token_1:
   secret: abcdefgh_secret
   source: twitter
   user: user_1
+
+tkh_2:
+  user: user_2
+  request_token: <%= OAuth::RequestToken.new('reqtoken', 'reqsecret').to_yaml.inspect %>
+  source: twitter

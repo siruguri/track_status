@@ -34,7 +34,7 @@ class ReadabilityParserWrapper
       when /utf\-8/i
         readability_data['content'].force_encoding(Encoding::UTF_8)
       when /text.plain/i
-        # This is probably when readability threw an error
+        # This is probably when readability threw an error, in which case the hash will have a key called failure_message
         response.body
       else
         raise Exception.new("Cannot understand content type #{response.header['Content-Type']}")

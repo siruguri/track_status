@@ -5,6 +5,8 @@ class TwitterProfile < ActiveRecord::Base
   has_many :profile_followers, foreign_key: :leader_id
   has_many :followers, through: :profile_followers, class_name: 'TwitterProfile', primary_key: :leader_id,
            foreign_key: :follower_id
+
+  belongs_to :user
   
   before_create :tweets_count_zero
 

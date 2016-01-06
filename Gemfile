@@ -42,6 +42,7 @@ gem 'sinatra', :require => nil
 # Reddit scraping
 gem 'nokogiri'
 gem 'twitter'
+gem 'oauth'
 
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  

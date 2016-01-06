@@ -36,7 +36,7 @@ class TwitterRedirectFetchJob < ActiveJob::Base
         
         if !body.blank? and !(body.is_a? Hash)
           # We only save the body when it's retrieved from Readability - sometimes Readability fails
-          Rails.logger.debug "--- Retrieved #{body.size} bytes of data"
+
           web_article.body = body
           web_article.save!
           

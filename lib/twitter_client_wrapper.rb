@@ -2,26 +2,39 @@ class TwitterClientWrapper
   attr_reader :client
   class TwitterClientArgumentException < Exception
   end
+  def config
+    @config ||= {}
+  end
   
   def initialize(opts = {})
-    token_hash = opts[:token]
+    token_rec = opts[:token]
     
     @client = Twitter::REST::Client.new do |config|
       config.consumer_key    = Rails.application.secrets.twitter_consumer_key
       config.consumer_secret = Rails.application.secrets.twitter_consumer_secret
-      if token_hash.nil?
+      if token_rec.nil?
         config.access_token    = Rails.application.secrets.twitter_single_app_access_token
         config.access_token_secret = Rails.application.secrets.twitter_single_app_access_token_secret
       else
-        config.access_token = token_hash[:token]
-        config.access_token_secret = token_hash[:secret]
+        config.access_token = token_rec.token
+        config.access_token_secret = token_rec.secret
       end
     end
+
+    config[:access_token] = opts[:token].present? ? opts[:token].token
+                            : Rails.application.secrets.twitter_single_app_access_token
   end
 
   def rate_limited(&block)
     curr_time = Time.now
-    ct = TwitterRequestRecord.where('created_at > ?', curr_time - 1.minute).count
+    if config[:access_token].nil?
+      tok = Rails.application.secrets.twitter_single_app_access_token
+    else
+      tok = config[:access_token]
+    end
+      
+    ct = TwitterRequestRecord.where('created_at > ? and request_for = ?', curr_time - 1.minute, tok).count
+    
     if ct >= 12
       t = TwitterRequestRecord.last
       t.ran_limit = true
@@ -53,6 +66,17 @@ class TwitterClientWrapper
     end
   end
 
+  def account_settings!(user_rec)
+    # Don't run this method unless we have a user authenticating to Twitter
+
+    return unless user_rec.class == User and config[:access_token].present?
+
+    t = TwitterProfile.new(user: user_rec)
+    payload = get(t, :account_settings)
+    t.handle = payload[:data][:screen_name]
+    t.save!
+  end
+  
   def fetch_followers!(handle_rec)
     unless (last_req = TwitterRequestRecord.where(user: handle_rec, request_type: 'follower_ids')).empty?
       cursor = last_req[0].cursor
@@ -163,16 +187,19 @@ class TwitterClientWrapper
   end
   
   def base_request(method, handle_rec, command = :profile, opts = {})
-    return nil if handle_rec.handle.nil? and handle_rec.twitter_id.nil? or
-      !([:follower_ids, :profile, :tweets].include? command)
+    return nil if (handle_rec.user.nil? and command == :account_settings) or
+      (handle_rec.handle.nil? and handle_rec.twitter_id.nil? and
+       [:follower_ids, :profile, :tweets].include? command)
     
-    if handle_rec.handle
+    if handle_rec.handle.present?
       twitter_pk_hash = {screen_name: handle_rec.handle}
-    else
+    elsif handle_rec.twitter_id.present?
       twitter_pk_hash = {user_id: handle_rec.twitter_id}
     end
     
     case command
+    when :account_settings
+      req = Twitter::REST::Request.new(@client, method, "/1.1/account/settings.json")
     when :follower_ids
       req = Twitter::REST::Request.new(@client, method, "/1.1/followers/ids.json",
                                        twitter_pk_hash.merge(opts.select { |k, v| k == :cursor }))
@@ -207,6 +234,7 @@ class TwitterClientWrapper
       else
         body = response
       end
+      
       case command
       when :tweets
         cursor = body.blank? ? opts[:limit_id] : (opts[:limiter] == :since_id ? body.first[:id] : body.last[:id])
@@ -215,7 +243,9 @@ class TwitterClientWrapper
       end
     end
 
-    TwitterRequestRecord.create request_type: command, cursor: cursor, status: errors.empty?, handle: handle_rec.handle
+    TwitterRequestRecord.create request_type: command, cursor: cursor, status: errors.empty?,
+                                request_for: config[:access_token],
+                                handle: (command == :account_settings ? body[:screen_name] : handle_rec.handle)
 
     {data: body}.merge errors
   end
