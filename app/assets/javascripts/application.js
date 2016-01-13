@@ -13,6 +13,7 @@
 //= require js-routes
 //= require jquery
 //= require jquery-ui
+//= require jquery_ujs
 //= require bootstrap-sprockets
 //= require jquery.tokeninput
 //= require channel_post

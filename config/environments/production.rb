@@ -84,9 +84,10 @@ Rails.application.configure do
       :address        => 'smtp.gmail.com',
       :port           => '587',
       :authentication => :plain,
-      :user_name      => 'siruguri@gmail.com',
-      :password       => Rails.application.secrets.gpwd,
+      :user_name      => Rails.application.secrets.gmail_smtp_username,
+      :password       => Rails.application.secrets.gmail_smtp_password,
       :domain         => 'gmail.com',
       :enable_starttls_auto => true
   }  
+  config.action_mailer.default_url_options = { host: Rails.application.secrets.default_host }
 end

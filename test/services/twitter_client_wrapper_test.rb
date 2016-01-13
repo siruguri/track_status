@@ -79,6 +79,7 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     assert_equal 2, enqueued_jobs.size
 
     assert_equal Tweet.last.user.id, WebArticle.last.twitter_profile_id
+    refute Tweet.last.mesg.blank?
 
     assert Tweet.last.is_retweet?
   end
