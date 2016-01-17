@@ -36,6 +36,7 @@ class TwittersControllerTest < ActionController::TestCase
     assert_equal users(:user_2).id, TwitterProfile.last.user_id
     # This is in the fixture file
     assert_equal 'theSeanCook', TwitterProfile.last.handle
+    assert_match /theSeanCook/, response.body
   end
   
   test '#index' do

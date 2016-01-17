@@ -35,4 +35,17 @@ class EmailControllerTest < ActionController::TestCase
     
     assert_match 'success', response.body
   end
+
+  test 'responds to wildcard requests' do
+    init_re_count = ReceivedEmail.count
+    init_wa_count = WebArticle.count
+    assert_enqueued_with(job: ActionMailer::DeliveryJob) do
+      post :transform, {mandrill_events: mandrill_request, wildcard: 'true'}
+    end
+    assert_equal init_wa_count, WebArticle.count
+
+    assert_equal 'GeneralMailer', enqueued_jobs.last[:args][0]
+    assert_equal 'wildcard', enqueued_jobs.last[:args][3]['type']
+  end
+  
 end

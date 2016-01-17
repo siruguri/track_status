@@ -38,8 +38,9 @@ class TwittersController < ApplicationController
         site: 'https://api.twitter.com'
       )
 
-      callback_str = "#{request.protocol}#{request.host}#{request.port == 80 ? '' : ':' + request.port.to_s}/twitter/set_twitter_token"
-      puts callback_str
+      callback_str = twitter_set_twitter_token_url
+      Rails.logger.debug ">>> #{callback_str}"
+      
       request_token = client.get_request_token(oauth_callback: callback_str)
 
       o = OauthTokenHash.create(source: 'twitter', user: current_user, request_token: request_token.to_yaml)
@@ -70,6 +71,8 @@ class TwittersController < ApplicationController
         TwitterClientWrapper.new(token: latest_tokenhash).rate_limited do
           account_settings! x
         end
+
+        @remote_id = x.twitter_profile.handle
       else
         render nothing: true
       end

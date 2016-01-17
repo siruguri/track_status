@@ -9,18 +9,21 @@ class EmailController < ApplicationController
   end
 
   def transform
-    if params[:dev_body]
+    mandrill_hash = params[:mandrill_events] ? JSON.parse(params[:mandrill_events]) : nil
+    if params[:dev_body] 
       GeneralMailer.notification_email(payload: params[:dev_body]).deliver_later
       render 'pages/success'
+    elsif params[:wildcard] == 'true'
+      if body = (mandrill_body mandrill_hash)
+        GeneralMailer.notification_email(payload: body, type: 'wildcard').deliver_later
+      end
+      render 'pages/success'
     elsif params[:mandrill_events]
-      mandrill_hash = JSON.parse params[:mandrill_events]
 
-      r=ReceivedEmail.create(source: 'mandrill', payload: JSON.parse(params[:mandrill_events]))
-      GeneralMailer.notification_email(payload: params[:mandrill_events]).deliver_later
+      r=ReceivedEmail.create(source: 'mandrill', payload: mandrill_hash)
+      GeneralMailer.notification_email(payload: mandrill_hash).deliver_later
 
-      if mandrill_hash.size > 0 and mandrill_hash[0]['msg'] and
-        mandrill_hash[0]['msg']['raw_msg']
-        body = mandrill_hash[0]['msg']['raw_msg']
+      if body = mandrill_body(mandrill_hash)
         m = DataProcessHelpers.hyperlink_pattern.match body
         if m
           uri = m[1]
@@ -34,6 +37,16 @@ class EmailController < ApplicationController
       render 'pages/success'
     else
       render 'pages/fail', status: 400
+    end
+  end
+
+  private
+  def mandrill_body(mandrill_hash)
+    if mandrill_hash.size > 0 and mandrill_hash[0]['msg'] and
+      mandrill_hash[0]['msg']['raw_msg']
+      return mandrill_hash[0]['msg']['raw_msg']
+    else
+      return nil
     end
   end
 end

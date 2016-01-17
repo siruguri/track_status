@@ -43,7 +43,7 @@ class TwitterClientWrapper
       # Enforce max of 12 requests per minute = 180 per 15 min window
       sleep 60 unless Rails.env.test?
     end
-    
+
     instance_eval(&block) if block_given?
   end
 
