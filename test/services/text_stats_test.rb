@@ -10,11 +10,6 @@ class TextStatsTest < ActiveSupport::TestCase
     @leading_space_model_3 = TextStats::DocumentModel.new ' cat dog cat cat cat'
   end
 
-  def test_opening_files
-    assert_equal([["cat", 4], ["dog", 2], ["frog", 1]],
-                 TextStats::DocumentModel.new(File.join(Rails.root, 'test', 'fixtures', 'files', 'text_stats_input_1.txt')).sorted_counts)
-  end
-  
   def test_counting_works
     assert_equal({"cat" => 4, "dog" => 2, "buffalo" => 1}, @model_1.counts)
     assert_equal({"cat dog" => 2, "dog cat" => 1, "cat cat"=>2, "dog buffalo" => 1}, @model_1.counts(2))

@@ -41,7 +41,7 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
       t = TwitterProfile.last
       assert_equal 8400, t.twitter_id
       
-      assert_equal 2, ProfileFollower.count
+      assert_equal 2, ProfileFollower.where(leader: twitter_profiles(:twitter_profile_1)).count
 
       assert_equal 1479414865424994218, TwitterRequestRecord.last.cursor
       assert_equal "follower_ids", TwitterRequestRecord.last.request_type

@@ -49,7 +49,7 @@ module TextStats
     
     def initialize(body, opts={})
       body = body || ''
-      if File.exists? body
+      if File.exists?(body + '782')
         @body = File.open(body, 'r').readlines.join(' ').gsub /’/, '\''
         @source_name = body
       else

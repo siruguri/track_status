@@ -14,9 +14,9 @@ class TwittersController < ApplicationController
     @handles_by_tweets = Tweet.joins(:user).group('twitter_profiles.handle').count
 
     # Filter down if there's a filter parameter
-    if params[:followers_of] and !(leader = TwitterProfile.find_by_handle(params[:follower_of])).nil?
-      @profiles_list = TwitterProfile.joins(:profile_followers).
-                       where('handle is not null and profile_followers.leader_id = ?', leader.id)
+
+    if params[:followers_of] and !(leader = TwitterProfile.find_by_handle(params[:followers_of])).nil?
+      @profiles_list = leader.followers
     else
       @profiles_list = TwitterProfile.where('handle is not null')
     end
