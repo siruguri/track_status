@@ -9,9 +9,10 @@ class ReadabilityArticlesTagsTest < Capybara::Rails::TestCase
   end
   
   test 'can see tags list' do
-    visit '/readability/list'
+    visit '/readability/list?site=aldaily'
     page.find('#token-input-tags-list').native.send_keys('a')
     page.find('#token-input-tags-list')
+
     assert page.has_css?('.token-input-dropdown ul li', count: 5)
 
     suggested_value = page.find('.token-input-dropdown ul li:first-child')

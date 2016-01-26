@@ -59,11 +59,11 @@ class ReadabilityControllerTest < ActionController::TestCase
   describe 'readability article browse' do
     it 'shows the most recently created article' do
       # Depends on the fixture being available with the most recent creation date.
-      all_articles = WebArticle.where('created_at is not null').order(created_at: :desc)
+      all_articles = WebArticle.where('created_at is not null').order(updated_at: :desc)
       
       get :list_articles, site: 'aldaily'
       assert_template :list
-      assert_match /most recent/, response.body
+      assert_match /most recent aldaily/, response.body
       
       # 4 links - 2 header, next, and orig because start offset is 0 by default
       all_hrefs = ''
@@ -88,6 +88,13 @@ class ReadabilityControllerTest < ActionController::TestCase
           assert_match /\?start=0/, link.attribute('href').value
         end
       end
+    end
+
+    it 'works without source' do
+      get :list_articles
+      assert_template :list
+
+      assert_select('a', links_in_nav + 1)
     end
   end
 

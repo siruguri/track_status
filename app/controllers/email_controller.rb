@@ -29,8 +29,7 @@ class EmailController < ApplicationController
           uri = m[1]
           parser = ReadabilityParserWrapper.new
 
-          w = WebArticle.new 
-          w.original_url = uri
+          w = WebArticle.find_or_initialize_by original_url: uri
           begin
             resp = parser.parse uri
             if resp
@@ -39,6 +38,8 @@ class EmailController < ApplicationController
           rescue Exception => e
             w.body = e.message
           end
+
+          w.save
         end
       end
       render 'pages/success'

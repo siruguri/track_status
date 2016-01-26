@@ -4,7 +4,7 @@ class ReadabilityController < ApplicationController
     if params[:id].nil? || (w = WebArticle.find_by_id(params[:id])).nil?
       render json: []
     else
-      render json: w.top_grams(sort_score)
+      render json: (x=w.top_grams(sort_score))
     end
   end
   def tag_article
@@ -48,8 +48,11 @@ class ReadabilityController < ApplicationController
 
   def list_articles
     @offset = params[:start] ? params[:start].to_i : 0
-    @articles = WebArticle.order(created_at: :desc).offset(@offset > 0 ? @offset - 1 : @offset).limit(
-      @offset > 0 ? 3 : 2)
+
+    source_sql = params[:site] ? "= ?" : "is null"
+    @articles = WebArticle.where("source #{source_sql}", params[:site]).
+                order(updated_at: :desc).offset(@offset > 0 ? @offset - 1 : @offset).
+                limit(@offset > 0 ? 3 : 2)
 
     @prev = @offset == 0 ? -1 : @offset - 1
     @next = @articles.count > 1 ? @offset + 1 : -1
