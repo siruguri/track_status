@@ -7,21 +7,25 @@ class ProfileStat < ActiveRecord::Base
   end
   
   def self.update_all
-    TwitterProfile.includes(:tweets).where('handle is not null').each do |profile|
+    TwitterProfile.includes(:tweets).where('handle is not null').find_each do |profile|
       stat_rec = (profile.profile_stat || create(twitter_profile_id: profile.id))
-      update_followers profile, stat_rec
+      update_followers profile, stat_rec, save_later: true
       update_tweet_counts profile, stat_rec
     end
   end
 
   private
-  def self.update_followers(profile, stat_rec)
+  def self.update_followers(profile, stat_rec, opts = {})
+    opts[:save_later] ||= false
+    
     follower_count = ProfileFollower.where(leader: profile).count
     stat_rec.stats_hash[:follower_count] = follower_count
-    stat_rec.save
+    stat_rec.save unless opts[:save_later]
   end
   
-  def self.update_tweet_counts(profile, stat_rec)
+  def self.update_tweet_counts(profile, stat_rec, opts = {})
+    opts[:save_later] ||= false
+    
     retweet_agg = 0
 
     # Count total tweets in db, and total retweet count across all these
@@ -41,6 +45,6 @@ class ProfileStat < ActiveRecord::Base
     stat_rec.stats_hash[:total_tweets] = profile.tweets.count
     stat_rec.stats_hash[:retweet_aggregate] = retweet_agg
     stat_rec.stats_hash[:retweeted_avg] = retweet_agg.to_f/retweeted_mesgs
-    stat_rec.save
+    stat_rec.save unless opts[:save_later]
   end
 end

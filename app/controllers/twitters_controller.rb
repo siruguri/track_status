@@ -15,7 +15,14 @@ class TwittersController < ApplicationController
 
     # Filter down if there's a filter parameter
 
-    if params[:followers_of] and !(leader = TwitterProfile.find_by_handle(params[:followers_of])).nil?
+    leader=nil
+    if params[:followers_of]
+      leader = TwitterProfile.find_by_handle params[:followers_of]
+    end
+    if !leader and current_user and current_user.twitter_profile and current_user.twitter_profile.handle
+      leader = current_user.twitter_profile
+    end
+    if leader
       @profiles_list = leader.followers
     else
       @profiles_list = TwitterProfile.where('handle is not null')
