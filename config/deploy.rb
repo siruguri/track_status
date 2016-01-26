@@ -5,6 +5,8 @@ app_name = 'track_status'
 set :application, app_name
 set :full_app_name, app_name
 set :repo_url, "git@github.com:siruguri/#{app_name}.git"
+# Choose a Ruby explicitly, or read from an environment variable.
+set :rvm_ruby_version, '2.3.0'
 
 set :bundle_without, [:test]
 

@@ -28,9 +28,16 @@ class EmailController < ApplicationController
         if m
           uri = m[1]
           parser = ReadabilityParserWrapper.new
-          resp = parser.parse uri
-          if resp
-            w = WebArticle.create(original_url: resp.url, body: resp.content)
+
+          w = WebArticle.new 
+          w.original_url = uri
+          begin
+            resp = parser.parse uri
+            if resp
+              w.body = resp.content
+            end
+          rescue Exception => e
+            w.body = e.message
           end
         end
       end
