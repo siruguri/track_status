@@ -1,7 +1,17 @@
 %p
   Hi
 %p
-  This email comes to you from #{`hostname`}
+  This email comes to you from
+%i
+  #{`hostname`}
 %p
-  You received a message at Mandrill that said:
-  = @payload
+  You received a message via a mailer service that said:
+%p
+  %b
+    Subject: #{@payload['subject']}
+%hr
+  %p
+    Body
+%hr
+  %p
+    = @payload['text']
