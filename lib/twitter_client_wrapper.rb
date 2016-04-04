@@ -186,12 +186,14 @@ class TwitterClientWrapper
       all_web_articles = []      
       data.each do |tweet|
         # Scan and store all the URLs into web article models; remove them from the tweets
+        is_retweeted = false
         unless tweet[:retweeted_status].nil?
           tweet[:retweeted_status][:text].gsub! twitter_regex, ''
+          is_retweeted = true
         end
 
         new_tweets << Tweet.new(tweet_details: tweet, tweet_id: tweet[:id], mesg: tweet[:text],
-                                tweeted_at: tweet[:created_at], user: handle_rec)
+                                tweeted_at: tweet[:created_at], user: handle_rec, is_retweeted: is_retweeted)
         new_tweets.last.mesg.gsub! twitter_regex, ''
         all_web_articles += make_web_article_list tweet[:entities]
       end

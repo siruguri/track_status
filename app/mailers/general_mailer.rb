@@ -8,8 +8,7 @@ class GeneralMailer < ActionMailer::Base
 
     opts[:to] ||= 'siruguri@gmail.com'
     
-    subject = 'mandrill deliver: info@siruguri.net'
-    subject += (opts[:type] && opts[:type] == 'wildcard') ? ' wildcard' : ''
+    subject = 'sendgrid deliver: info@siruguri.net'
     mail to: opts[:to], subject: subject
   end
 end

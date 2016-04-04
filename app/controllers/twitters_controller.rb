@@ -28,7 +28,7 @@ class TwittersController < ApplicationController
       @profiles_list = TwitterProfile.where('handle is not null')
     end
 
-    @profiles_list = @profiles_list.joins(:profile_stat).includes(:profile_stat)
+    @profiles_list = @profiles_list.joins(:profile_stat).includes(:profile_stat).where('profile_stats.stats_hash_v2 != ?', '{}')
     @profiles_list_sorts = {tweets_count: @profiles_list.order(tweets_count: :desc),
                             tweets_retrieved: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'total_tweets\')::integer desc'),
                             retweets_collected: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'retweet_aggregate\')::integer desc'),

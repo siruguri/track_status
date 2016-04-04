@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160126005651) do
+ActiveRecord::Schema.define(version: 20160127064228) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -189,6 +189,7 @@ ActiveRecord::Schema.define(version: 20160126005651) do
     t.jsonb    "tweet_details",           default: {}, null: false
     t.text     "mesg"
     t.integer  "tweet_id",      limit: 8
+    t.boolean  "is_retweeted"
   end
 
   add_index "tweets", ["twitter_id"], name: "index_twitter_id_on_tweets", using: :btree

@@ -7,10 +7,18 @@ class ProfileStat < ActiveRecord::Base
   end
   
   def self.update_all
-    TwitterProfile.includes(:tweets).where('handle is not null').find_each do |profile|
-      stat_rec = (profile.profile_stat || create(twitter_profile_id: profile.id))
+    stat_recs_list = []
+
+    TwitterProfile.where('handle is not null').find_each do |profile|
+      stat_rec = (profile.profile_stat || new(twitter_profile_id: profile.id))
       update_followers profile, stat_rec, save_later: true
-      update_tweet_counts profile, stat_rec
+      update_tweet_counts profile, stat_rec, save_later: true
+
+      stat_recs_list << stat_rec
+    end
+
+    stat_recs_list.each do |r|
+      r.save
     end
   end
 
