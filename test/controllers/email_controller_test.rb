@@ -10,6 +10,9 @@ class EmailControllerTest < ActionController::TestCase
   def sendgrid_request
     fixture_file('sendgrid_request.txt')
   end
+  def sendgrid_request_html
+    fixture_file('sendgrid_request_html.txt')
+  end
 
   def setup
     set_net_stubs
@@ -34,6 +37,7 @@ class EmailControllerTest < ActionController::TestCase
   test 'responds to sendgrid and mandrill requests' do
     assert_creation({mandrill_events: mandrill_request})
     assert_creation JSON.parse(sendgrid_request)
+    assert_creation JSON.parse(sendgrid_request_html)
   end
 
   test 'responds to wildcard requests' do
@@ -55,8 +59,8 @@ class EmailControllerTest < ActionController::TestCase
       post :transform, req_hash
     end
 
-    assert_equal init_wa_count + 1, WebArticle.count
     assert_equal init_re_count + 1, ReceivedEmail.count
+    assert_equal init_wa_count + 1, WebArticle.count
     assert_equal Array, ReceivedEmail.last.payload.class
     
     assert_match 'success', response.body

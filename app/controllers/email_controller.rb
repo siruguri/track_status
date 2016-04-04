@@ -60,6 +60,9 @@ class EmailController < ApplicationController
     elsif mail_service_hash['text']
       # This is the Sendgrid format
       return MailServicePayload.new('sendgrid', mail_service_hash['text'])
+    elsif mail_service_hash['html']
+      # This is the Sendgrid format
+      return MailServicePayload.new('sendgrid', mail_service_hash['html'])
     else
       return nil
     end
