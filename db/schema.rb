@@ -15,7 +15,6 @@ ActiveRecord::Schema.define(version: 20160127064228) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-  enable_extension "hstore"
   enable_extension "citext"
 
   create_table "account_entries", force: :cascade do |t|
