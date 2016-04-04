@@ -24,7 +24,7 @@ class EmailController < ApplicationController
       payload = mail_payload(mail_svc_hash)
       if payload
         r=ReceivedEmail.create(source: payload.source, payload: (mail_svc_hash.is_a?(Array) ? mail_svc_hash : [mail_svc_hash]))
-        GeneralMailer.notification_email(payload: mail_svc_hash).deliver_later
+        GeneralMailer.notification_email(payload: payload.body).deliver_later
 
         # Retrieve first string match on a URL like string
         m = DataProcessHelpers.hyperlink_pattern.match payload.body

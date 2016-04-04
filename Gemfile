@@ -37,6 +37,7 @@ gem 'bootstrap-sass'
 gem 'haml'
 gem 'json'
 
+gem 'redis-namespace'
 gem 'sidekiq'
 # Required for sidekiq monitoring
 gem 'sinatra', :require => nil
