@@ -24,7 +24,7 @@ class EmailController < ApplicationController
       payload = mail_payload(mail_svc_hash)
       if payload
         r=ReceivedEmail.create(source: payload.source, payload: (mail_svc_hash.is_a?(Array) ? mail_svc_hash : [mail_svc_hash]))
-        GeneralMailer.notification_email(payload: payload.body).deliver_later
+        GeneralMailer.notification_email(payload: mail_svc_hash).deliver_later
 
         # Retrieve first string match on a URL like string
         m = DataProcessHelpers.hyperlink_pattern.match payload.body
@@ -57,9 +57,9 @@ class EmailController < ApplicationController
       mail_service_hash[0]['msg']['raw_msg']
       # This is the Mandrill format
       return MailServicePayload.new('mandrill', mail_service_hash[0]['msg']['raw_msg'])
-    elsif mail_service_hash['email']
+    elsif mail_service_hash['text']
       # This is the Sendgrid format
-      return MailServicePayload.new('sendgrid', mail_service_hash['email'])
+      return MailServicePayload.new('sendgrid', mail_service_hash['text'])
     else
       return nil
     end
