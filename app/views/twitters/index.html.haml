@@ -1,5 +1,5 @@
 %h3
-  Sort By
+  = "Sort#{current_user ? ' Your Followers': ''} By"
 .paragraph.small-font
   (empty? #{link_to "Try running a stats update", analyses_task_page_url})
 .paragraph.row

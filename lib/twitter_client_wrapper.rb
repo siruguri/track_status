@@ -239,7 +239,8 @@ class TwitterClientWrapper
       
       req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/user_timeline.json", {
                                          count: 200, include_rts: true, trim_user: 1,
-                                         exclude_replies: true}.merge(twitter_pk_hash).merge(addl_opts))
+                                         mexclude_replies: true
+                                       }.merge(twitter_pk_hash).merge(addl_opts))
     end
 
     status = true

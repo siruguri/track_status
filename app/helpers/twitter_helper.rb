@@ -7,7 +7,7 @@ module TwitterHelper
     if (stat = profile.profile_stat)
       ": #{stat.stats_hash['total_tweets']} tweets retrieved, " +
         "retweet average = #{sprintf("%0.2f", stat.stats_hash['retweeted_avg'])}, " +
-        "total retweets = #{stat.stats_hash['retweet_aggregate']}, in #{(@handles_by_tweets[profile.handle])} attempts"
+        "total retweets = #{stat.stats_hash['retweet_aggregate']}"
     else
       ": No tweets retrieved"
     end
