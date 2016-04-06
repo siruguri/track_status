@@ -75,9 +75,10 @@ module TextStats
       end
 
       if opts[:twitter]
-        @body.gsub(/[^@#'a-zA-Z0-9]/, ' ').strip.split(/\s+/).map(&:downcase) - stop_words
+        b = @body.gsub(/https?\:..t\.co.[^\s]+/, '').downcase
+        b.gsub(/[^@#'a-zA-Z0-9]/, ' ').strip.split(/\s+/) - stop_words
       else
-        @body.gsub(/[^'a-zA-Z0-9]/, ' ').strip.split(/\s+/).map(&:downcase) - stop_words
+        @body.downcase.gsub(/[^'a-zA-Z0-9]/, ' ').strip.split(/\s+/) - stop_words
       end
     end
 

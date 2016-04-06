@@ -42,15 +42,12 @@ class TwittersControllerTest < ActionController::TestCase
   describe '#index' do
     it "return all profiles without a restriction" do
       get :index
-
-      assert_select('li.twitter-profile', ProfileStat.count*4) do |lis|
-        assert_operator lis.select { |l| /Tue, Mar 03, 12:17:04/.match l.text}.size, :>, 0
-      end
+      assert_select('.row.handle-details', ProfileStat.count*4)
     end
 
     it "users followers_of restriction" do
       get :index, { followers_of: twitter_profiles(:leader_profile).handle }
-      assert_select('li.twitter-profile', 4)
+      assert_select('.row.handle-details', 4)
     end
   end
   
