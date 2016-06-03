@@ -104,3 +104,8 @@ input#token-input-tags-list {
 .time-font {
   font-family: Courier;
 }
+
+/* bootstrap resets */
+.nav > li > a {
+  display: inline-block;
+}

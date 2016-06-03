@@ -7,4 +7,12 @@ class TwitterProfile < ActiveRecord::Base
            foreign_key: :follower_id
 
   belongs_to :user
+
+  after_create :create_stat
+  private
+  def create_stat
+    # blank profile stat for later batch processing
+    p = ProfileStat.new twitter_profile_id: self.id
+    p.save
+  end
 end

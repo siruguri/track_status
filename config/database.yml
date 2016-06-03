@@ -29,9 +29,8 @@ test:
 production:
   adapter: postgresql
   encoding: unicode
-  username: pg_dev
-  password: pg_dev_password
+  username: <%= ENV['POSTGRES_USER'] %>
+  password: <%= ENV['POSTGRES_PASSWORD'] %>
   pool: 5
-  database: trackstatus_dev
-  host: localhost  
-
+  database: trackstatus_prod
+  host: postgres

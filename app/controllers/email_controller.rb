@@ -1,10 +1,24 @@
 class EmailController < ApplicationController
   # Email controller
   class MailServicePayload
-    attr_reader :source, :body
-    def initialize(source, body)
+    attr_reader :source, :fields
+    def initialize(source, hash)
       @source = source
-      @body = body
+      @fields = make_fields hash
+    end
+
+    private
+    def make_fields(hash)
+      case @source
+      when 'sparkpost'
+        sparkpost_base = hash['_json'][0]['msys']['relay_message']['content']
+        return {body: sparkpost_base['text'],
+                html_body: sparkpost_base['html'],
+                subject: sparkpost_base['subject'],
+                to: sparkpost_base['to']}
+      else
+        return {body: 'cannot parse'}
+      end
     end
   end
   
@@ -22,12 +36,12 @@ class EmailController < ApplicationController
       render 'pages/success'
     else
       payload = mail_payload(mail_svc_hash)
-      if payload
+      if payload.source != 'unknown'
         r=ReceivedEmail.create(source: payload.source, payload: (mail_svc_hash.is_a?(Array) ? mail_svc_hash : [mail_svc_hash]))
         GeneralMailer.notification_email(payload: mail_svc_hash).deliver_later
 
         # Retrieve first string match on a URL like string
-        m = DataProcessHelpers.hyperlink_pattern.match payload.body
+        m = DataProcessHelpers.hyperlink_pattern.match payload.fields[:body]
         if m
           uri = m[1]
           parser = ReadabilityParserWrapper.new
@@ -46,7 +60,9 @@ class EmailController < ApplicationController
         end
         render 'pages/success'
       else
-        render 'pages/fail', status: 400
+        mail_svc_hash['source'] = 'unknown'
+        GeneralMailer.notification_email(payload: mail_svc_hash).deliver_later
+        render 'pages/fail', status: 200
       end
     end
   end
@@ -63,8 +79,11 @@ class EmailController < ApplicationController
     elsif mail_service_hash['html']
       # This is the Sendgrid format
       return MailServicePayload.new('sendgrid', mail_service_hash['html'])
+    elsif mail_service_hash.dig('_json', 0, 'msys')
+    # This is from Sparkpost
+      return MailServicePayload.new('sparkpost', mail_service_hash)
     else
-      return nil
+      return MailServicePayload.new('unknown', mail_service_hash)
     end
   end
 end

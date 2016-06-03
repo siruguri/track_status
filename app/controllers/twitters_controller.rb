@@ -32,7 +32,7 @@ class TwittersController < ApplicationController
     @profiles_list_sorts = {tweets_count: @profiles_list.order(tweets_count: :desc),
                             tweets_retrieved: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'total_tweets\')::integer desc'),
                             retweets_collected: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'retweet_aggregate\')::integer desc'),
-                            avg_retweets_collected: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'retweeted_avg\')::float desc'),
+                            retweeted_avg: @profiles_list.order('(profile_stats.stats_hash_v2 ->> \'retweeted_avg\')::float desc'),
                             last_known_tweet_time: @profiles_list.order(last_tweet_time: :desc)
                            }
   end
@@ -47,11 +47,15 @@ class TwittersController < ApplicationController
 
       callback_str = twitter_set_twitter_token_url
       Rails.logger.debug ">>> #{callback_str}"
-      
+
       request_token = client.get_request_token(oauth_callback: callback_str)
 
       o = OauthTokenHash.create(source: 'twitter', user: current_user, request_token: request_token.to_yaml)
-      redirect_to request_token.authorize_url
+      if Rails.env.test?
+        redirect_to 'test.twitter.com/authorize'
+      else
+        redirect_to request_token.authorize_url
+      end
     else
       redirect_to new_user_session_path, notice: 'Need to be signed in locally'
     end      
@@ -91,11 +95,10 @@ class TwittersController < ApplicationController
   def batch_call
     @app_token = set_app_tokens
     
-    unless params["uncrawled-profiles"].nil?
+    if params["uncrawled-profiles"].present?
       uncrawled_profiles_query.all.each do |profile|
-        @t = profile
-        bio
-        tweets
+        bio profile
+        tweets profile
       end
     end
     redirect_to twitter_input_handle_path
@@ -109,13 +112,13 @@ class TwittersController < ApplicationController
       when /populate.*followers/
         followers
       when /get.*bio/
-        bio
+        bio @t
       when /get.*older tweets/
         # Let's get the bio too, if we never did, when asking for tweets
-        bio if !@t.member_since.present?
-        tweets(direction: 'older')
+        bio @t if !@t.member_since.present?
+        tweets(@t, direction: 'older')
       when /get newer tweets/
-        tweets(direction: 'newer')
+        tweets(@t, direction: 'newer')
       end
       redirect_to twitter_path(handle: @t.handle)
     else
@@ -138,8 +141,8 @@ class TwittersController < ApplicationController
 
   private
   def uncrawled_profiles_query
-    #TwitterProfile.where('twitter_id is not null and handle is null')
-    TwitterProfile.includes(:tweets).joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null')    
+    TwitterProfile.includes(:tweets).
+      joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null')    
   end
   
   def set_handle_or_return
@@ -161,11 +164,11 @@ class TwittersController < ApplicationController
   def followers
     TwitterFetcherJob.perform_later @t, 'followers', token: @app_token
   end
-  def bio
-    TwitterFetcherJob.perform_later @t, 'bio', token: @app_token
+  def bio(t)
+    TwitterFetcherJob.perform_later t, 'bio', token: @app_token
   end
-  def tweets(opts = {})
-    TwitterFetcherJob.perform_later @t, 'tweets', ({token: @app_token}.merge(opts))
+  def tweets(t, opts = {})
+    TwitterFetcherJob.perform_later t, 'tweets', ({token: @app_token}.merge(opts))
   end
 
   def word_cloud

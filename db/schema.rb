@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160127064228) do
+ActiveRecord::Schema.define(version: 20160818162205) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -129,11 +129,14 @@ ActiveRecord::Schema.define(version: 20160127064228) do
   add_index "profile_followers", ["leader_id"], name: "index_leader_id_on_profile_followers", using: :btree
 
   create_table "profile_stats", force: :cascade do |t|
-    t.integer "twitter_profile_id"
-    t.jsonb   "stats_hash_v2",      default: {}, null: false
+    t.integer  "twitter_profile_id"
+    t.jsonb    "stats_hash_v2",        default: {}, null: false
+    t.datetime "most_recent_tweet_at"
+    t.datetime "most_old_tweet_at"
   end
 
   add_index "profile_stats", ["stats_hash_v2"], name: "index_profile_stats_on_stats_hash_v2", using: :gin
+  add_index "profile_stats", ["twitter_profile_id"], name: "index_profile_stats_on_twitter_profile_id", using: :btree
 
   create_table "received_emails", force: :cascade do |t|
     t.string   "source"
@@ -189,8 +192,11 @@ ActiveRecord::Schema.define(version: 20160127064228) do
     t.text     "mesg"
     t.integer  "tweet_id",      limit: 8
     t.boolean  "is_retweeted"
+    t.boolean  "processed"
   end
 
+  add_index "tweets", ["processed"], name: "index_tweets_on_processed", using: :btree
+  add_index "tweets", ["twitter_id"], name: "index_tweets_on_twitter_id", using: :btree
   add_index "tweets", ["twitter_id"], name: "index_twitter_id_on_tweets", using: :btree
 
   create_table "twitter_profiles", force: :cascade do |t|
@@ -211,6 +217,8 @@ ActiveRecord::Schema.define(version: 20160127064228) do
     t.datetime "last_tweet_time"
     t.integer  "user_id"
   end
+
+  add_index "twitter_profiles", ["twitter_id"], name: "index_twitter_profiles_on_twitter_id", using: :btree
 
   create_table "twitter_request_records", force: :cascade do |t|
     t.string   "handle"

@@ -9,7 +9,4 @@ class ApplicationController < ActionController::Base
   def after_sign_out_path_for(resource)
     stored_location_for(resource) || twitter_input_handle_path
   end  
-  def after_sign_up_path_for(resource)
-    stored_location_for(resource) || twitter_input_handle_path
-  end  
 end

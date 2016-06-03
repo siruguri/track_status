@@ -16,9 +16,14 @@ class AnalysisControllerTest < ActionController::TestCase
   end
 
   test 'update profile stats' do
-    assert_difference('ProfileStat.count', TwitterProfile.where('handle is not null').count - ProfileStat.count) do
+    # avoiding learning the SQL - fixtures shd set this to 1
+    no_stat_no_tweets_profile_count = 1    
+    old_stats_agg = profile_stats(:ps_1).stats_hash[:retweet_aggregate]
+    assert_difference('ProfileStat.count', no_stat_no_tweets_profile_count) do
       post :execute_task, {commit: 'Update Profile Stats'}
     end
+
+    assert_equal old_stats_agg, profile_stats(:ps_1).reload.stats_hash[:retweet_aggregate]
   end
 
   test 'reprocess all profiles' do

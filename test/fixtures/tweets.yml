@@ -1,6 +1,26 @@
+DEFAULTS: &DEFAULTS
+  processed: <%= false %>
+  
 tweet_1:
-  tweet_details: <%= {entities: {urls: []}, text: 'bear bear cheetah cheetah', retweet_count: 2, id: 'latest_tweet_id'}.to_json %>
+  <<: *DEFAULTS
+  tweet_details: <%= {entities: {urls: []}, text: 'bear bear cheetah cheetah', retweet_count: 2, id: 'latest_tweet_id', retweeted_status: {"text" => 'hello'}}.to_json %>
   twitter_id: 1
-  tweeted_at: <%= Time.now - 15.years %>
+  tweeted_at: <%= DateTime.strptime('2016-03-15 12:00:00', '%Y-%m-%d %H:%M:%S ') %>
+  mesg: bear bear cheetah cheetah https://t.co/jl1llclk12t
+  tweet_id: 9918575021211
+  
+tweet_2:
+  <<: *DEFAULTS
+  tweet_details: <%= {entities: {urls: []}, text: 'bear bear cheetah cheetah', retweet_count: 5, id: 'latest_tweet_id'}.to_json %>
+  twitter_id: 1
+  tweeted_at: <%= DateTime.strptime('2016-06-15 12:00:00', '%Y-%m-%d %H:%M:%S ') %>
   mesg: bear bear cheetah cheetah https://t.co/jl1llclk12t
   tweet_id: 9918575028735
+  
+tweet_3:
+  <<: *DEFAULTS
+  tweet_details: <%= {entities: {urls: []}, text: 'fox blue', retweet_count: 5, id: 'latest_tweet_id', retweeted_status: nil}.to_json %>
+  twitter_id: 66
+  tweeted_at: <%= DateTime.strptime('2016-06-15 12:00:00', '%Y-%m-%d %H:%M:%S ') %>
+  mesg: fox blue
+  tweet_id: 99185750219912

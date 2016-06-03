@@ -11,7 +11,7 @@ gem 'uglifier'
 gem 'coffee-rails'
 gem 'jquery-ui-rails'
 
-gem 'activerecord-import'
+gem 'activerecord-import', git: 'https://github.com/zdennis/activerecord-import.git', tag: 'v0.15.0'
 
 # No issue found that references possible bug in update to 3, possibly interacting with something else.
 gem 'sprockets', '~> 2'
@@ -67,6 +67,7 @@ group :development, :test do
 end
 
 group :test do
+  gem 'selenium-webdriver'
   gem 'poltergeist'
   gem 'mocha'
   gem 'simplecov'

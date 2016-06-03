@@ -15,8 +15,16 @@
         %li
           = link_to "Enter handle", twitter_input_handle_url
         - if current_user
-          %li
-            = link_to "Sign Out #{current_user.email[0..12]}...", destroy_user_session_path, method: :delete
+          %li.dropdown 
+            %a.dropdown-toggle{href: "#", "data-toggle" => "dropdown"} 
+              #{current_user.email[0..12]}...
+            %b.caret
+            %ul.dropdown-menu
+              %li
+                - if current_user.twitter_profile
+                  = link_to 'Profile', twitter_url(handle: current_user.twitter_profile.handle)
+              %li
+                = link_to "Sign Out", destroy_user_session_path, method: :delete
         - else
           %li
             = link_to 'Sign In', new_user_session_path

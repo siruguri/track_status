@@ -40,14 +40,20 @@ class EmailControllerTest < ActionController::TestCase
     assert_creation JSON.parse(sendgrid_request_html)
   end
 
+  test 'responds to sparkpost' do
+    init_wa_count = WebArticle.count
+    assert_enqueued_with(job: ActionMailer::DeliveryJob) do
+      post :transform, sparkpost_json_sample
+    end
+    assert_equal init_wa_count + 1, WebArticle.count
+    assert_equal 'sparkpost', ReceivedEmail.last.source
+  end
+  
   test 'responds to wildcard requests' do
     init_re_count = ReceivedEmail.count
-    init_wa_count = WebArticle.count
     assert_enqueued_with(job: ActionMailer::DeliveryJob) do
       post :transform, {mandrill_events: mandrill_request, wildcard: 'true'}
     end
-    assert_equal 1 + init_wa_count, WebArticle.count
-
     assert_equal 'GeneralMailer', enqueued_jobs.last[:args][0]
   end
   
@@ -60,9 +66,13 @@ class EmailControllerTest < ActionController::TestCase
     end
 
     assert_equal init_re_count + 1, ReceivedEmail.count
-    assert_equal init_wa_count + 1, WebArticle.count
+
     assert_equal Array, ReceivedEmail.last.payload.class
     
     assert_match 'success', response.body
-  end    
+  end
+
+  def sparkpost_json_sample
+    j = {'_json' => [{'msys' => {'relay_message' => {'content' => {'text' => 'this is sparkpost text and http://www.google.com'}}}}]}
+  end
 end

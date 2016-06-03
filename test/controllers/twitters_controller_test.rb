@@ -4,7 +4,7 @@ class TwittersControllerTest < ActionController::TestCase
   def setup
     set_net_stubs
   end
-  
+
   test 'routing' do
     assert_routing({method: :post, path: '/twitter/twitter_call', handle: 'xyz'},
                    {controller: 'twitters', action: 'twitter_call'})
@@ -61,9 +61,17 @@ class TwittersControllerTest < ActionController::TestCase
 #    assert_equal [["cheetah", 2], ["bear", 2], ["cat", 2.0/1.042], ["dog", 2.0/1.042]], assigns(:all_word_cloud)
   end
 
-  test '#input_handle' do
-    get :input_handle
-    assert_match /Get bio/, response.body
+  describe '#input_handle' do
+    it 'works without login' do
+      get :input_handle
+      assert_match /Get bio/, response.body
+    end
+
+    it 'works with login' do
+      devise_sign_in users(:user_2)
+      get :input_handle
+      assert assigns(:user_has_profile)
+    end
   end
 
   test '#bio' do
@@ -110,8 +118,16 @@ class TwittersControllerTest < ActionController::TestCase
         end
 
         # Look in fixture file
-        assert_equal 881092809019, Tweet.last.tweet_id
+        assert_equal 239413543487819778, Tweet.last.tweet_id
       end
-    end  
+    end
+  end
+  
+  describe 'twitter oauth' do
+    it 'works' do
+      devise_sign_in users(:user_2)
+      get :authorize_twitter
+      assert_redirected_to 'test.twitter.com/authorize'
+    end
   end
 end

@@ -7,9 +7,11 @@
       .twitter-biobox.handlebox
         = link_to @bio.handle, "https://www.twitter.com/#{@bio.handle}", target: '_blank'
       .twitter-biobox
-        #{@bio.location}
+        Location: #{@bio.location}
       .twitter-biobox
         #{@bio.bio}
+      .twitter-biobox
+        Num. followers: #{@bio.num_following}
     = form_tag twitter_twitter_call_path, class: 'inline-block' do
       = hidden_field_tag :handle, @bio.handle
       = submit_tag "Get older tweets"

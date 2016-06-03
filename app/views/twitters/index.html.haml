@@ -20,7 +20,7 @@
     .col-xs-2
       Total tweets
     .col-xs-5
-      Tweet Stats (retrieved/avg/total)
+      Retweet Stats (avg/total)
     .col-xs-3
       Last tweet at 
   - if @profiles_list.count > 0
@@ -38,5 +38,5 @@
 
     .databox#databox-3
       .paragraph
-        = render partial: 'stat_boxes', locals: {sort_method: :avg_retweets_collected}
+        = render partial: 'stat_boxes', locals: {sort_method: :retweeted_avg}
 

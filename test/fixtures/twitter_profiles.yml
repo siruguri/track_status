@@ -4,6 +4,7 @@ twitter_profile_1:
   last_tweet_time: <%= DateTime.strptime("Tue Nov 03 12:17:04 +0000 2015", '%a %b %d %H:%M:%S %z %Y') %>
   last_tweet: hello there 1
   twitter_id: 1
+  user: user_2
   
 nota_twitter_profile:
   handle: nota_twitter_handle
@@ -26,7 +27,7 @@ alimawali:
   twitter_id: 3
   
 only_id_1:
-  twitter_id: 90879087
+  twitter_id: 4
 
 only_id_2:
   twitter_id: 10241024
@@ -36,7 +37,9 @@ no_id_profile:
 
 existing_followers:
   handle: existing_followers_profile
+  twitter_id: 66
 
 leader_profile:
   handle: leader_profile_handle
+  twitter_id: 5
   

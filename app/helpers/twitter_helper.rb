@@ -5,8 +5,7 @@ module TwitterHelper
     
   def number_of_tweets_message(profile)
     if (stat = profile.profile_stat)
-      "#{stat.stats_hash['total_tweets']} / " +
-        "#{sprintf("%0.2f", stat.stats_hash['retweeted_avg'])} / " +
+      "#{sprintf("%0.2f", stat.stats_hash['retweeted_avg'])} / " +
         " #{stat.stats_hash['retweet_aggregate']}"
     else
       "No tweets retrieved"
