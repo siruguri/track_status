@@ -8,7 +8,7 @@ class User < ActiveRecord::Base
   has_many :token_hash_records, class_name: 'OauthTokenHash'
   has_one :twitter_profile
   
-  def latest_token_hash(src)
+  def latest_token_hash(src='twitter')
     token_hash_records.where(source: src).order(created_at: :desc).first
   end
 end

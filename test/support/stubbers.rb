@@ -34,6 +34,11 @@ def set_net_stubs
     to_return(status: 404, body: invalid_twitter_response)
   
              
+  stub_request(:post, "https://api.twitter.com/1.1/statuses/update.json").
+    with(body: /screen_name=.*handle.status=my.tweet/).
+    with(headers: single_token_headers).
+    to_return(status: 200, body: valid_twitter_response(:singletweet))
+  
   stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&mexclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
     with(headers: app_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
@@ -42,8 +47,6 @@ def set_net_stubs
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
-  # https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&include_rts=true&mexclude_replies=true&screen_name=twitter_handle&since_id=9918575028735&trim_user=1
-  # https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&include_rts=true&max_id=9918575021211&mexclude_replies=true&screen_name=twitter_handle&trim_user=1
   stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*(since|max)_id=\d+/).
     with(headers: app_token_headers).    
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
@@ -60,6 +63,11 @@ def set_net_stubs
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:newertweets))
   
+  # Feed
+  stub_request(:get, "https://api.twitter.com/1.1/friends/ids.json?cursor=-1&screen_name=twitter_handle").
+    with(headers: single_token_headers).    
+    to_return(status: 200, body: valid_twitter_response(:my_feed))
+
   # Followers
   stub_request(:get, "https://api.twitter.com/1.1/followers/ids.json?cursor=-1&screen_name=twitter_handle").
     with(headers: single_token_headers).    

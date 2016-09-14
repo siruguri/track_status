@@ -9,3 +9,7 @@ user_1:
 user_2:
   email: user2@valid.com
   <<: *DEFAULTS
+
+user_with_profile:
+  email: user_with_profile@emails.com
+  <<: *DEFAULTS

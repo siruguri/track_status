@@ -8,3 +8,9 @@ tkh_2:
   user: user_2
   request_token: <%= OAuth::RequestToken.new('reqtoken', 'reqsecret').to_yaml.inspect %>
   source: twitter
+  
+tkh_user_with_profile:
+  token: abcdefgh
+  secret: abcdefgh_secret
+  source: twitter
+  user: user_with_profile

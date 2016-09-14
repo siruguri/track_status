@@ -1,2 +1,2 @@
 #!/bin/bash
-bundle exec sidekiq -q twitter_fetches -q mailers -q reanalyses -q scrapers -L log/sidekiq.log
+bundle exec sidekiq -q tweets -q mailers -q twitter_fetches -q reanalyses -q scrapers -L log/sidekiq.log

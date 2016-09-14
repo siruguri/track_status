@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160818162205) do
+ActiveRecord::Schema.define(version: 20160913232623) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -95,6 +95,13 @@ ActiveRecord::Schema.define(version: 20160818162205) do
     t.datetime "updated_at"
   end
 
+  create_table "graph_connections", force: :cascade do |t|
+    t.integer "leader_id"
+    t.integer "follower_id"
+  end
+
+  add_index "graph_connections", ["leader_id"], name: "index_leader_id_on_profile_followers", using: :btree
+
   create_table "job_records", force: :cascade do |t|
     t.string   "job_id"
     t.string   "status"
@@ -120,13 +127,6 @@ ActiveRecord::Schema.define(version: 20160818162205) do
     t.datetime "updated_at"
     t.string   "request_token"
   end
-
-  create_table "profile_followers", force: :cascade do |t|
-    t.integer "leader_id"
-    t.integer "follower_id"
-  end
-
-  add_index "profile_followers", ["leader_id"], name: "index_leader_id_on_profile_followers", using: :btree
 
   create_table "profile_stats", force: :cascade do |t|
     t.integer  "twitter_profile_id"
@@ -216,8 +216,11 @@ ActiveRecord::Schema.define(version: 20160818162205) do
     t.integer  "twitter_id",      limit: 8
     t.datetime "last_tweet_time"
     t.integer  "user_id"
+    t.text     "word_cloud"
+    t.boolean  "protected"
   end
 
+  add_index "twitter_profiles", ["last_tweet_time"], name: "index_twitter_profiles_on_last_tweet_time", using: :btree
   add_index "twitter_profiles", ["twitter_id"], name: "index_twitter_profiles_on_twitter_id", using: :btree
 
   create_table "twitter_request_records", force: :cascade do |t|

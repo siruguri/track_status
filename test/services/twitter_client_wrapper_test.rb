@@ -28,11 +28,23 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     @c.rate_limited do
       fetch_followers! h
     end
-    assert_equal 2, ProfileFollower.where(leader_id: @handle.id).count
+    assert_equal 2, GraphConnection.where(leader_id: @handle.id).count
     # This Twitter ID is in the fixture file
     assert_equal 1, TwitterProfile.where(twitter_id: 8400).count
   end
   
+  test 'my feed' do
+    h = @handle
+    assert_difference('GraphConnection.where(follower_id: @handle.id).count', 2) do
+      @c.rate_limited do
+        fetch_my_feed! h
+      end
+    end
+
+    # This Twitter ID is in the fixture file
+    assert_equal 1, TwitterProfile.where(twitter_id: 8401).count
+  end
+
   describe 'profile fetching' do
     it 'works with a new profile' do
       h = @handle
@@ -76,11 +88,13 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
 
     assert_equal 2 + wa_ct, WebArticle.count
     assert_equal 'twitter', WebArticle.last.source
-    assert_equal 2, enqueued_jobs.size
+
+    # There's only one job for the full list of articles
+    assert_equal 1, enqueued_jobs.size
+    assert_equal 2, enqueued_jobs.first[:args][0].size
 
     assert_equal Tweet.last.user.id, WebArticle.last.twitter_profile_id
     refute Tweet.last.mesg.blank?
-
     assert Tweet.last.is_retweet?
   end
 

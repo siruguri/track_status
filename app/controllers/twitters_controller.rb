@@ -1,12 +1,31 @@
 class TwittersController < ApplicationController
   include TwitterAnalysis
-  before_action :set_handle_or_return, only: [:twitter_call, :show]
+  before_action :set_handle_or_return, only: [:twitter_call, :show, :feed]
+  before_action :authenticate_user!, only: [:schedule]
+
+  def schedule
+    # Can only schedule for connected accounts.
+    if current_user.twitter_profile.nil?
+      flash[:notice] = 'Your account doesn\'t have a handle yet. Please set one.'
+      redirect_to twitter_input_handle_path and return
+    end
+    
+    if request.request_method == 'GET'
+      render :schedule
+    elsif request.request_method == 'POST'
+      if message_list = construct_messages
+        DripTweetJob.perform_later current_user.twitter_profile, message_list
+      end
+    else
+      redirect_to new_user_session_path
+    end
+  end
   
   def input_handle
-    @uncrawled_profiles = uncrawled_profiles_query.count
-    if current_user and (p = current_user.twitter_profile).present?
+    @no_tweet_profiles = no_tweets_profiles_query.count
+    if current_user&.latest_token_hash
       @user_has_profile = true
-      @user_handle = p.handle
+      @user_handle = current_user.twitter_profile.handle
     end
   end
 
@@ -46,8 +65,6 @@ class TwittersController < ApplicationController
       )
 
       callback_str = twitter_set_twitter_token_url
-      Rails.logger.debug ">>> #{callback_str}"
-
       request_token = client.get_request_token(oauth_callback: callback_str)
 
       o = OauthTokenHash.create(source: 'twitter', user: current_user, request_token: request_token.to_yaml)
@@ -75,7 +92,7 @@ class TwittersController < ApplicationController
         )
 
         acc_token = client.get_access_token(req_token, oauth_verifier: params[:oauth_verifier])
-
+        # This token will not expire - https://dev.twitter.com/oauth/overview/faq (9/9/16)
         latest_tokenhash.update_attributes(token: acc_token.token, secret: acc_token.secret)
 
         x = current_user
@@ -95,8 +112,8 @@ class TwittersController < ApplicationController
   def batch_call
     @app_token = set_app_tokens
     
-    if params["uncrawled-profiles"].present?
-      uncrawled_profiles_query.all.each do |profile|
+    if params["no-tweet-profiles"].present?
+      no_tweets_profiles_query.all.each do |profile|
         bio profile
         tweets profile
       end
@@ -108,61 +125,73 @@ class TwittersController < ApplicationController
     if params[:commit]
       @app_token = set_app_tokens
 
-      case params[:commit].downcase
+      case params[:commit].downcase 
+      when /your.*feed/
+        my_feed         
       when /populate.*followers/
         followers
       when /get.*bio/
-        bio @t
+        bio @bio
       when /get.*older tweets/
         # Let's get the bio too, if we never did, when asking for tweets
-        bio @t if !@t.member_since.present?
-        tweets(@t, direction: 'older')
+        bio @bio if !@bio.member_since.present?
+        tweets(@bio, direction: 'older')
       when /get newer tweets/
-        tweets(@t, direction: 'newer')
+        tweets(@bio, direction: 'newer')
       end
-      redirect_to twitter_path(handle: @t.handle)
+      redirect_to twitter_handle_path(handle: @bio.handle)
     else
       flash[:error] = 'Something went wrong.'
       redirect_to twitter_input_handle_path
     end
   end
+
+  def feed
+    @feed_list = @bio
+  end
   
   def show
-    @bio = @t
-    @latest_tweets = Tweet.where(user: @t).order(tweeted_at: :desc)
+    @latest_tweets = Tweet.where(user: @bio).order(tweeted_at: :desc)
+
+    newest_tweet_enter_date = (lt = @latest_tweets&.first) ? lt.tweeted_at : nil
+    @been_a_while = lt.nil? || ((DateTime.now - 24.hours) > newest_tweet_enter_date)
     
     unless @latest_tweets.count == 0
       @universe_size = DocumentUniverse.count
-      word_cloud
+      @word_cloud = word_cloud
     end
 
-    @g_set_title = @t.handle
+    @g_set_title = @bio.handle
   end
 
   private
-  def uncrawled_profiles_query
+  def no_tweets_profiles_query
     TwitterProfile.includes(:tweets).
-      joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null')    
+      joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null and protected =?', false)
   end
   
   def set_handle_or_return
     if params[:handle].nil?
       render nothing: true, status: 422
     else
-      @t = TwitterProfile.find_or_create_by handle: params[:handle]
+      @bio = TwitterProfile.find_or_create_by handle: params[:handle]
 
-      if @t.twitter_id.present?
-        @identifier_fk_hash = {twitter_id: @t.twitter_id}
-        @identifier = @t.twitter_id
+      if @bio.twitter_id.present?
+        @identifier_fk_hash = {twitter_id: @bio.twitter_id}
+        @identifier = @bio.twitter_id
       else
-        @identifier_fk_hash = {handle: @t.handle}
-        @identifier = @t.handle
+        @identifier_fk_hash = {handle: @bio.handle}
+        @identifier = @bio.handle
       end
     end
   end
   
+  def my_feed
+    TwitterFetcherJob.perform_later @bio, 'my_feed', token: @app_token
+  end
+  
   def followers
-    TwitterFetcherJob.perform_later @t, 'followers', token: @app_token
+    TwitterFetcherJob.perform_later @bio, 'followers', token: @app_token
   end
   def bio(t)
     TwitterFetcherJob.perform_later t, 'bio', token: @app_token
@@ -172,30 +201,40 @@ class TwittersController < ApplicationController
   end
 
   def word_cloud
-    @tweets_count = 0
+    # Use a db cache for the text analysis
+    if @bio.word_cloud.empty?
+      @word_cloud = {}
+      doc_sets = separated_docs @latest_tweets.all
 
-    doc_sets = separated_docs @latest_tweets.all
-    @tweets_count = doc_sets[:tweets_count]
-    @orig_tweets_count = doc_sets[:orig_tweets_count]
-
-    o_dm = TextStats::DocumentModel.new(doc_sets[:orig_doc], twitter: true)
-    a_dm = TextStats::DocumentModel.new(doc_sets[:all_doc], twitter: true)
-    r_dm = TextStats::DocumentModel.new(doc_sets[:retweet_doc], twitter: true)
-    w_dm = TextStats::DocumentModel.new(crawled_web_documents(@t), as_html: true)
-    
-    if @universe_size > 0
-      du = DocumentUniverse.last.universe
-      o_dm.universe = du
-      a_dm.universe = du
-      r_dm.universe = du
-      w_dm.universe = du
+      o_dm = TextStats::DocumentModel.new(doc_sets[:orig_doc], twitter: true)
+      a_dm = TextStats::DocumentModel.new(doc_sets[:all_doc], twitter: true)
+      r_dm = TextStats::DocumentModel.new(doc_sets[:retweet_doc], twitter: true)
+      w_dm = TextStats::DocumentModel.new(crawled_web_documents(@bio), as_html: true)
+      
+      if @universe_size > 0
+        du = DocumentUniverse.last.universe
+        o_dm.universe = du
+        a_dm.universe = du
+        r_dm.universe = du
+        w_dm.universe = du
+      end
+      
+      orig_word_cloud = o_dm.sorted_counts
+      all_word_cloud = a_dm.sorted_counts
+      
+      @word_cloud.merge!({orig_word_cloud: orig_word_cloud, tweets_count: doc_sets[:tweets_count],
+                          orig_tweets_count: doc_sets[:orig_tweets_count],
+                          orig_word_cloud_filtered: orig_word_cloud.select { |w| remove_entities_and_numbers w },
+                          all_word_cloud: all_word_cloud,
+                          all_word_cloud_filtered: all_word_cloud.select { |w| remove_entities_and_numbers w },
+                          retweets_word_cloud: r_dm.sorted_counts.select { |w| remove_entities_and_numbers w },
+                          webdocs_word_cloud: w_dm.sorted_counts, orig_word_explanations: o_dm.explanations
+                         })
+      @bio.word_cloud = @word_cloud
+      @bio.save
     end
-    
-    @orig_word_cloud = o_dm.sorted_counts
-    @orig_word_explanations = o_dm.explanations
-    @all_word_cloud = a_dm.sorted_counts
-    @retweets_word_cloud = r_dm.sorted_counts
-    @webdocs_word_cloud = w_dm.sorted_counts
+
+    @bio.word_cloud
   end
     
   def set_app_tokens
@@ -203,10 +242,25 @@ class TwittersController < ApplicationController
   end
 
   def crawled_web_documents(profile)
-    @webdocs_count = 0
+    @word_cloud[:webdocs_count] = 0
     WebArticle.where('web_articles.body is not null and twitter_profile_id = ?', profile.id).all.map do |article|
-      @webdocs_count += 1
+      @word_cloud[:webdocs_count] += 1
       article.body
     end.join ' '
+  end
+
+  def construct_messages
+    # return nil if params is incorrect
+
+    ret = nil
+    if params[:uri] and (list = params.dig(:twitter_schedule, :messages))
+      ret = list.map { |msg| "#{msg} #{params[:uri]}" }
+    end
+
+    ret
+  end
+
+  def remove_entities_and_numbers(w)
+    !(/\A\d+\Z/.match(w[0]) || /^\#/.match(w[0]) || /^\@/.match(w[0]))
   end
 end

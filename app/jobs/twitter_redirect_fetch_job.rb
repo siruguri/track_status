@@ -1,14 +1,18 @@
 class TwitterRedirectFetchJob < ActiveJob::Base
   queue_as :scrapers
 
-  def perform(web_article)
+  def perform(web_article_list)
     # Twitter URLs have a 301 redirect
+    web_article = web_article_list.shift
+    
     if web_article.is_a? String
       web_article = WebArticle.find_by_original_url(web_article)
     end
     
     return if !web_article.is_a?(WebArticle) or web_article.body.present?
     actual_url = ''
+    sleep_total = 0
+    
     begin
       u = URI(web_article.original_url)
 
@@ -35,8 +39,9 @@ class TwitterRedirectFetchJob < ActiveJob::Base
       unless actual_url.blank?
         parser = ReadabilityParserWrapper.new
         body = parser.parse(actual_url).try(:content)
-        # Hourly allowance = 1000
-        sleep 4 unless Rails.env.test?
+        
+        # Hourly allowance for Readability = 1000
+        sleep_total += 4 unless Rails.env.test?
         
         if !body.blank? and !(body.is_a? Hash)
           # We only save the body when it's retrieved from Readability - sometimes Readability fails
@@ -45,7 +50,7 @@ class TwitterRedirectFetchJob < ActiveJob::Base
           web_article.save!
           
           # Rate limit this job if it saves a new body
-          sleep 3
+          sleep_total += 3
         else
           web_article.body = body[:failure_message]
           web_article.save!
@@ -53,7 +58,11 @@ class TwitterRedirectFetchJob < ActiveJob::Base
       end
     rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, Timeout::Error, Errno::ECONNRESET, SocketError,
            Errno::EINVAL, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e2
-      web_article.update_attributes({fetch_failed: false})
+      web_article.update_attributes({fetch_failed: true})
+    end
+
+    if web_article_list.size > 0
+      TwitterRedirectFetchJob.set(wait_until: Time.now + sleep_total.minutes).perform_later web_article_list
     end
   end
 end

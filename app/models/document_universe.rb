@@ -4,10 +4,14 @@ class DocumentUniverse < ActiveRecord::Base
   
   def self.reanalyze
     du = TextStats::DocumentUniverse.new
-    Tweet.pluck(:mesg).each do |mesg|
-      if mesg.present? and mesg.size > 0
+    ctr = 0
+    Tweet.where('mesg is not null and mesg != ?', '').find_in_batches(batch_size: 1000) do |grp|
+      grp.map(&:mesg).each do |mesg|
         du.add TextStats::DocumentModel.new(mesg)
       end
+
+      Rails.logger.debug ">>> Batch #{ctr}"
+      ctr += 1
     end
     create universe: du
   end

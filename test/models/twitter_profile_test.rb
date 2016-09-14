@@ -9,4 +9,10 @@ class TwitterProfileTest < ActiveSupport::TestCase
     end
     assert_equal 0, t.tweets_count
   end
+
+  test '#friends' do
+    follower = twitter_profiles(:twitter_profile_1)
+    assert_equal GraphConnection.where('follower_id = ?', follower.id).count,
+                 follower.friends.count
+  end
 end

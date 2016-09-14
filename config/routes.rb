@@ -17,20 +17,26 @@ Rails.application.routes.draw do
   
   get '/reddits/userinfo/:user' => 'reddits#userinfo'
   
-  get '/readability/run_scrape' => 'readability#run_scrape'
-  get '/readability/list' => 'readability#list_articles'
-  get '/readability/tag_words' => 'readability#tag_words'
-  post '/readability/tag_article' => 'readability#tag_article'
-
+  scope 'readability', as: 'readability', controller: 'readability' do
+    get :run_scrape
+    get :list, action: :list_articles
+    get :tag_words
+    post :tag_article
+  end
+  
   scope :twitter, as: 'twitter', controller: 'twitters' do
     get :authorize_twitter
     get :set_twitter_token    
 
+    get :schedule
+    post :schedule
+    
     get :index
     get :input_handle
     post :twitter_call
     post :batch_call
-    get '/:handle', action: :show
+    get '/handle/:handle', action: :show, as: :handle
+    get '/feed/:handle', action: :feed, as: :feed
   end
   
   resources 'channel_posts', only: [:index, :create, :new]

@@ -19,11 +19,12 @@ class TwitterJobsTest < Capybara::Rails::TestCase
 
   test 'uncrawled profiles processing can be started' do
     assert_enqueued_with(job: TwitterFetcherJob) do
-      click_button 'uncrawled-profiles'
+      click_button 'no-tweet-profiles'
     end
 
-    # Twice as many twitter_profiles that don't have tweets - right now, 7
+    # Twice as many twitter_profiles that don't have tweets - right now, 9
     # added leader_profile on 1/19
-    assert_equal 2 * 7, enqueued_jobs.size
+    # added twitter_profile_user_with_profile on 9/8, someother_leader_profile on 9/13
+    assert_equal 2 * 9, enqueued_jobs.size
   end
 end

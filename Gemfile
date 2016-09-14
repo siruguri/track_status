@@ -10,6 +10,7 @@ gem 'uglifier'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails'
 gem 'jquery-ui-rails'
+gem 'underscore-rails'
 
 gem 'activerecord-import', git: 'https://github.com/zdennis/activerecord-import.git', tag: 'v0.15.0'
 
@@ -33,6 +34,7 @@ gem 'dotenv'
 # Everybody gotta have some Bootstrap!
 gem 'jquery-rails'
 gem 'bootstrap-sass'
+gem 'rails-backbone'
 
 gem 'haml'
 gem 'json'

@@ -7,6 +7,7 @@
         = submit_tag "Get your bio", class: 'btn btn-default'
         = submit_tag "Get your older tweets", class: 'btn btn-default'
         = submit_tag "Populate your followers", class: 'btn btn-default', id: 'populate-followers'
+        = submit_tag "Get your feed list", class: 'btn btn-default', id: 'populate-my-feed'
     - else
       You haven't registered your Twitter handle yet.
       = link_to "Authorize with Twitter", twitter_authorize_twitter_url
@@ -28,5 +29,5 @@
     = form_tag twitter_batch_call_path do
       - if @uncrawled_profiles != 0
         %li 
-          = "#{@uncrawled_profiles} profiles only have Twitter IDs"
-          = submit_tag "Process them!", name: 'uncrawled-profiles', class: 'btn btn-default', id: 'uncrawled-profiles'
+          = "#{@no_tweet_profiles} profiles do not have tweets"
+          = submit_tag "Process them!", name: 'no-tweet-profiles', class: 'btn btn-default', id: 'no-tweet-profiles'

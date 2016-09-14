@@ -22,7 +22,7 @@
             %ul.dropdown-menu
               %li
                 - if current_user.twitter_profile
-                  = link_to 'Profile', twitter_url(handle: current_user.twitter_profile.handle)
+                  = link_to 'Profile', twitter_handle_url(handle: current_user.twitter_profile.handle)
               %li
                 = link_to "Sign Out", destroy_user_session_path, method: :delete
         - else

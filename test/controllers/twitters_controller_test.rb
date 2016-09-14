@@ -13,7 +13,7 @@ class TwittersControllerTest < ActionController::TestCase
 
   test 'errors' do
     post :twitter_call, {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
-    assert_redirected_to twitter_path(handle: 'twitter_handle')
+    assert_redirected_to twitter_handle_path(handle: 'twitter_handle')
 
     post :twitter_call, {commit: 'Hack it'}
     assert_equal 422, response.status
@@ -57,8 +57,7 @@ class TwittersControllerTest < ActionController::TestCase
     assert_match /ee bee/, response.body
     assert_match /\d.*retrieved/i, response.body
 
-    assert_equal [["bear", 2], ["cheetah", 2]], assigns(:orig_word_cloud)
-#    assert_equal [["cheetah", 2], ["bear", 2], ["cat", 2.0/1.042], ["dog", 2.0/1.042]], assigns(:all_word_cloud)
+    assert_equal [["bear", 2], ["cheetah", 2]], assigns(:word_cloud)[:orig_word_cloud]
   end
 
   describe '#input_handle' do
@@ -79,9 +78,17 @@ class TwittersControllerTest < ActionController::TestCase
       post :twitter_call, {commit: 'Get bio', handle: twitter_profiles(:twitter_profile_1).handle}
     end
 
-    assert_redirected_to twitter_path(handle: twitter_profiles(:twitter_profile_1).handle)
+    assert_redirected_to twitter_handle_path(handle: twitter_profiles(:twitter_profile_1).handle)
   end
 
+  test '#my_feed' do
+    assert_enqueued_with(job: TwitterFetcherJob) do
+      post :twitter_call, {commit: 'Get your feed', handle: twitter_profiles(:twitter_profile_1).handle}
+    end
+
+    assert_redirected_to twitter_handle_path(handle: twitter_profiles(:twitter_profile_1).handle)
+  end
+  
   test '#bio with unknown twitter profile' do
     assert_difference('TwitterProfile.count', 1) do
       post :twitter_call, {commit: "Get bio", handle: 'nosuch_handle'}
@@ -91,7 +98,7 @@ class TwittersControllerTest < ActionController::TestCase
   describe 'getting tweets' do
     describe 'when authenticated' do
       before do
-        devise_sign_in users(:user_1)
+        devise_sign_in users(:user_with_profile)
       end
 
       it 'uses access tokens' do
@@ -128,6 +135,35 @@ class TwittersControllerTest < ActionController::TestCase
       devise_sign_in users(:user_2)
       get :authorize_twitter
       assert_redirected_to 'test.twitter.com/authorize'
+    end
+  end
+
+  describe 'schedule' do
+    it 'needs login for getting and posting' do
+      get :schedule
+      assert_redirected_to new_user_session_path
+      post :schedule
+      assert_redirected_to new_user_session_path
+
+      devise_sign_in users(:user_1)
+      put :schedule
+      assert_redirected_to twitter_input_handle_path
+    end
+  
+    describe 'signed in' do
+      before do
+        devise_sign_in users(:user_with_profile)
+      end
+      it 'renders form' do
+        get :schedule
+        assert_template :schedule
+      end
+
+      it 'sets up jobs' do
+        assert_enqueued_with(job: DripTweetJob) do
+          post :schedule, twitter_schedule: {messages: ['a', 'b', 'c']}, uri: 'http://www.myuri.com'
+        end
+      end
     end
   end
 end

@@ -2,10 +2,14 @@ class TwitterProfile < ActiveRecord::Base
   has_many :tweets, foreign_key: :twitter_id, primary_key: :twitter_id, dependent: :destroy
   has_one :profile_stat, dependent: :destroy
 
-  has_many :profile_followers, foreign_key: :leader_id, dependent: :destroy
-  has_many :followers, through: :profile_followers, class_name: 'TwitterProfile', primary_key: :leader_id,
-           foreign_key: :follower_id
-
+  has_many :graph_connections_head, class_name: 'GraphConnection',
+           dependent: :destroy, foreign_key: :leader_id, inverse_of: :leader
+  has_many :graph_connections_tail, class_name: 'GraphConnection',
+           dependent: :destroy, foreign_key: :follower_id, inverse_of: :follower
+  has_many :friends, through: :graph_connections_tail, source: :leader, class_name: 'TwitterProfile'
+  has_many :followers, through: :graph_connections_head, source: :follower, class_name: 'TwitterProfile'
+  
+  serialize :word_cloud, Hash
   belongs_to :user
 
   after_create :create_stat

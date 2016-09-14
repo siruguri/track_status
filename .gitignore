@@ -32,7 +32,7 @@ bower.json
 *.dmp
 .env
 *.rdb
-local/
+scripts_local/
 /simple_coverage/
 /coverage/
 .DS_Store

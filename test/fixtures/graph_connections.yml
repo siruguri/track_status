@@ -1,0 +1,6 @@
+pf_1:
+  leader: leader_profile
+  follower: twitter_profile_1
+pf_2:
+  leader: someother_leader_profile
+  follower: twitter_profile_1
