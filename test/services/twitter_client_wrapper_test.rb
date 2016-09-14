@@ -33,16 +33,31 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     assert_equal 1, TwitterProfile.where(twitter_id: 8400).count
   end
   
-  test 'my feed' do
-    h = @handle
-    assert_difference('GraphConnection.where(follower_id: @handle.id).count', 2) do
-      @c.rate_limited do
-        fetch_my_feed! h
+  describe 'my feed' do
+    it 'works without a prev request' do
+      h = @handle
+      assert_difference('GraphConnection.where(follower_id: @handle.id).count', 2) do
+        @c.rate_limited do
+          fetch_my_friends! h
+        end
       end
+
+      # This Twitter ID is in the fixture file
+      assert_equal 1, TwitterProfile.where(twitter_id: 8401).count
     end
 
-    # This Twitter ID is in the fixture file
-    assert_equal 1, TwitterProfile.where(twitter_id: 8401).count
+    it 'works with a previous request' do
+      h = @handle
+      TwitterRequestRecord.create handle: h.handle, request_type: 'following_ids', cursor: 12345
+      assert_difference('GraphConnection.where(follower_id: @handle.id).count', 2) do
+        @c.rate_limited do
+          fetch_my_friends! h
+        end
+      end
+
+      # This Twitter ID is in the fixture file
+      assert_equal 1, TwitterProfile.where(twitter_id: 8401).count
+    end
   end
 
   describe 'profile fetching' do

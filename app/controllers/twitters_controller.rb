@@ -22,11 +22,7 @@ class TwittersController < ApplicationController
   end
   
   def input_handle
-    @no_tweet_profiles = no_tweets_profiles_query.count
-    if current_user&.latest_token_hash
-      @user_has_profile = true
-      @user_handle = current_user.twitter_profile.handle
-    end
+    set_input_handle_path_vars
   end
 
   def index
@@ -125,9 +121,14 @@ class TwittersController < ApplicationController
     if params[:commit]
       @app_token = set_app_tokens
 
-      case params[:commit].downcase 
-      when /your.*feed/
-        my_feed         
+      case params[:commit].downcase
+      when /refresh.*feed/i
+        if current_user
+          # Can't refresh feed if no one's logged in
+          @notice = refresh_feed
+        end
+      when /whom.*follow/i
+        my_friends      
       when /populate.*followers/
         followers
       when /get.*bio/
@@ -139,7 +140,13 @@ class TwittersController < ApplicationController
       when /get newer tweets/
         tweets(@bio, direction: 'newer')
       end
-      redirect_to twitter_handle_path(handle: @bio.handle)
+
+      unless @notice.blank?
+        @notice = "Request returned: #{@notice}"
+      end
+
+      set_input_handle_path_vars
+      render :input_handle
     else
       flash[:error] = 'Something went wrong.'
       redirect_to twitter_input_handle_path
@@ -147,7 +154,7 @@ class TwittersController < ApplicationController
   end
 
   def feed
-    @feed_list = @bio
+    @feed_list = Tweet.latest_by_friends(current_user).paginate(page: (params[:page] || 1), per_page: 10)
   end
   
   def show
@@ -165,6 +172,14 @@ class TwittersController < ApplicationController
   end
 
   private
+  def set_input_handle_path_vars
+    @no_tweet_profiles = no_tweets_profiles_query.count
+    if current_user&.latest_token_hash
+      @user_has_profile = true
+      @user_handle = current_user.twitter_profile.handle
+    end
+  end
+  
   def no_tweets_profiles_query
     TwitterProfile.includes(:tweets).
       joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null and protected =?', false)
@@ -185,9 +200,25 @@ class TwittersController < ApplicationController
       end
     end
   end
+
+  def refresh_feed
+    # If the latest friends' tweet is more than 24 hours old, then do something ...
+    # current_user will have been set above
+    refresh_list = []
+    now = Time.now
+    if Tweet.latest_by_friends(current_user).first.tweeted_at < (now - 6.hours)
+      @bio.friends.where('last_tweet_time is not null and last_tweet_time > ?', DateTime.now - 100.days).
+        order(last_tweet_time: :desc).each do |profile|
+        TwitterFetcherJob.perform_later profile, 'tweets', token: @app_token
+        refresh_list << "#{profile.handle} (#{(now - profile.last_tweet_time)/(60*60*24)})"
+      end
+    end
+
+    refresh_list.join '; '
+  end
   
-  def my_feed
-    TwitterFetcherJob.perform_later @bio, 'my_feed', token: @app_token
+  def my_friends
+    TwitterFetcherJob.perform_later @bio, 'my_friends', token: @app_token
   end
   
   def followers

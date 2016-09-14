@@ -37,4 +37,14 @@ module TwitterHelper
            locals: {word_list: word_list.slice(0..25),
                     list_type_title: title_text, divisor: divisor}
   end
+
+  def better_urls(tweet)
+    # Remove t.co urls, and replace with the full extended urls
+    str = tweet.mesg.gsub(/http.?:\/\/t\.co\/[^\s]+/, '')
+    str += tweet.tweet_details['entities']['urls'].map do |u|
+      "(<a href='#{u['expanded_url']}'>#{u['expanded_url']}</a>)"
+    end.join ' '
+
+    str.html_safe
+  end
 end

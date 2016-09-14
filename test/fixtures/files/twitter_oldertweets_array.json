@@ -76,7 +76,7 @@
 	"favorited": false,
 	"truncated": false,
 	"created_at": "Sat Aug 25 17:26:51 +0000 2012",
-	"id_str": "239413543487819778",
+	"id_str": "239413543487814242",
 	"entities": {
 	    "urls": [
 		{
@@ -101,7 +101,7 @@
 	"text": "older with id We are working to resolve issues with application management & logging in to the dev portal: https://t.co/p5bOzH0k ^TS",
 	"retweet_count": 105,
 	"in_reply_to_status_id_str": null,
-	"id": 239413543487819778,
+	"id": 239413543487814242,
 	"geo": null,
 	"retweeted": true,
 	"possibly_sensitive": false,

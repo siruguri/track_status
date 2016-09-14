@@ -8,7 +8,8 @@ class TwitterRedirectFetchJob < ActiveJob::Base
     if web_article.is_a? String
       web_article = WebArticle.find_by_original_url(web_article)
     end
-    
+
+    # A previous job might have scraped this article.
     return if !web_article.is_a?(WebArticle) or web_article.body.present?
     actual_url = ''
     sleep_total = 0

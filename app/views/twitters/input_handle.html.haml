@@ -1,3 +1,7 @@
+- if @notice
+  .paragraph.bottomborder
+    = @notice
+    
 .paragraph.bottomborder
   - if current_user
     - if @user_has_profile.present?
@@ -7,7 +11,8 @@
         = submit_tag "Get your bio", class: 'btn btn-default'
         = submit_tag "Get your older tweets", class: 'btn btn-default'
         = submit_tag "Populate your followers", class: 'btn btn-default', id: 'populate-followers'
-        = submit_tag "Get your feed list", class: 'btn btn-default', id: 'populate-my-feed'
+        = submit_tag "Refresh whom you follow", class: 'btn btn-default', id: 'refresh-friends'
+        = submit_tag "Refresh your feed", class: 'btn btn-default', id: 'refresh-feed'
     - else
       You haven't registered your Twitter handle yet.
       = link_to "Authorize with Twitter", twitter_authorize_twitter_url

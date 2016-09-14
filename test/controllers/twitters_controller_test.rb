@@ -13,7 +13,7 @@ class TwittersControllerTest < ActionController::TestCase
 
   test 'errors' do
     post :twitter_call, {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
-    assert_redirected_to twitter_handle_path(handle: 'twitter_handle')
+    assert_template :input_handle
 
     post :twitter_call, {commit: 'Hack it'}
     assert_equal 422, response.status
@@ -78,15 +78,15 @@ class TwittersControllerTest < ActionController::TestCase
       post :twitter_call, {commit: 'Get bio', handle: twitter_profiles(:twitter_profile_1).handle}
     end
 
-    assert_redirected_to twitter_handle_path(handle: twitter_profiles(:twitter_profile_1).handle)
+    assert_template :input_handle
   end
 
   test '#my_feed' do
     assert_enqueued_with(job: TwitterFetcherJob) do
-      post :twitter_call, {commit: 'Get your feed', handle: twitter_profiles(:twitter_profile_1).handle}
+      post :twitter_call, {commit: 'whom follow', handle: twitter_profiles(:twitter_profile_1).handle}
     end
 
-    assert_redirected_to twitter_handle_path(handle: twitter_profiles(:twitter_profile_1).handle)
+    assert_template :input_handle
   end
   
   test '#bio with unknown twitter profile' do

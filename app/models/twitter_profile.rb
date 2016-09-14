@@ -2,6 +2,7 @@ class TwitterProfile < ActiveRecord::Base
   has_many :tweets, foreign_key: :twitter_id, primary_key: :twitter_id, dependent: :destroy
   has_one :profile_stat, dependent: :destroy
 
+  has_many :twitter_request_records, foreign_key: :handle, primary_key: :handle
   has_many :graph_connections_head, class_name: 'GraphConnection',
            dependent: :destroy, foreign_key: :leader_id, inverse_of: :leader
   has_many :graph_connections_tail, class_name: 'GraphConnection',

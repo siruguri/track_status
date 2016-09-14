@@ -1,7 +1,9 @@
+# user's token
 def app_token_headers(app_token = 'abcdefgh')
   {'Accept' => 'application/json', 'Authorization' => /#{app_token}/}
 end
 
+# twitter app's token
 def single_token_headers
   {'Accept' => 'application/json', 'Authorization' => /cjCezt7cqCpk2c9XgtufSw9zh.*#{Rails.application.secrets.twitter_single_app_access_token}/}
 end
@@ -39,32 +41,41 @@ def set_net_stubs
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:singletweet))
   
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&mexclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
     with(headers: app_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&mexclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
-  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*(since|max)_id=\d+/).
+  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*max_id=\d+/).
     with(headers: app_token_headers).    
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
 
-  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*(since|max)_id=\d+/).
+  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*max_id=\d+/).
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&mexclude_replies=true&include_rts=true&screen_name=no_id_here&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=no_id_here&trim_user=1").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:oldertweets_noid))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&mexclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=240859602684612608&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=9918575028735&trim_user=1").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:newertweets))
+
+  # Write a tweet
+  stub_request(:post, "https://api.twitter.com/1.1/statuses/update.json").
+    with(:body => {"screen_name"=>"twitter_handle", "status"=>nil},
+         :headers => single_token_headers).
+    to_return(:status => 200, :body => valid_twitter_response(:tweet_success))
   
   # Feed
   stub_request(:get, "https://api.twitter.com/1.1/friends/ids.json?cursor=-1&screen_name=twitter_handle").
+    with(headers: single_token_headers).    
+    to_return(status: 200, body: valid_twitter_response(:my_feed))
+  stub_request(:get, "https://api.twitter.com/1.1/friends/ids.json?cursor=12345&screen_name=twitter_handle").
     with(headers: single_token_headers).    
     to_return(status: 200, body: valid_twitter_response(:my_feed))
 

@@ -63,3 +63,29 @@ h3 {
   }
 }
 
+.tweet-list {
+  list-style: numeric;
+  .item {
+    background-color: #FFF;
+    &:hover {
+      background-color: #f5f8fa;
+    }
+
+    border: 1px solid #E1E8ED;
+    padding: 9px 12px;
+
+    .handle {
+      line-height: 20px;
+      font-size: 13px;
+      color: #8899a6;
+      a {
+	color: #8899a6;
+	text-decorate: underline;
+	&:hover {
+	  cursor: pointer;
+	}
+      }
+      font-weight: bold;
+    }
+  }
+}

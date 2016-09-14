@@ -19,8 +19,8 @@ gem 'sprockets', '~> 2'
 gem 'thin'
 
 gem 'devise'
-
 gem 'js-routes'
+gem 'will_paginate'
 
 gem 'newrelic_rpm'
 group :production do

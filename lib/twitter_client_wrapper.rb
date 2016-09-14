@@ -58,13 +58,14 @@ class TwitterClientWrapper
   end
 
   def save_articles!(article_list, handle)
+    # Try to save a list of URLs, if they aren't in the db already
     return if article_list.empty?
     
     existing_urls = WebArticle.where(original_url: article_list).pluck :original_url
     article_list -= existing_urls
 
     # No callbacks
-    article_list = article_list.uniq
+    article_list = article_list.uniq.select { |u| WebArticle.valid_uri?(u) }
     WebArticle.import(
       article_list.map { |new_url| WebArticle.new(original_url: new_url, source: 'twitter', twitter_profile: handle) }
     )
@@ -73,16 +74,13 @@ class TwitterClientWrapper
   end
   
   def make_web_article_list(entity_hash)
-    # Return list of URLs found in tweets
+    # Return list of URLs found in tweets as long as they don't point to twitter.com
 
     return [] unless entity_hash
     created_articles = []
     entity_hash[:urls].each do |s|
       unless s[:expanded_url].match '.twitter.com'
-        w = WebArticle.new(original_url: s[:expanded_url])
-        if w.valid?
-          created_articles << s[:expanded_url]
-        end
+        created_articles << s[:expanded_url]
       end
     end
 
@@ -131,8 +129,8 @@ class TwitterClientWrapper
       end
     end
   end
-  
-  def fetch_my_feed!(handle_rec)
+
+  def fetch_my_friends!(handle_rec)
     unless (last_req = TwitterRequestRecord.where(user: handle_rec, request_type: 'following_ids')).empty?
       cursor = last_req[0].cursor
     else
@@ -156,9 +154,7 @@ class TwitterClientWrapper
   
   def fetch_profile!(handle_rec)
     # Don't fetch if the data is relatively fresh
-    Rails.logger.debug ">>> trying #{handle_rec.twitter_id}"    
     if handle_rec.bio.present? and handle_rec.updated_at > Time.now - 2.days
-      Rails.logger.debug ">>> Ignoring #{handle_rec.twitter_id}"
       return
     end
     
@@ -186,7 +182,7 @@ class TwitterClientWrapper
 
   def fetch_tweets!(handle_rec, relative_to_tweet = nil, opts = {})
     limiter = nil
-    direction = opts[:direction].try(:to_sym) || :older
+    direction = opts[:direction].try(:to_sym) || :newer
     
     unless relative_to_tweet.blank?
       case direction
@@ -282,7 +278,7 @@ class TwitterClientWrapper
       
       req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/user_timeline.json", {
                                          count: 200, include_rts: true, trim_user: 1,
-                                         mexclude_replies: true
+                                         exclude_replies: true
                                        }.merge(twitter_pk_hash).merge(addl_opts))
     end
 

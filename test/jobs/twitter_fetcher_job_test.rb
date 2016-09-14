@@ -3,6 +3,11 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
   def setup
     set_net_stubs
   end
+
+  test 'other jobs' do
+    TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'tweet'
+    TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'my_friends'
+  end
   
   test ':bio job works with valid handle' do
     refute_match /Oakland/, twitter_profiles(:twitter_profile_1).location
@@ -30,6 +35,7 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
       assert_difference('Tweet.count', 4) do
         TwitterFetcherJob.perform_now twitter_profiles(:no_id_profile), 'tweets'
       end
+      assert_equal 239413592287818484, Tweet.last.tweet_id      
     end
   end
   
