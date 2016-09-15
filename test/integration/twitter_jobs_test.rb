@@ -22,9 +22,8 @@ class TwitterJobsTest < Capybara::Rails::TestCase
       click_button 'no-tweet-profiles'
     end
 
-    # Twice as many twitter_profiles that don't have tweets - right now, 9
-    # added leader_profile on 1/19
-    # added twitter_profile_user_with_profile on 9/8, someother_leader_profile on 9/13
-    assert_equal 2 * 9, enqueued_jobs.size
+    # Twice as many twitter_profiles that don't have tweets - right now, 7
+    # added twitter_profile_user_with_profile on 9/8
+    assert_equal 2 * 7, enqueued_jobs.size
   end
 end

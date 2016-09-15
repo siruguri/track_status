@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160914015357) do
+ActiveRecord::Schema.define(version: 20160915225128) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -223,6 +223,7 @@ ActiveRecord::Schema.define(version: 20160914015357) do
 
   add_index "twitter_profiles", ["last_tweet_time"], name: "index_twitter_profiles_on_last_tweet_time", using: :btree
   add_index "twitter_profiles", ["twitter_id"], name: "index_twitter_profiles_on_twitter_id", using: :btree
+  add_index "twitter_profiles", ["user_id"], name: "index_twitter_profiles_on_user_id", unique: true, using: :btree
 
   create_table "twitter_request_records", force: :cascade do |t|
     t.string   "handle"

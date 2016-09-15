@@ -64,8 +64,10 @@ leader_profile:
   <<: *DEFAULTS
   handle: leader_profile_handle
   twitter_id: 5
+  last_tweet_time: <%= DateTime.now - 50.days %>
   
 someother_leader_profile:
   <<: *DEFAULTS
   handle: someother_leader_profile_handle
   twitter_id: 55
+  last_tweet_time: <%= DateTime.now - 500.days %>

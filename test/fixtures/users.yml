@@ -13,3 +13,8 @@ user_2:
 user_with_profile:
   email: user_with_profile@emails.com
   <<: *DEFAULTS
+
+user_wo_profile:
+  email: user_wo_profile@emails.com
+  <<:  *DEFAULTS
+  

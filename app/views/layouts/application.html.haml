@@ -17,8 +17,9 @@
     = csrf_meta_tags
 
   %body
+    .toast
     = render "navigation"
-    .container.main
+    .container-fluid.main
       -if flash[:notice] or flash[:alert]
         .container
         -if flash[:notice]

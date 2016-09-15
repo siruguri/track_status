@@ -11,4 +11,4 @@ functions = ->
       $('.selection-box').removeClass 'sort-target'
       $(evt.target).addClass 'sort-target'
     
-$(document).on('page:load ready', functions)    
+$(document).on('page:load ready', functions)

@@ -90,7 +90,7 @@ def set_net_stubs
 
   # Account settings
   stub_request(:get, "https://api.twitter.com/1.1/account/settings.json").
-    with(:headers => app_token_headers("accesstoken")).
+    with(:headers => app_token_headers("accesstoken-set-in-test")).
     to_return(:status => 200, :body => valid_twitter_response(:account_settings))
   
   # Twitter redirects

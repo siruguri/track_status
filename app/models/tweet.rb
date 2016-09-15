@@ -2,8 +2,13 @@ class Tweet < ActiveRecord::Base
   has_many :web_articles
   belongs_to :user, class_name: 'TwitterProfile', primary_key: 'twitter_id', foreign_key: 'twitter_id'
 
-  def self.latest_by_friends(user)
-    joins(user: :graph_connections_head).where('graph_connections.follower_id = ?', user.twitter_profile.id).order(tweeted_at: :desc)
+  def self.latest_by_friends(profile)
+    joins(user: :graph_connections_head).where('graph_connections.follower_id = ?', profile.id).order(tweeted_at: :desc)
+  end
+  
+  def self.top_of_feed(profile)
+    # returns the tweeted time of where the user's feed has last been updated to
+    latest_by_friends(profile).first.tweeted_at
   end
   
   def is_retweet?
@@ -17,5 +22,9 @@ class Tweet < ActiveRecord::Base
 
   def self.oldest
     order(tweeted_at: :asc).first
+  end
+
+  def has_media?
+    tweet_details['entities']['media']&.size    
   end
 end

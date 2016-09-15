@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     post :tag_article
   end
   
+  post '/ajax_api' => 'ajax#multiplex'
   scope :twitter, as: 'twitter', controller: 'twitters' do
     get :authorize_twitter
     get :set_twitter_token    
@@ -36,7 +37,7 @@ Rails.application.routes.draw do
     post :twitter_call
     post :batch_call
     get '/handle/:handle', action: :show, as: :handle
-    get '/feed/:handle', action: :feed, as: :feed
+    get '/feed(/:handle)', action: :feed, as: :feed
   end
   
   resources 'channel_posts', only: [:index, :create, :new]

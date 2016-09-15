@@ -17,6 +17,7 @@
 //= require bootstrap-sprockets
 //= require jquery.tokeninput
 //= require channel_post
+//= require action_trigger_shim
 //= require twitter_index
 //= require twitter_scheduler
 //= require underscore

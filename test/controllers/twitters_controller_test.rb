@@ -5,6 +5,11 @@ class TwittersControllerTest < ActionController::TestCase
     set_net_stubs
   end
 
+  test '#feed' do
+    devise_sign_in (u = users(:user_2))
+    get :feed
+  end
+  
   test 'routing' do
     assert_routing({method: :post, path: '/twitter/twitter_call', handle: 'xyz'},
                    {controller: 'twitters', action: 'twitter_call'})
@@ -23,20 +28,33 @@ class TwittersControllerTest < ActionController::TestCase
     assert_match /went.wrong/i, flash[:error]
   end
 
-  test '#set_twitter_token' do
-    devise_sign_in users(:user_2)
+  describe '#set_twitter_token' do
+    it 'bumps up against uniqueness constraints for users' do
+      devise_sign_in users(:user_2)
 
-    t =  OAuth::Token.new('accesstoken', 'accesssecret')
-    OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
+      t =  OAuth::Token.new('accesstoken-set-in-test', 'accesssecret')
+      OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
 
-    assert_difference('TwitterProfile.count', 1) do
-      get :set_twitter_token, {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
+      assert_raises(ActiveRecord::RecordNotUnique) do
+        get :set_twitter_token, {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
+      end
     end
 
-    assert_equal users(:user_2).id, TwitterProfile.last.user_id
-    # This is in the fixture file
-    assert_equal 'theSeanCook', TwitterProfile.last.handle
-    assert_match /theSeanCook/, response.body
+    it 'works otherwise' do
+      devise_sign_in users(:user_wo_profile)
+
+      t =  OAuth::Token.new('accesstoken-set-in-test', 'accesssecret')
+      OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
+
+      assert_difference('TwitterProfile.count', 1) do
+        get :set_twitter_token, {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
+      end
+
+      assert_equal users(:user_wo_profile).id, TwitterProfile.last.user_id
+      # This is in the fixture file
+      assert_equal 'theSeanCook', TwitterProfile.last.handle
+      assert_match /theSeanCook/, response.body
+    end
   end
   
   describe '#index' do
@@ -81,11 +99,24 @@ class TwittersControllerTest < ActionController::TestCase
     assert_template :input_handle
   end
 
-  test '#my_feed' do
+  test '#my_friends' do
     assert_enqueued_with(job: TwitterFetcherJob) do
       post :twitter_call, {commit: 'whom follow', handle: twitter_profiles(:twitter_profile_1).handle}
     end
 
+    assert_template :input_handle
+  end
+  
+  test '#refresh_feed' do
+    post :twitter_call, {commit: 'refresh feed', handle: twitter_profiles(:twitter_profile_1).handle}
+    assert (enqueued_jobs.size == 0 or enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size == 0)
+
+    devise_sign_in users(:user_2) # users tp 1
+    assert_enqueued_with(job: TwitterFetcherJob) do
+      post :twitter_call, {commit: 'refresh feed'}
+    end
+    # tp_1 has two friends, one tweeted 500 days ago though
+    assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
     assert_template :input_handle
   end
   

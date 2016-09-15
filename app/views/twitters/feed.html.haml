@@ -1,3 +1,8 @@
+- if @feed_list.size == 0 || Tweet.top_of_feed(current_user.twitter_profile) < (Time.now - 24.hours)
+  .paragraph
+    .btn.feed-refresh.action{'data-action-id' => 1}
+      Refresh Feed
+  
 - if @feed_list.size > 0
   %ol.tweet-list
     - @feed_list.each do |tweet, handle|
@@ -6,6 +11,9 @@
           = link_to tweet.user.handle, 'https://twitter.com/' + tweet.user.handle
         .mesg
           = better_urls(tweet)
+        - if tweet.has_media?
+          .tweet-media
+            %img{src: tweet.tweet_details['entities']['media'][0]['media_url_https']}
 
 = will_paginate @feed_list
 

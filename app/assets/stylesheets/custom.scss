@@ -109,3 +109,26 @@ input#token-input-tags-list {
 .nav > li > a {
   display: inline-block;
 }
+
+.toast {
+  transition: height 1s, padding-top 1s;
+  -webkit-transition: height 1s, padding-top 1s;
+  position: absolute;
+  z-index: 2;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fde073;
+  padding-top: 0;
+  height: 0;
+  
+  text-align: center;
+  border: none;
+  
+  &.open {
+    padding-top: 10px;
+    height: 50px;
+    border: solid 1px gray;
+  }
+}

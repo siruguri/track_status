@@ -125,7 +125,7 @@ class TwittersController < ApplicationController
       when /refresh.*feed/i
         if current_user
           # Can't refresh feed if no one's logged in
-          @notice = refresh_feed
+          @notice = TwitterManagement::Feed.refresh_feed(@bio).join '; '
         end
       when /whom.*follow/i
         my_friends      
@@ -154,7 +154,9 @@ class TwittersController < ApplicationController
   end
 
   def feed
-    @feed_list = Tweet.latest_by_friends(current_user).paginate(page: (params[:page] || 1), per_page: 10)
+    @feed_list = current_user&.twitter_profile ?
+                   Tweet.latest_by_friends(current_user.twitter_profile).paginate(page: (params[:page] || 1), per_page: 10) :
+                   []
   end
   
   def show
@@ -186,10 +188,10 @@ class TwittersController < ApplicationController
   end
   
   def set_handle_or_return
-    if params[:handle].nil?
+    if params[:handle].nil? and !(current_user && (@bio = current_user.twitter_profile).present?)
       render nothing: true, status: 422
     else
-      @bio = TwitterProfile.find_or_create_by handle: params[:handle]
+      @bio ||= TwitterProfile.find_or_create_by handle: params[:handle]
 
       if @bio.twitter_id.present?
         @identifier_fk_hash = {twitter_id: @bio.twitter_id}
@@ -199,22 +201,6 @@ class TwittersController < ApplicationController
         @identifier = @bio.handle
       end
     end
-  end
-
-  def refresh_feed
-    # If the latest friends' tweet is more than 24 hours old, then do something ...
-    # current_user will have been set above
-    refresh_list = []
-    now = Time.now
-    if Tweet.latest_by_friends(current_user).first.tweeted_at < (now - 6.hours)
-      @bio.friends.where('last_tweet_time is not null and last_tweet_time > ?', DateTime.now - 100.days).
-        order(last_tweet_time: :desc).each do |profile|
-        TwitterFetcherJob.perform_later profile, 'tweets', token: @app_token
-        refresh_list << "#{profile.handle} (#{(now - profile.last_tweet_time)/(60*60*24)})"
-      end
-    end
-
-    refresh_list.join '; '
   end
   
   def my_friends
