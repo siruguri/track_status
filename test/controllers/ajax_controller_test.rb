@@ -5,9 +5,7 @@ class AjaxControllerTest < ActionController::TestCase
     assert_routing ({path: '/ajax_api', method: :post}), {controller: 'ajax', action: 'multiplex'}
   end
   
-  test '#multiplex' do
-    xhr :post, :multiplex, {payload: "actions/trigger/1"}
-    assert_equal 'success', JSON.parse(response.body)['status']
+  test '#multiplex:errors' do
     xhr :post, :multiplex, {payload: "actions/trigger/a"}
     assert_equal 'error', JSON.parse(response.body)['status']
     xhr :post, :multiplex, {payload: "actionsx/trigger/1"}
@@ -18,4 +16,10 @@ class AjaxControllerTest < ActionController::TestCase
     xhr :post, :multiplex, {payload: "reads/trigger/1"}
     assert_equal 200, response.status
   end
+
+  test '#multiplex:success' do
+    devise_sign_in users(:user_2)
+    xhr :post, :multiplex, {payload: "actions/trigger/1"}
+    assert_equal 'success', JSON.parse(response.body)['status']
+  end    
 end
