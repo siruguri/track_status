@@ -177,8 +177,9 @@ class TwittersController < ApplicationController
   def set_input_handle_path_vars
     @no_tweet_profiles = no_tweets_profiles_query.count
     if current_user&.latest_token_hash
-      @user_has_profile = true
-      @user_handle = current_user.twitter_profile.handle
+      @user_has_profile = current_user.twitter_profile.present?
+      # BUG: this handle might not be set by the account_settings job before this page is refreshed.
+      @user_handle = current_user.twitter_profile&.handle
     end
   end
   
