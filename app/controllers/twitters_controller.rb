@@ -184,7 +184,7 @@ class TwittersController < ApplicationController
   
   def no_tweets_profiles_query
     TwitterProfile.includes(:tweets).
-      joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null and protected =?', false)
+      joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null and protected =? and member_since > ?', false, DateTime.now - 6.months)
   end
   
   def set_handle_or_return

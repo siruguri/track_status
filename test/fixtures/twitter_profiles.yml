@@ -1,5 +1,6 @@
 DEFAULTS: &DEFAULTS
   protected: false
+  member_since: <%= DateTime.now - 3.months %>
   
 twitter_profile_1:
   <<: *DEFAULTS

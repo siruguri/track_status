@@ -89,20 +89,32 @@ h3 {
 
     border: 1px solid #E1E8ED;
     padding: 9px 12px;
-
-    .handle {
-      line-height: 20px;
-      font-size: 13px;
+    .line-one {
       color: #8899a6;
-      a {
-	color: #8899a6;
-	text-decorate: underline;
-	&:hover {
-	  cursor: pointer;
+      font-size: 13px;
+      line-height: 20px;
+      
+      .handle {
+	display: inline-block;
+	a {
+	  color: #8899a6;
+	  text-decorate: underline;
+	  &:hover {
+	    cursor: pointer;
+	  }
 	}
+	font-weight: bold;
       }
-      font-weight: bold;
+
+      .time {
+	&:before {
+	  content: '\00b7';
+	}
+	
+	display: inline-block;
+      }
     }
+    
     .tweet-media {
       margin-top: 10px;
       img {

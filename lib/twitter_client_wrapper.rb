@@ -146,7 +146,7 @@ class TwitterClientWrapper
 
       new_ids = payload[:data][:ids] - ts.map { |t| t.twitter_id }
       new_ids.each do |id|
-        new_friend = TwitterProfile.create(twitter_id: id)
+        new_friend = TwitterProfile.create(twitter_id: id, protected: false)
         new_friend.followers << handle_rec
       end
     end
@@ -154,7 +154,7 @@ class TwitterClientWrapper
   
   def fetch_profile!(handle_rec)
     # Don't fetch if the data is relatively fresh
-    if handle_rec.bio.present? and handle_rec.updated_at > Time.now - 2.days
+    if handle_rec.bio.present? and handle_rec.updated_at > Time.now - 5.minutes
       return
     end
     
@@ -171,6 +171,7 @@ class TwitterClientWrapper
         handle_rec.last_tweet_time = DateTime.strptime(payload[:data][:status][:created_at],
                                                        '%a %b %d %H:%M:%S %z %Y')
       end
+      handle_rec.member_since = payload[:data][:created_at]
       handle_rec.tweets_count = payload[:data][:statuses_count]
       handle_rec.num_following = payload[:data][:friends_count]
       handle_rec.num_followers = payload[:data][:followers_count]
@@ -184,14 +185,14 @@ class TwitterClientWrapper
     limiter = nil
     direction = opts[:direction].try(:to_sym) || :newer
     
-    unless relative_to_tweet.blank?
+    unless relative_to_tweet.blank? && opts[:relative_id].nil?
       case direction
       when :newer
         limiter = :since_id
-        limit_id = relative_to_tweet.tweet_id
+        limit_id = relative_to_tweet&.tweet_id || opts[:relative_id]
       when :older
         limiter = :max_id
-        limit_id = relative_to_tweet.tweet_id
+        limit_id = relative_to_tweet&.tweet_id || opts[:relative_id]
       else
         raise TwitterClientArgumentException.new("#{direction} is not a valid direction (either :newer or :older)")
       end
@@ -227,7 +228,7 @@ class TwitterClientWrapper
         all_web_articles += make_web_article_list tweet[:entities]
       end
 
-      Tweet.import new_tweets
+      Tweet.import new_tweets, on_duplicate_key_ignore: true
       save_articles! all_web_articles, handle_rec
     end
 

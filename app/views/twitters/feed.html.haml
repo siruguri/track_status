@@ -7,8 +7,11 @@
   %ol.tweet-list
     - @feed_list.each do |tweet, handle|
       %ul.item
-        .handle
-          = link_to tweet.user.handle, 'https://twitter.com/' + tweet.user.handle
+        .line-one
+          .handle
+            = link_to tweet.user.handle, 'https://twitter.com/' + tweet.user.handle
+          .time
+            = better_time(tweet)  
         .mesg
           = better_urls(tweet)
         - if tweet.has_media?

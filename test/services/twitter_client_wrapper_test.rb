@@ -44,6 +44,7 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
 
       # This Twitter ID is in the fixture file
       assert_equal 1, TwitterProfile.where(twitter_id: 8401).count
+      assert_equal false, TwitterProfile.where(twitter_id: 8401).first.protected
     end
 
     it 'works with a previous request' do
@@ -111,6 +112,15 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     assert_equal Tweet.last.user.id, WebArticle.last.twitter_profile_id
     refute Tweet.last.mesg.blank?
     assert Tweet.last.is_retweet?
+  end
+
+  test 'plain tweets fetching with a relative_id' do
+    assert_difference('Tweet.count', 1) do
+      h = @handle
+      @c.rate_limited do
+        fetch_tweets! h, nil, relative_id: '567r', direction: :newer
+      end
+    end
   end
 
   test 'cursored tweets fetching works' do

@@ -47,4 +47,8 @@ module TwitterHelper
 
     str.html_safe
   end
+
+  def better_time(tweet)
+    tweet.tweeted_at.strftime '%m %d %H:%M'
+  end
 end
