@@ -105,8 +105,10 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     assert_equal 2 + wa_ct, WebArticle.count
     assert_equal 'twitter', WebArticle.last.source
 
-    # There's only one job for the full list of articles
-    assert_equal 1, enqueued_jobs.size
+    # There's one scraper job for the full list of articles and one for the pagination
+    assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterRedirectFetchJob }.size
+    assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
+    
     assert_equal 2, enqueued_jobs.first[:args][0].size
 
     assert_equal Tweet.last.user.id, WebArticle.last.twitter_profile_id

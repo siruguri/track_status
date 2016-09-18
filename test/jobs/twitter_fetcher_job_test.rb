@@ -28,7 +28,7 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
       end
 
       assert_equal twitter_profiles(:twitter_profile_1).id, Tweet.last.user.id
-      assert_equal 239413543487819778, Tweet.last.tweet_id
+      assert_equal 1111911239413, Tweet.last.tweet_id
     end
 
     it 'works when profile does not have twitter id' do

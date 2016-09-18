@@ -156,7 +156,7 @@ class TwittersControllerTest < ActionController::TestCase
         end
 
         # Look in fixture file
-        assert_equal 239413543487819778, Tweet.last.tweet_id
+        assert_equal 1111911239413, Tweet.last.tweet_id
       end
     end
   end

@@ -54,11 +54,14 @@ def set_net_stubs
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
-  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*max_id=\d+/).
+  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*max_id=9918575021211/).
     with(headers: app_token_headers).    
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
 
-  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*max_id=\d+/).
+  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*max_id=1111911\d+/).
+    with(headers: single_token_headers).
+    to_return(status: 200, body: valid_twitter_response(:empty))
+  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.*max_id=9918575021211/).
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
 

@@ -64,13 +64,14 @@ class TwitterClientWrapper
     existing_urls = WebArticle.where(original_url: article_list).pluck :original_url
     article_list -= existing_urls
 
-    # No callbacks
-    article_list = article_list.uniq.select { |u| WebArticle.valid_uri?(u) }
-    WebArticle.import(
-      article_list.map { |new_url| WebArticle.new(original_url: new_url, source: 'twitter', twitter_profile: handle) }
-    )
-    
-    TwitterRedirectFetchJob.perform_later article_list
+    if article_list.size > 0    
+      # No callbacks
+      article_list = article_list.uniq.select { |u| WebArticle.valid_uri?(u) }
+      WebArticle.import(
+        article_list.map { |new_url| WebArticle.new(original_url: new_url, source: 'twitter', twitter_profile: handle) }
+      )
+      TwitterRedirectFetchJob.perform_later article_list
+    end
   end
   
   def make_web_article_list(entity_hash)
@@ -198,10 +199,14 @@ class TwitterClientWrapper
       end
     end
 
-    payload = get(handle_rec, :tweets, limiter.nil? ? {} : {limiter: limiter, limit_id: limit_id})
+    get_hash = limiter.nil? ? {} : {limiter: limiter, limit_id: limit_id}
+
+    # This next step only has effect when paginating
+    get_hash.merge! opts[:since_id] ? {since_id: opts[:since_id]} : ({})
+    payload = get(handle_rec, :tweets, get_hash)
 
     # Sometimes, there are no new tweets
-    if payload[:data] != '' and ((data = payload[:data]).size > 0)
+    if !((data = payload[:data]).blank?)
       # This app is designed to create profiles even if only handles are avlbl, but requires Twitter IDs to match
       # tweets to users. So we have to grab the twitter id from the Twitter API response sometimes.
       if handle_rec.twitter_id.present?
@@ -230,6 +235,13 @@ class TwitterClientWrapper
 
       Tweet.import new_tweets, on_duplicate_key_ignore: true
       save_articles! all_web_articles, handle_rec
+
+      # Paginate tweets
+      next_opts = ({direction: 'older', relative_id: new_tweets.last.tweet_id}).merge(
+        limiter == :since_id ? ({since_id: limit_id}) : ({})
+      )
+      
+      TwitterFetcherJob.perform_later(handle_rec, 'tweets', next_opts)
     end
 
     payload
@@ -274,13 +286,18 @@ class TwitterClientWrapper
     when :tweets
       addl_opts = {}
       unless opts.empty?
-        addl_opts = {opts[:limiter] => opts[:limit_id]}        
+        addl_opts = {opts[:limiter] => opts[:limit_id]}
+        if opts[:since_id]
+          addl_opts.merge! ({since_id: opts[:since_id]})
+        end
       end
+
+      tweets_hash = {
+        include_rts: true, trim_user: 1,  exclude_replies: true, count: 200
+      }.merge(twitter_pk_hash).merge(addl_opts)
       
-      req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/user_timeline.json", {
-                                         count: 200, include_rts: true, trim_user: 1,
-                                         exclude_replies: true
-                                       }.merge(twitter_pk_hash).merge(addl_opts))
+      req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/user_timeline.json",
+                                       tweets_hash)
     end
 
     status = true
@@ -304,7 +321,7 @@ class TwitterClientWrapper
       
       case command
       when :tweets
-        cursor = body.blank? ? opts[:limit_id] : (opts[:limiter] == :since_id ? body.first[:id] : body.last[:id])
+        cursor = body.blank? ? opts[:limit_id] : body.last[:id]
       when :follower_ids
         cursor = body[:next_cursor]
       end
