@@ -126,7 +126,8 @@ class TwitterClientWrapper
 
       new_ids = payload[:data][:ids] - ts.map { |t| t.twitter_id }
       new_ids.each do |id|
-        handle_rec.followers <<  TwitterProfile.new(twitter_id: id)
+        t = TwitterProfile.new(twitter_id: id, protected: false)
+        handle_rec.followers << t
       end
     end
   end
@@ -176,39 +177,46 @@ class TwitterClientWrapper
       handle_rec.tweets_count = payload[:data][:statuses_count]
       handle_rec.num_following = payload[:data][:friends_count]
       handle_rec.num_followers = payload[:data][:followers_count]
+
       handle_rec.save
     end
 
     payload
   end
 
-  def fetch_tweets!(handle_rec, relative_to_tweet = nil, opts = {})
+  def fetch_tweets!(handle_rec, opts = {})
+    # opts[:relative_id] == -1 if there are no existing tweets to key to
     limiter = nil
     direction = opts[:direction].try(:to_sym) || :newer
+    relative_id = opts[:relative_id]
     
-    unless relative_to_tweet.blank? && opts[:relative_id].nil?
-      case direction
-      when :newer
-        limiter = :since_id
-        limit_id = relative_to_tweet&.tweet_id || opts[:relative_id]
-      when :older
-        limiter = :max_id
-        limit_id = relative_to_tweet&.tweet_id || opts[:relative_id]
-      else
-        raise TwitterClientArgumentException.new("#{direction} is not a valid direction (either :newer or :older)")
-      end
+    Rails.logger.debug ">>> Tweets fetch with options #{opts}, relative to id #{relative_id}"
+    
+    case direction
+    when :newer
+      limiter = :since_id
+    when :older
+      limiter = :max_id
+    else
+      raise TwitterClientArgumentException.new("#{direction} is not a valid direction (either :newer or :older)")
     end
 
-    get_hash = limiter.nil? ? {} : {limiter: limiter, limit_id: limit_id}
+    # This might be a fetch for a brand new profile (relative_id is -1 for dummy tweet)
+    get_hash = (relative_id == -1 || limiter.nil?) ? {} : {limiter: limiter, limit_id: relative_id}
 
-    # This next step only has effect when paginating
-    get_hash.merge! opts[:since_id] ? {since_id: opts[:since_id]} : ({})
+    # Pagination
+    if opts[:since_id].present? and direction == :older
+      get_hash.merge! ({since_id: opts[:since_id]})
+    end
+    
     payload = get(handle_rec, :tweets, get_hash)
 
-    # Sometimes, there are no new tweets
-    if !((data = payload[:data]).blank?)
+    # Sometimes, there are no new tweets, or nothing older than what's the newest one provided (which returns 1 obj)
+    unless (data = payload[:data]).blank? or (data.size == 1 && direction == :older)
       # This app is designed to create profiles even if only handles are avlbl, but requires Twitter IDs to match
       # tweets to users. So we have to grab the twitter id from the Twitter API response sometimes.
+
+      Rails.logger.debug ">>> Received #{data.size} items in data #{data}"
       if handle_rec.twitter_id.present?
         fk = handle_rec.twitter_id
       else
@@ -236,12 +244,20 @@ class TwitterClientWrapper
       Tweet.import new_tweets, on_duplicate_key_ignore: true
       save_articles! all_web_articles, handle_rec
 
-      # Paginate tweets
-      next_opts = ({direction: 'older', relative_id: new_tweets.last.tweet_id}).merge(
-        limiter == :since_id ? ({since_id: limit_id}) : ({})
-      )
-      
-      TwitterFetcherJob.perform_later(handle_rec, 'tweets', next_opts)
+      # Paginate tweets but don't go crazy trying to fetch tweets for new profiles the first time
+      if relative_id != -1
+        pass_since = 
+          if opts[:since_id].present? && direction == :older
+            {since_id: opts[:since_id]}
+          elsif direction == :newer && relative_id != -1
+            {since_id: relative_id}
+          else
+            {}
+          end
+        next_opts = ({direction: 'older', relative_id: new_tweets.last.tweet_id}).merge pass_since
+        Rails.logger.debug ">>> paginating past #{new_tweets.last.tweet_id}, tweeted on #{new_tweets.last.tweeted_at}, using #{next_opts}"
+        TwitterFetcherJob.perform_later(handle_rec, 'tweets', next_opts)
+      end
     end
 
     payload
@@ -287,6 +303,7 @@ class TwitterClientWrapper
       addl_opts = {}
       unless opts.empty?
         addl_opts = {opts[:limiter] => opts[:limit_id]}
+        # Tweet pagination
         if opts[:since_id]
           addl_opts.merge! ({since_id: opts[:since_id]})
         end
@@ -314,7 +331,7 @@ class TwitterClientWrapper
         # At one point I was mucking with the Twitter gem to force it to return the actual HTTP
         # response, so I could look at its headers
         body = response[:body]
-        Rails.logger.debug "Headers are: #{response[:headers].inspect}"
+        Rails.logger.debug ">>> Headers are: #{response[:headers].inspect}"
       else
         body = response
       end

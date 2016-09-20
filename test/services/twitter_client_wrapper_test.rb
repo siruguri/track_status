@@ -96,18 +96,19 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
   test 'plain tweets fetching works' do
     wa_ct = WebArticle.count
     assert_difference('Tweet.count', 2) do
-      h = @handle
+      h = twitter_profiles :bobcostas
+      # Bob has a dummy tweet
       @c.rate_limited do
-        fetch_tweets! h
+        fetch_tweets! h, relative_id: -1
        end
     end
 
     assert_equal 2 + wa_ct, WebArticle.count
     assert_equal 'twitter', WebArticle.last.source
 
-    # There's one scraper job for the full list of articles and one for the pagination
+    # There's one scraper job for the full list of articles and none for the pagination
     assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterRedirectFetchJob }.size
-    assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
+    assert_equal 0, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
     
     assert_equal 2, enqueued_jobs.first[:args][0].size
 
@@ -120,7 +121,7 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     assert_difference('Tweet.count', 1) do
       h = @handle
       @c.rate_limited do
-        fetch_tweets! h, nil, relative_id: '567r', direction: :newer
+        fetch_tweets! h, relative_id: '567r', direction: :newer
       end
     end
   end

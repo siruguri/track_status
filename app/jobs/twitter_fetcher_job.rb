@@ -14,10 +14,7 @@ class TwitterFetcherJob < ActiveJob::Base
       when 'bio'
         fetch_profile! handle_rec
       when 'tweets'
-        if opts[:relative_id]
-          # used by pagination
-          t = Tweet.find_by_tweet_id opts[:relative_id]
-        else
+        if opts[:relative_id].nil?
           # The default behavior is to get the timeline that's more recent than the most recent tweet or that's older
           # than the oldest know tweets.
           t = if opts[:direction].try(:to_sym) == :older
@@ -25,9 +22,10 @@ class TwitterFetcherJob < ActiveJob::Base
               else
                 handle_rec.tweets.newest
               end
+          opts[:relative_id] = t&.tweet_id || -1
         end
         
-        fetch_tweets! handle_rec, t, opts
+        fetch_tweets! handle_rec, opts
       end
     end
   end
