@@ -125,7 +125,7 @@ class TwittersController < ApplicationController
       when /refresh.*feed/i
         if current_user
           # Can't refresh feed if no one's logged in
-          @notice = TwitterManagement::Feed.refresh_feed(@bio).join '; '
+          @notice = TwitterManagement::Feed.refresh_feed(@bio, @app_token).join '; '
         end
       when /whom.*follow/i
         my_friends      
@@ -144,13 +144,10 @@ class TwittersController < ApplicationController
       unless @notice.blank?
         @notice = "Request returned: #{@notice}"
       end
-
-      set_input_handle_path_vars
-      render :input_handle
     else
       flash[:error] = 'Something went wrong.'
-      redirect_to twitter_input_handle_path
     end
+    redirect_to twitter_input_handle_path
   end
 
   def feed
@@ -185,7 +182,7 @@ class TwittersController < ApplicationController
   
   def no_tweets_profiles_query
     TwitterProfile.includes(:tweets).
-      joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null and protected =? and member_since > ?', false, DateTime.now - 6.months)
+      joins('left OUTER JOIN tweets ON tweets.twitter_id = twitter_profiles.twitter_id').where('tweets.id is null and protected =? and (twitter_profiles.created_at > ? or member_since > ?)', false, DateTime.now - 7.days, DateTime.now - 6.months)
   end
   
   def set_handle_or_return

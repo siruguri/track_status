@@ -11,7 +11,9 @@
           .handle
             = link_to tweet.user.handle, 'https://twitter.com/' + tweet.user.handle
           .time
-            = better_time(tweet)  
+            = better_time(tweet)
+          .retweet-button.action{'data-action-id' => 2, 'data-action-data' => "#{tweet.tweet_id}"}
+            Retweet
         .mesg
           = better_urls(tweet)
         - if tweet.has_media?

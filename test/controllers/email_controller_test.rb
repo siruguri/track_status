@@ -40,6 +40,10 @@ class EmailControllerTest < ActionController::TestCase
     assert_creation JSON.parse(sendgrid_request_html)
   end
 
+  test 'handles bad input' do
+    post :transform, bad_input_sample
+  end
+  
   test 'responds to sparkpost' do
     init_wa_count = WebArticle.count
     assert_enqueued_with(job: ActionMailer::DeliveryJob) do
@@ -73,6 +77,10 @@ class EmailControllerTest < ActionController::TestCase
   end
 
   def sparkpost_json_sample
-    j = {'_json' => [{'msys' => {'relay_message' => {'content' => {'text' => 'this is sparkpost text and http://www.google.com'}}}}]}
+    {'_json' => [{'msys' => {'relay_message' => {'content' => {'text' => 'this is sparkpost text and http://www.google.com'}}}}]}
+  end
+  
+  def bad_input_sample
+    {'_json' => {'msys' => 1}}
   end
 end

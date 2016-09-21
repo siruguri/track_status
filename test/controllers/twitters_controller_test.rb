@@ -18,7 +18,7 @@ class TwittersControllerTest < ActionController::TestCase
 
   test 'errors' do
     post :twitter_call, {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
-    assert_template :input_handle
+    assert_redirected_to twitter_input_handle_path
 
     post :twitter_call, {commit: 'Hack it'}
     assert_equal 422, response.status
@@ -96,7 +96,7 @@ class TwittersControllerTest < ActionController::TestCase
       post :twitter_call, {commit: 'Get bio', handle: twitter_profiles(:twitter_profile_1).handle}
     end
 
-    assert_template :input_handle
+    assert_redirected_to twitter_input_handle_path
   end
 
   test '#my_friends' do
@@ -104,7 +104,7 @@ class TwittersControllerTest < ActionController::TestCase
       post :twitter_call, {commit: 'whom follow', handle: twitter_profiles(:twitter_profile_1).handle}
     end
 
-    assert_template :input_handle
+    assert_redirected_to twitter_input_handle_path
   end
   
   test '#refresh_feed' do
@@ -117,7 +117,7 @@ class TwittersControllerTest < ActionController::TestCase
     end
     # tp_1 has two friends, one tweeted 500 days ago though
     assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
-    assert_template :input_handle
+    assert_redirected_to twitter_input_handle_path
   end
   
   test '#bio with unknown twitter profile' do

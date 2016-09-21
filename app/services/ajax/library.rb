@@ -8,29 +8,7 @@ module Ajax
       @@_data
     end
   end
-  
-  class Actions
-    def self.perform(idx, user=nil)
-      list = []
-      if t = user&.twitter_profile
-        list = TwitterManagement::Feed.refresh_feed(t).join '; '
-        Response.update list
-        
-        true
-      else
-        false
-      end
-    end    
-
-    def self.valid_ids
-      [1]
-    end
-
-    def self.last_known_response
-      Response.last_known_response
-    end
-  end
-  
+    
   class Library
     def self.route_action(action_str, user=nil)
       status_struct = {status: 'error', code: '500'}
@@ -50,7 +28,7 @@ module Ajax
           code = 422
           begin
             if params.size > 0 and (i = params[0].to_i) != '0' and Actions.valid_ids.include?(i)
-              success = Actions.perform i, user
+              success = Actions.perform i, {user: user}.merge(params.size > 1 ? ({data: params[1..-1]}) : {})
               data = Actions.last_known_response
             end
             if success

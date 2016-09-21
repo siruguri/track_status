@@ -93,6 +93,16 @@ h3 {
       color: #8899a6;
       font-size: 13px;
       line-height: 20px;
+      .retweet-button {
+	float: right;
+	margin-top: 5px;
+	background-color: #16a765;
+	color: white;
+	border-radius: 3px;
+	padding: 3px;
+	font-size: 0.9em;
+	cursor: pointer;
+      }
       
       .handle {
 	display: inline-block;

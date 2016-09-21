@@ -9,6 +9,13 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     @handle = twitter_profiles :twitter_profile_1
   end
 
+  test 'retweeting works' do
+    h = @handle
+    @c.rate_limited do
+      retweet! h, {tweet_id: 12341345}
+    end
+  end
+  
   test 'rate limiting works' do
     now = Time.now
     
@@ -126,7 +133,5 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     end
   end
 
-  test 'cursored tweets fetching works' do
-  end    
 end
 

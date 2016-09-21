@@ -18,7 +18,7 @@ shim_funcs = ->
         type: 'POST'
         url: '/ajax_api'
         data:
-          payload: 'actions/trigger/' + action_id
+          payload: 'actions/trigger/' + action_id + '/' + $(evt.target).data('action-data')
       )
       
       xhr.done((d, s, x) ->

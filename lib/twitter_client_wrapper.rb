@@ -67,9 +67,14 @@ class TwitterClientWrapper
     if article_list.size > 0    
       # No callbacks
       article_list = article_list.uniq.select { |u| WebArticle.valid_uri?(u) }
+
+      # This query really eats up a lot of disk space in development
+      ActiveRecord::Base.logger.level = 1
       WebArticle.import(
         article_list.map { |new_url| WebArticle.new(original_url: new_url, source: 'twitter', twitter_profile: handle) }
       )
+      ActiveRecord::Base.logger.level = 0      
+      
       TwitterRedirectFetchJob.perform_later article_list
     end
   end
@@ -106,6 +111,10 @@ class TwitterClientWrapper
     end
   end
 
+  def retweet!(handle_rec, opts)
+    payload = post(handle_rec, :retweet, opts)
+  end
+  
   def tweet!(handle_rec, opts)
     payload = post(handle_rec, :tweet, opts)
   end
@@ -190,8 +199,6 @@ class TwitterClientWrapper
     direction = opts[:direction].try(:to_sym) || :newer
     relative_id = opts[:relative_id]
     
-    Rails.logger.debug ">>> Tweets fetch with options #{opts}, relative to id #{relative_id}"
-    
     case direction
     when :newer
       limiter = :since_id
@@ -216,7 +223,6 @@ class TwitterClientWrapper
       # This app is designed to create profiles even if only handles are avlbl, but requires Twitter IDs to match
       # tweets to users. So we have to grab the twitter id from the Twitter API response sometimes.
 
-      Rails.logger.debug ">>> Received #{data.size} items in data #{data}"
       if handle_rec.twitter_id.present?
         fk = handle_rec.twitter_id
       else
@@ -245,7 +251,7 @@ class TwitterClientWrapper
       save_articles! all_web_articles, handle_rec
 
       # Paginate tweets but don't go crazy trying to fetch tweets for new profiles the first time
-      if relative_id != -1
+      if relative_id != -1 && opts[:pagination] != false
         pass_since = 
           if opts[:since_id].present? && direction == :older
             {since_id: opts[:since_id]}
@@ -255,7 +261,6 @@ class TwitterClientWrapper
             {}
           end
         next_opts = ({direction: 'older', relative_id: new_tweets.last.tweet_id}).merge pass_since
-        Rails.logger.debug ">>> paginating past #{new_tweets.last.tweet_id}, tweeted on #{new_tweets.last.tweeted_at}, using #{next_opts}"
         TwitterFetcherJob.perform_later(handle_rec, 'tweets', next_opts)
       end
     end
@@ -282,6 +287,10 @@ class TwitterClientWrapper
     end
 
     case command
+    when :retweet
+      return nil unless opts[:tweet_id]
+      req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/retweet/#{opts[:tweet_id]}.json",
+                                       twitter_pk_hash)
     when :tweet
       # Allows me to say text instead of status in my code if I want to
       real_opts = opts.clone
@@ -327,14 +336,14 @@ class TwitterClientWrapper
     rescue Twitter::Error, Twitter::Error::NotFound => e
       errors = {errors: "handle db id: #{handle_rec.id}, error: #{e.message}"}
     else
-      if response.is_a? Hash and response.keys.size == 2 and response.keys.include?(:headers)
-        # At one point I was mucking with the Twitter gem to force it to return the actual HTTP
-        # response, so I could look at its headers
-        body = response[:body]
-        Rails.logger.debug ">>> Headers are: #{response[:headers].inspect}"
-      else
-        body = response
-      end
+      body =
+        if response.is_a? Hash and response.keys.size == 2 and response.keys.include?(:headers)
+          # At one point I was mucking with the Twitter gem to force it to return the actual HTTP
+          # response, so I could look at its headers
+          response[:body]
+        else
+          response
+        end
       
       case command
       when :tweets
