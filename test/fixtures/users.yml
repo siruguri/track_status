@@ -17,4 +17,3 @@ user_with_profile:
 user_wo_profile:
   email: user_wo_profile@emails.com
   <<:  *DEFAULTS
-  

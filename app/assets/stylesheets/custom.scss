@@ -113,7 +113,7 @@ input#token-input-tags-list {
 .toast {
   transition: height 1s, padding-top 1s;
   -webkit-transition: height 1s, padding-top 1s;
-  position: absolute;
+  position: fixed;
   z-index: 2;
   overflow: hidden;
   top: 0;

@@ -1,13 +1,20 @@
 require 'test_helper'
 class TwittersControllerTest < ActionController::TestCase
   include ActiveJob::TestHelper
+  include Devise::Test::ControllerHelpers
+  
   def setup
     set_net_stubs
   end
 
   test '#feed' do
-    devise_sign_in (u = users(:user_2))
+    sign_in users(:user_2)
     get :feed
+    sign_out :user
+    
+    sign_in users(:user_with_profile)
+    get :feed
+    sign_out :user
   end
   
   test 'routing' do

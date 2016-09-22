@@ -12,7 +12,7 @@ module Ajax
         end
       when 2
         tweet_id = opts[:data][0]
-        j = TwitterFetcherJob.perform_later opts[:user]&.twitter_profile, 'retweet', {tweet_id: tweet_id}
+        j = TwitterFetcherJob.perform_later opts[:user]&.twitter_profile, 'retweet', {tweet_id: tweet_id, token: opts[:user].latest_token_hash}
         Response.update "retweet scheduled"
       end
 

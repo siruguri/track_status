@@ -2,7 +2,7 @@ class TwitterFetcherJob < ActiveJob::Base
   queue_as :twitter_fetches
 
   def perform(handle_rec, command='bio', opts = {})
-    TwitterClientWrapper.new(token: opts[:token]).rate_limited do
+    TwitterClientWrapper.new(opts).rate_limited do
       case command
       when 'retweet'
         retweet! handle_rec, opts

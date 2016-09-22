@@ -4,3 +4,6 @@ pf_1:
 pf_2:
   leader: someother_leader_profile
   follower: twitter_profile_1
+gc_recent_leader__user_with_profile:
+  leader: recent_leader_profile
+  follower: twitter_profile_user_with_profile

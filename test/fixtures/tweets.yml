@@ -40,3 +40,11 @@ tweet_someother_leader_1:
   tweeted_at: <%= DateTime.strptime('2016-06-14 12:00:00', '%Y-%m-%d %H:%M:%S ') %>
   mesg: leader tweet for feed testing cannot be more recent than Jun 15 '16
   tweet_id: 99185750215678
+
+tweet_recent_leader_1:
+  <<: *DEFAULTS
+  tweet_details: <%= {entities: {urls: []}, text: 'fox blue', retweet_count: 5, id: 'latest_tweet_id', retweeted_status: nil}.to_json %>
+  twitter_id: 66
+  tweeted_at: <%= DateTime.now - 2.hours %>
+  mesg: recent leader tweet for feed testing has to be more recent than 24 hours ago
+  tweet_id: 81885777111234

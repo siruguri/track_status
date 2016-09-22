@@ -72,3 +72,9 @@ someother_leader_profile:
   handle: someother_leader_profile_handle
   twitter_id: 55
   last_tweet_time: <%= DateTime.now - 500.days %>
+
+recent_leader_profile:
+  <<: *DEFAULTS
+  handle: recent_leader_profile_handle
+  twitter_id: 66
+  last_tweet_time: <%= DateTime.now - 2.hours %>

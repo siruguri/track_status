@@ -152,6 +152,7 @@ class TwittersController < ApplicationController
 
   def feed
     @time_to_wait = (Time.now - 24.hours) - Tweet.top_of_feed(current_user.twitter_profile)
+
     if @time_to_wait < 0
       t = -1 * @time_to_wait
       @hrs = (t / 3600).floor
