@@ -19,6 +19,7 @@
 //= require channel_post
 //= require action_trigger_shim
 //= require twitter_index
+//= require twitter_feed
 //= require twitter_scheduler
 //= require underscore
 //= require backbone

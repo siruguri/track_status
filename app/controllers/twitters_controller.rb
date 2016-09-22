@@ -151,6 +151,14 @@ class TwittersController < ApplicationController
   end
 
   def feed
+    @time_to_wait = (Time.now - 24.hours) - Tweet.top_of_feed(current_user.twitter_profile)
+    if @time_to_wait < 0
+      t = -1 * @time_to_wait
+      @hrs = (t / 3600).floor
+      @mins = (60 * ((t / 3600) - @hrs)).floor
+      @secs = (t - (3600 * @hrs + 60 * @mins)).floor
+    end
+    
     @feed_list = current_user&.twitter_profile ?
                    Tweet.latest_by_friends(current_user.twitter_profile).paginate(page: (params[:page] || 1), per_page: 10) :
                    []

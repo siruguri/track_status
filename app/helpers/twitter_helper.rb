@@ -39,9 +39,17 @@ module TwitterHelper
   end
 
   def better_urls(tweet)
+    if tweet.is_a? Tweet
+      mesg_str = tweet.mesg
+      entities_hash = tweet.tweet_details['entities']
+    else
+      mesg_str = tweet['text']
+      entities_hash = tweet['entities']
+    end
+    
     # Remove t.co urls, and replace with the full extended urls
-    str = tweet.mesg.gsub(/http.?:\/\/t\.co\/[^\s]+/, '')
-    str += tweet.tweet_details['entities']['urls'].map do |u|
+    str = mesg_str.gsub(/http.?:\/\/t\.co\/[^\s]+/, '')
+    str += entities_hash['urls'].map do |u|
       "(<a href='#{u['expanded_url']}'>#{u['expanded_url']}</a>)"
     end.join ' '
 

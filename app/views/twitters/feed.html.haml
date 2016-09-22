@@ -1,8 +1,13 @@
-- if @feed_list.size == 0 || Tweet.top_of_feed(current_user.twitter_profile) < (Time.now - 24.hours)
+- if @feed_list.size == 0 || @time_to_wait >= 0
   .paragraph
     .btn.feed-refresh.action{'data-action-id' => 1}
       Refresh Feed
-  
+- else
+  .time_data{'data-hrs' => @hrs, 'data-mins' => @mins, 'data-secs' => @secs}
+  .countdown
+    .hrs
+    .mins
+    .secs
 - if @feed_list.size > 0
   %ol.tweet-list
     - @feed_list.each do |tweet, handle|
@@ -14,11 +19,22 @@
             = better_time(tweet)
           .retweet-button.action{'data-action-id' => 2, 'data-action-data' => "#{tweet.tweet_id}"}
             Retweet
-        .mesg
-          = better_urls(tweet)
-        - if tweet.has_media?
-          .tweet-media
-            %img{src: tweet.tweet_details['entities']['media'][0]['media_url_https']}
+        - if tweet.is_retweeted
+          - rt_handle = tweet.tweet_details['entities']['user_mentions'][0]['screen_name']
+          .line-one
+            .handle
+              = "\u21b3"
+              = link_to rt_handle , 'https://twitter.com/' + rt_handle
+            .time
+              = better_time(tweet)
+          .mesg
+            = better_urls(tweet.tweet_details['retweeted_status'])
+        - else
+          .mesg
+            = better_urls(tweet)
+          - if tweet.has_media?
+            .tweet-media
+              %img{src: tweet.tweet_details['entities']['media'][0]['media_url_https']}
 
-= will_paginate @feed_list
+= will_paginate @feed_list, page_links: false
 

@@ -94,6 +94,7 @@ h3 {
       font-size: 13px;
       line-height: 20px;
       .retweet-button {
+	position: relative;
 	float: right;
 	margin-top: 5px;
 	background-color: #16a765;
@@ -133,3 +134,28 @@ h3 {
     }
   }
 }
+
+.previous_page {
+  display: none;
+}
+.next_page {
+  margin-left: 15px;
+}
+.time_data {
+  display: none;
+}
+.countdown {
+  margin-bottom: 10px;
+  * {
+    display: inline-block;
+    background-color: black;
+    color: white;
+    min-width: 30px;
+    text-align: right;
+    margin-right: 10px;
+    padding: 3px 5px 5px 3px;    
+    border-radius: 3px;    
+  }
+}
+
+  
