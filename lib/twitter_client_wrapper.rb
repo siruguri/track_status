@@ -289,8 +289,7 @@ class TwitterClientWrapper
     case command
     when :retweet
       return nil unless opts[:tweet_id]
-      req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/retweet/#{opts[:tweet_id]}.json",
-                                       twitter_pk_hash)
+      req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/retweet/#{opts[:tweet_id]}.json")
     when :tweet
       # Allows me to say text instead of status in my code if I want to
       real_opts = opts.clone

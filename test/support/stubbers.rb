@@ -38,7 +38,7 @@ def set_net_stubs
              
   stub_request(:post, "https://api.twitter.com/1.1/statuses/update.json").
     with(body: /screen_name=.*handle.status=my.tweet/).
-    with(headers: single_token_headers).
+    with(headers: app_token_headers).
     to_return(status: 200, body: valid_twitter_response(:singletweet))
   
   stub_request(:post, "https://api.twitter.com/1.1/statuses/retweet/12341345.json").

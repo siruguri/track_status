@@ -14,7 +14,8 @@ class TwittersController < ApplicationController
       render :schedule
     elsif request.request_method == 'POST'
       if message_list = construct_messages
-        DripTweetJob.perform_later current_user.twitter_profile, message_list
+        @app_token = set_app_tokens
+        DripTweetJob.perform_later current_user.twitter_profile, message_list, token: @app_token
       end
     else
       redirect_to new_user_session_path

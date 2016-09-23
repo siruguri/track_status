@@ -201,6 +201,9 @@ class TwittersControllerTest < ActionController::TestCase
         assert_enqueued_with(job: DripTweetJob) do
           post :schedule, twitter_schedule: {messages: ['a', 'b', 'c']}, uri: 'http://www.myuri.com'
         end
+
+        assert_equal users(:user_with_profile).latest_token_hash.token,
+                     GlobalID::Locator.locate(enqueued_jobs[0][:args][2]['token']['_aj_globalid']).token
       end
     end
   end
