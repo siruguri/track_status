@@ -78,3 +78,9 @@ recent_leader_profile:
   handle: recent_leader_profile_handle
   twitter_id: 66
   last_tweet_time: <%= DateTime.now - 2.hours %>
+
+just_follower_1:
+  <<: *DEFAULTS
+  handle: just_follower_1
+  twitter_id: 807
+  last_tweet_time: <%= DateTime.strptime('2016-09-23 10:00', "%Y-%m-%d %H:%M") %>

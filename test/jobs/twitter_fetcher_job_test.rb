@@ -1,5 +1,6 @@
 require 'test_helper'
 class TwitterFetcherJobTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
   def setup
     set_net_stubs
   end
@@ -38,7 +39,16 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
       assert_equal 239413592287818484, Tweet.last.tweet_id      
     end
   end
-  
+
+  test 'follower bios' do
+    assert_enqueued_with(job: TwitterFetcherJob) do
+      TwitterFetcherJob.perform_now twitter_profiles(:leader_profile), 'follower_bios'
+    end
+
+    assert_equal twitter_profiles(:leader_profile).graph_connections_head.count,
+                 enqueued_jobs.size
+  end
+    
   describe ":followers" do
     it 'works without existing followers' do
       assert_difference('TwitterProfile.count', 2) do
@@ -54,9 +64,17 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
     end
     
     it 'works with existing followers' do
+      assert_equal 1, GraphConnection.where(leader_id: twitter_profiles(:existing_followers).id,
+                                            follower_id: twitter_profiles(:just_follower_1).id).count
+
+      prev_q_size = enqueued_jobs.size
       assert_difference('TwitterProfile.count', 3) do
         TwitterFetcherJob.perform_now twitter_profiles(:existing_followers), 'followers'
       end
+
+      # new followers will get new follower_bios jobs
+      assert_equal 1 + prev_q_size, enqueued_jobs.size
+      assert_equal 0, GraphConnection.where(follower_id: TwitterProfile.find_by_handle('just_follower_1').id).count
     end
   end
 end

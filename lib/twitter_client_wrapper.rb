@@ -128,12 +128,18 @@ class TwitterClientWrapper
     
     payload = get(handle_rec, :follower_ids, {cursor: cursor})
     if payload[:data] != ''
+      existing_twitter_ids = handle_rec.followers.pluck :twitter_id
+      
       ts = TwitterProfile.where(twitter_id: payload[:data][:ids]).all
       ts.each do |t|
         handle_rec.followers << t unless handle_rec.followers.include? t
       end
 
-      new_ids = payload[:data][:ids] - ts.map { |t| t.twitter_id }
+      stale_ids = handle_rec.followers.where('twitter_id not in (?)', payload[:data][:ids]).pluck :id
+      new_ids = payload[:data][:ids] - existing_twitter_ids
+
+      # Remove stale graph connections
+      GraphConnection.where('leader_id = ? and follower_id in (?)', handle_rec.id, stale_ids).map &:delete
       new_ids.each do |id|
         t = TwitterProfile.new(twitter_id: id, protected: false)
         handle_rec.followers << t

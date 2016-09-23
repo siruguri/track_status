@@ -26,6 +26,11 @@ class AjaxLibraryTest < ActiveSupport::TestCase
       assert_is_success data
       # handle of one of user_2's friends
       assert_match /leader_profile_handle/, data[:data]
+
+      assert_enqueued_with(job: TwitterFetcherJob) do
+        data = Ajax::Library.route_action("actions/trigger/2/12380912039", users(:user_2))
+      end
+      assert_match /scheduled/, data[:data]      
     end
   end
   

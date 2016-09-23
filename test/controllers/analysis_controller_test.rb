@@ -18,7 +18,8 @@ class AnalysisControllerTest < ActionController::TestCase
   test 'update profile stats' do
     # avoiding learning the SQL - fixtures shd set this to below #
     # - added leader and some other leader on 9/14/16
-    no_stat_has_tweets_profile_count = 3
+    # added just_followers_1 on 9/23
+    no_stat_has_tweets_profile_count = 4
     old_stats_agg = profile_stats(:ps_1).stats_hash[:retweet_aggregate]
     assert_difference('ProfileStat.count', no_stat_has_tweets_profile_count) do
       post :execute_task, {commit: 'Update Profile Stats'}

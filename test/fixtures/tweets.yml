@@ -48,3 +48,11 @@ tweet_recent_leader_1:
   tweeted_at: <%= DateTime.now - 2.hours %>
   mesg: recent leader tweet for feed testing has to be more recent than 24 hours ago
   tweet_id: 81885777111234
+
+tweet_just_follower_1:
+  <<: *DEFAULTS
+  tweet_details: <%= {entities: {urls: []}, text: 'fox blue', retweet_count: 5, id: 'latest_tweet_id', retweeted_status: nil}.to_json %>
+  twitter_id: 807
+  tweeted_at: <%= DateTime.now - 2.hours %>
+  mesg: just follower 1 tweet
+  tweet_id: 18851882479234
