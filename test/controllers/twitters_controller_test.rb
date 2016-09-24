@@ -11,9 +11,24 @@ class TwittersControllerTest < ActionController::TestCase
     sign_in users(:user_2)
     get :feed
     sign_out :user
-    
-    sign_in users(:user_with_profile)
-    get :feed
+
+    # Trigger time to wait logic and paging logic simultaneously
+    sign_in (u = users(:user_with_profile))
+
+    # this is a graph connection
+    generate_new_tweets twitter_profiles(:recent_leader_profile), 15
+
+    # A bookmark is created
+    assert_difference('Config.count') do
+      get :feed, page: 2
+    end
+
+    # Two existing tweets + 15 = 17.
+    assert_equal 7, assigns(:feed_list).size
+
+    # Getting the first page won't change the bookmark
+    get :feed, page: 1
+    assert_equal 2, Config.last.config_value.to_i
     sign_out :user
   end
   
@@ -42,15 +57,14 @@ class TwittersControllerTest < ActionController::TestCase
       t =  OAuth::Token.new('accesstoken-set-in-test', 'accesssecret')
       OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
 
-      assert_raises(ActiveRecord::RecordNotUnique) do
-        get :set_twitter_token, {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
-      end
+      get :set_twitter_token, {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
+      assert_match /claim/, TwitterRequestRecord.last.status_message
     end
 
     it 'works otherwise' do
       devise_sign_in users(:user_wo_profile)
 
-      t =  OAuth::Token.new('accesstoken-set-in-test', 'accesssecret')
+      t =  OAuth::Token.new('accesstoken-set-in-test-for-new-profile', 'accesssecret')
       OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
 
       assert_difference('TwitterProfile.count', 1) do
@@ -205,6 +219,15 @@ class TwittersControllerTest < ActionController::TestCase
         assert_equal users(:user_with_profile).latest_token_hash.token,
                      GlobalID::Locator.locate(enqueued_jobs[0][:args][2]['token']['_aj_globalid']).token
       end
+    end
+  end
+
+  private
+  def generate_new_tweets(profile, num)
+    num.times.each do |i|
+      t = Tweet.new tweet_id: "8810280192#{i}", tweeted_at: DateTime.now - 1.day - i.minutes,
+                    tweet_details: ({entities: {}, text: 'hello'}), mesg: 'hello', twitter_id: profile.twitter_id
+      t.save
     end
   end
 end

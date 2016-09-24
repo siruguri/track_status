@@ -24,6 +24,7 @@ class TwitterJobsTest < Capybara::Rails::TestCase
 
     # Twice as many twitter_profiles that don't have tweets - right now, 7
     # added twitter_profile_user_with_profile on 9/8
-    assert_equal 2 * 7, enqueued_jobs.size
+    # added tp_assign_to_2 on 9/23
+    assert_equal 2 * 8, enqueued_jobs.size
   end
 end

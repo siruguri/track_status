@@ -100,13 +100,19 @@ class TwitterClientWrapper
 
     t = TwitterProfile.new(user: user_rec)
     payload = get(t, :account_settings)
-    handle = payload[:data][:screen_name]
-
-    if (prev = TwitterProfile.find_by_handle handle).present?
-      prev.user = user_rec
-      prev.save!
+    twitter_id = payload[:data][:id]
+    
+    if (prev = TwitterProfile.find_by_twitter_id twitter_id).present?
+      begin
+        prev.user = user_rec
+        prev.save!
+      rescue ActiveRecord::RecordNotUnique => e
+      # User can't claim a profile already claimed by someone else
+        rec = TwitterRequestRecord.last
+        rec.update_attributes status_message: rec.status_message + ": error: already claimed by #{user_rec.id}"
+      end
     else
-      t.handle = handle
+      t.handle = payload[:data][:screen_name]
       t.save!
     end
   end

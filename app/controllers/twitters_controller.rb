@@ -154,16 +154,25 @@ class TwittersController < ApplicationController
   def feed
     @time_to_wait = (Time.now - 24.hours) - Tweet.top_of_feed(current_user.twitter_profile)
 
+    # how long before the next refresh? Might be more efficient to do this on th client, in JS
     if @time_to_wait < 0
       t = -1 * @time_to_wait
       @hrs = (t / 3600).floor
       @mins = (60 * ((t / 3600) - @hrs)).floor
       @secs = (t - (3600 * @hrs + 60 * @mins)).floor
     end
-    
+
+    bkmk_key = "#{current_user.email}.twitter.bookmark"
+    bkmk = Config.find_by_config_key(bkmk_key)&.config_value
+    page = params[:page] || bkmk || 1
+
     @feed_list = current_user&.twitter_profile ?
-                   Tweet.latest_by_friends(current_user.twitter_profile).paginate(page: (params[:page] || 1), per_page: 10) :
+                   Tweet.latest_by_friends(current_user.twitter_profile).paginate(page: page, per_page: 10) :
                    []
+    if @feed_list.size > 0 && (bkmk.nil? || bkmk.to_i < params[:page].to_i)
+      c = Config.find_or_create_by(config_key: bkmk_key)
+      c.update_attributes config_value: params[:page].to_i
+    end
   end
   
   def show
@@ -227,7 +236,7 @@ class TwittersController < ApplicationController
 
   def word_cloud
     # Use a db cache for the text analysis
-    if @bio.word_cloud.empty?
+    if @bio.word_cloud.empty? or params[:word_cloud] == '1'
       @word_cloud = {}
       doc_sets = separated_docs @latest_tweets.all
 

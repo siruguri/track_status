@@ -35,6 +35,12 @@ class TwitterFetcherJob < ActiveJob::Base
           end
           
           fetch_tweets! handle_rec, opts
+
+          # This might be a fetch on someone's feed who was reading it and had a bookmark. Trample it!
+          if (bkmk = opts[:refresh_bookmark]) &&
+             (c = Config.find_by_config_key bkmk)
+            c.update_attributes config_value: '1'
+          end
         end
       end
     end

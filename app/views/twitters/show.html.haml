@@ -1,5 +1,5 @@
 .paragraph
-  If you don't see the data you expected, try #{link_to('refreshing this page', twitter_handle_path(handle: @bio.handle))}.
+  If you don't see the data you expected, try #{link_to('refreshing this page', twitter_handle_path(handle: @bio.handle, word_cloud: 1))}.
 
 %p
   - if @bio
@@ -18,7 +18,7 @@
       = submit_tag "Get newer tweets"
     - if @latest_tweets && @latest_tweets.count > 0
       .paragraph
-        #{@word_cloud[:tweets_count]} Tweets retrieved (from&nbsp;
+        #{@latest_tweets.count} tweets retrieved (from&nbsp;
         %b><
           #{nice_date(@latest_tweets.first.tweeted_at)} to #{nice_date(@latest_tweets.last.tweeted_at)}
         ) Retweet Percentage #{sprintf("%0g", 100-@word_cloud[:orig_tweets_count]*100.0/@word_cloud[:tweets_count])}

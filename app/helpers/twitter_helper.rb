@@ -49,10 +49,12 @@ module TwitterHelper
     
     # Remove t.co urls, and replace with the full extended urls
     str = mesg_str.gsub(/http.?:\/\/t\.co\/[^\s]+/, '')
-    str += entities_hash['urls'].map do |u|
-      "(<a href='#{u['expanded_url']}'>#{u['expanded_url']}</a>)"
-    end.join ' '
-
+    unless entities_hash['urls'].nil?
+      str += entities_hash['urls'].map do |u|
+        "(<a href='#{u['expanded_url']}'>#{u['expanded_url']}</a>)"
+      end.join ' '
+    end
+    
     str.html_safe
   end
 

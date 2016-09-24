@@ -105,6 +105,9 @@ def set_net_stubs
   stub_request(:get, "https://api.twitter.com/1.1/account/settings.json").
     with(:headers => app_token_headers("accesstoken-set-in-test")).
     to_return(:status => 200, :body => valid_twitter_response(:account_settings))
+  stub_request(:get, "https://api.twitter.com/1.1/account/settings.json").
+    with(:headers => app_token_headers("accesstoken-set-in-test-for-new-profile")).
+    to_return(:status => 200, :body => valid_twitter_response(:account_settings_for_new_profile))
   
   # Twitter redirects
   stub_request(:get, "https://t.co/MjJ8xAnT").
