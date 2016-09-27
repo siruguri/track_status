@@ -39,11 +39,14 @@ class TwittersControllerTest < ActionController::TestCase
   end
 
   test 'errors' do
+    post :twitter_call, {commit: "Get bio", handle: 'nosuch_handle'}
+    assert_equal 302, response.status
+
     post :twitter_call, {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
     assert_redirected_to twitter_input_handle_path
 
     post :twitter_call, {commit: 'Hack it'}
-    assert_equal 422, response.status
+    assert_equal 302, response.status
 
     post :twitter_call, {handle: twitter_profiles(:twitter_profile_1).handle}
     assert_redirected_to twitter_input_handle_path
@@ -137,16 +140,12 @@ class TwittersControllerTest < ActionController::TestCase
       post :twitter_call, {commit: 'refresh feed'}
     end
     # tp_1 has two friends, one tweeted 500 days ago though
-    assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
+    fetch_jobs = enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }
+    assert_equal 'user2@valid.com.twitter.bookmark', fetch_jobs[0][:args][2]['refresh_bookmark']
+    assert_equal 1, fetch_jobs.size
     assert_redirected_to twitter_input_handle_path
   end
   
-  test '#bio with unknown twitter profile' do
-    assert_difference('TwitterProfile.count', 1) do
-      post :twitter_call, {commit: "Get bio", handle: 'nosuch_handle'}
-    end
-  end
-
   describe 'getting tweets' do
     describe 'when authenticated' do
       before do

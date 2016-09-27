@@ -43,7 +43,8 @@ module TwitterHelper
       mesg_str = tweet.mesg
       entities_hash = tweet.tweet_details['entities']
     else
-      mesg_str = tweet['text']
+      # This changed in the Twitter API and I modified it in my code in Sep '16
+      mesg_str = tweet['full_text'] || tweet['text']
       entities_hash = tweet['entities']
     end
     
@@ -60,5 +61,9 @@ module TwitterHelper
 
   def better_time(tweet)
     tweet.tweeted_at.strftime '%m %d %H:%M'
+  end
+
+  def tweet_text(tweet)
+    tweet.mesg
   end
 end

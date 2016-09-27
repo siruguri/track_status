@@ -158,4 +158,11 @@ h3 {
   }
 }
 
-  
+.quoted_box {
+  margin-top: 12px;
+  padding: 12px;
+  border: solid 1px #e1e8ed;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}

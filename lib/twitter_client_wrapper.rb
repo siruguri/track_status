@@ -52,6 +52,10 @@ class TwitterClientWrapper
   end
 
   private
+  def extract_user_info(hash)
+    hash.nil? ? {} : hash.delete(:user).select { |k, v| [:id, :id_str, :screen_name].include?(k) }
+  end
+  
   def twitter_regex
     # http://t.co/gboESznVDm
     /https?...t\.co.[^\s]+/
@@ -206,10 +210,13 @@ class TwitterClientWrapper
   end
 
   def fetch_tweets!(handle_rec, opts = {})
-    # opts[:relative_id] == -1 if there are no existing tweets to key to
+    # opts[:relative_id] == -1 happens when there are no existing tweets to key to; it also forces new
+    # tweets to be retrieved for handle_rec
     limiter = nil
     direction = opts[:direction].try(:to_sym) || :newer
     relative_id = opts[:relative_id]
+
+    return if relative_id.nil?
     
     case direction
     when :newer
@@ -220,8 +227,11 @@ class TwitterClientWrapper
       raise TwitterClientArgumentException.new("#{direction} is not a valid direction (either :newer or :older)")
     end
 
-    # This might be a fetch for a brand new profile (relative_id is -1 for dummy tweet)
-    get_hash = (relative_id == -1 || limiter.nil?) ? {} : {limiter: limiter, limit_id: relative_id}
+    # This might be a fetch for a brand new profile (relative_id is -1 for dummy tweet); else, we have a mismatch of
+    # parameters so we need this guard
+    return if relative_id != -1 && limiter.nil? || relative_id.nil? && limiter.present?
+    
+    get_hash = (relative_id == -1) ? {} : {limiter: limiter, limit_id: relative_id}
 
     # Pagination
     if opts[:since_id].present? and direction == :older
@@ -249,11 +259,26 @@ class TwitterClientWrapper
         # Scan and store all the URLs into web article models; remove them from the tweets
         is_retweeted = false
         unless tweet[:retweeted_status].nil?
-          tweet[:retweeted_status][:text].gsub! twitter_regex, ''
+          tweet[:retweeted_status][:full_text].gsub! twitter_regex, ''
           is_retweeted = true
         end
 
-        new_tweets << Tweet.new(tweet_details: tweet, tweet_id: tweet[:id], mesg: tweet[:text],
+        begin
+          orig_user_info = extract_user_info tweet
+          retweeted_user_info = extract_user_info tweet[:retweeted_status]
+          quoted_user_info = extract_user_info tweet[:quoted_status]
+        rescue NoMethodError => e
+          Rails.logger.debug "> had trouble with tweet #{tweet}"
+        end
+        
+        if tweet[:quoted_status]
+          tweet[:quoted_status][:user] = quoted_user_info
+        end
+        if tweet[:retweeted_status]
+          tweet[:retweeted_status][:user] = retweeted_user_info
+        end
+        
+        new_tweets << Tweet.new(tweet_details: tweet, tweet_id: tweet[:id], mesg: tweet[:full_text],
                                 tweeted_at: tweet[:created_at], user: handle_rec, is_retweeted: is_retweeted)
         new_tweets.last.mesg.gsub! twitter_regex, ''
         all_web_articles += make_web_article_list tweet[:entities]
@@ -263,7 +288,7 @@ class TwitterClientWrapper
       save_articles! all_web_articles, handle_rec
 
       # Paginate tweets but don't go crazy trying to fetch tweets for new profiles the first time
-      if relative_id != -1 && opts[:pagination] != false
+      if relative_id != -1 && opts[:pagination] == true
         pass_since = 
           if opts[:since_id].present? && direction == :older
             {since_id: opts[:since_id]}
@@ -305,7 +330,7 @@ class TwitterClientWrapper
     when :tweet
       # Allows me to say text instead of status in my code if I want to
       real_opts = opts.clone
-      real_opts[:status] = real_opts[:text] unless real_opts[:status]
+      real_opts[:status] ||= real_opts[:text]
       
       req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/update.json",
                                        twitter_pk_hash.merge(real_opts.select{ |k, v| k == :status}))
@@ -320,19 +345,15 @@ class TwitterClientWrapper
     when :profile
       req = Twitter::REST::Request.new(@client, method, "/1.1/users/show.json", twitter_pk_hash)
     when :tweets
-      addl_opts = {}
-      unless opts.empty?
-        addl_opts = {opts[:limiter] => opts[:limit_id]}
-        # Tweet pagination
-        if opts[:since_id]
-          addl_opts.merge! ({since_id: opts[:since_id]})
-        end
-      end
+      whitelist = [:since_id, :tweet_mode]
+      addl_opts = opts[:limiter] ? ({opts[:limiter] => opts[:limit_id]}) : {}
+      addl_opts.merge!(
+        opts.select { |k, v| whitelist.include?(k) }
+      )
 
       tweets_hash = {
-        include_rts: true, trim_user: 1,  exclude_replies: true, count: 200
+        include_rts: true, trim_user: 0,  exclude_replies: true, count: 200, tweet_mode: 'extended'
       }.merge(twitter_pk_hash).merge(addl_opts)
-      
       req = Twitter::REST::Request.new(@client, method, "/1.1/statuses/user_timeline.json",
                                        tweets_hash)
     end

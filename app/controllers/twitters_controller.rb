@@ -205,19 +205,24 @@ class TwittersController < ApplicationController
   end
   
   def set_handle_or_return
-    if params[:handle].nil? and !(current_user && (@bio = current_user.twitter_profile).present?)
-      render nothing: true, status: 422
-    else
-      @bio ||= TwitterProfile.find_or_create_by handle: params[:handle]
-
-      if @bio.twitter_id.present?
-        @identifier_fk_hash = {twitter_id: @bio.twitter_id}
-        @identifier = @bio.twitter_id
-      else
-        @identifier_fk_hash = {handle: @bio.handle}
-        @identifier = @bio.handle
-      end
+    # Params overrides other behavior
+    if params[:handle].nil? 
+      return false if (@bio = current_user&.twitter_profile).nil?
     end
+
+    # Set bio if it didn't come from the logged in user above.
+    @bio ||= TwitterProfile.where('lower(handle) = ?', "#{params[:handle].downcase}").first
+    return false if @bio.nil?
+
+    if @bio.twitter_id.present?
+      @identifier_fk_hash = {twitter_id: @bio.twitter_id}
+      @identifier = @bio.twitter_id
+    else
+      @identifier_fk_hash = {handle: @bio.handle}
+      @identifier = @bio.handle
+    end
+
+    true
   end
   
   def my_friends

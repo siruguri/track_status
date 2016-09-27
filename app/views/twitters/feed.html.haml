@@ -20,7 +20,7 @@
           .retweet-button.action{'data-action-id' => 2, 'data-action-data' => "#{tweet.tweet_id}"}
             Retweet
         - if tweet.is_retweeted
-          - rt_handle = tweet.tweet_details['entities']['user_mentions'][0]['screen_name']
+          - rt_handle = tweet.tweet_details['retweeted_status']['user']['screen_name']
           .line-one
             .handle
               = "\u21b3"
@@ -29,6 +29,11 @@
               = better_time(tweet)
           .mesg
             = better_urls(tweet.tweet_details['retweeted_status'])
+        - elsif tweet.tweet_details['quoted_status']
+          .mesg
+            = tweet_text(tweet)
+          .quoted_box
+            = render partial: 'quote_tweet', locals: {quoted_tweet: tweet.tweet_details['quoted_status']}
         - else
           .mesg
             = better_urls(tweet)

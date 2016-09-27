@@ -46,16 +46,16 @@ def set_net_stubs
     to_return(status: 200, body: valid_twitter_response(:singletweet))
 
   # Tweets
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=567r&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=567r&trim_user=0&tweet_mode=extended").
     with(headers: single_token_headers).
     to_return(:status => 200, body: valid_twitter_response(:relative_id_tweets))
   
-  #statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=bobcostas&trim_user=1
-  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.exclude_replies=true.include_rts=true.screen_name=(bobcostas|twitter_handle).trim_user=1/).
+  #statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=bobcostas&trim_user=0
+  stub_request(:get, /api.twitter.com.1.1.statuses.user_timeline.json.count=200.exclude_replies=true.include_rts=true.screen_name=(bobcostas|twitter_handle).trim_user=0.tweet_mode=extended/).
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&trim_user=0&tweet_mode=extended").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:plaintweets))
 
@@ -70,11 +70,11 @@ def set_net_stubs
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:oldertweets))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=no_id_here&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=no_id_here&trim_user=0&tweet_mode=extended").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:oldertweets_noid))
 
-  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=9918575028735&trim_user=1").
+  stub_request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&exclude_replies=true&include_rts=true&screen_name=twitter_handle&since_id=9918575028735&trim_user=0&tweet_mode=extended").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:newertweets))
 
