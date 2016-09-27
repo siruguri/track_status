@@ -169,7 +169,7 @@ class TwittersController < ApplicationController
     @feed_list = current_user&.twitter_profile ?
                    Tweet.latest_by_friends(current_user.twitter_profile).paginate(page: page, per_page: 10) :
                    []
-    if @feed_list.size > 0 && (bkmk.nil? || bkmk.to_i < params[:page].to_i)
+    if @feed_list.size > 0 && (page == '1' || bkmk.nil? || bkmk.to_i < params[:page].to_i)
       c = Config.find_or_create_by(config_key: bkmk_key)
       c.update_attributes config_value: params[:page].to_i
     end

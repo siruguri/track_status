@@ -26,9 +26,13 @@ class TwittersControllerTest < ActionController::TestCase
     # Two existing tweets + 15 = 17.
     assert_equal 7, assigns(:feed_list).size
 
-    # Getting the first page won't change the bookmark
+    # The bookmark is stable
+    get :feed, page: 2
+    assert_equal 7, assigns(:feed_list).size
+    
+    # Getting the first page does change the bookmark
     get :feed, page: 1
-    assert_equal 2, Config.last.config_value.to_i
+    assert_equal 1, Config.last.config_value.to_i
     sign_out :user
   end
   
