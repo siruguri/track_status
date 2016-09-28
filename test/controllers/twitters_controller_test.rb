@@ -16,22 +16,22 @@ class TwittersControllerTest < ActionController::TestCase
     sign_in (u = users(:user_with_profile))
 
     # this is a graph connection
-    generate_new_tweets twitter_profiles(:recent_leader_profile), 15
+    generate_new_tweets twitter_profiles(:recent_leader_profile), 14
 
     # A bookmark is created
     assert_difference('Config.count') do
-      get :feed, page: 2
+      get :feed, params: {page: 2}
     end
 
-    # Two existing tweets + 15 = 17.
+    # 3 existing tweets + 14 = 17
     assert_equal 7, assigns(:feed_list).size
 
     # The bookmark is stable
-    get :feed, page: 2
+    get :feed, params: {page: 2}
     assert_equal 7, assigns(:feed_list).size
     
     # Getting the first page does change the bookmark
-    get :feed, page: 1
+    get :feed, params: {page: 1}
     assert_equal 1, Config.last.config_value.to_i
     sign_out :user
   end
@@ -43,16 +43,16 @@ class TwittersControllerTest < ActionController::TestCase
   end
 
   test 'errors' do
-    post :twitter_call, {commit: "Get bio", handle: 'nosuch_handle'}
+    post :twitter_call, params: {commit: "Get bio", handle: 'nosuch_handle'}
     assert_equal 302, response.status
 
-    post :twitter_call, {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
+    post :twitter_call, params: {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
     assert_redirected_to twitter_input_handle_path
 
-    post :twitter_call, {commit: 'Hack it'}
+    post :twitter_call, params: {commit: 'Hack it'}
     assert_equal 302, response.status
 
-    post :twitter_call, {handle: twitter_profiles(:twitter_profile_1).handle}
+    post :twitter_call, params: {handle: twitter_profiles(:twitter_profile_1).handle}
     assert_redirected_to twitter_input_handle_path
     assert_match /went.wrong/i, flash[:error]
   end
@@ -64,7 +64,7 @@ class TwittersControllerTest < ActionController::TestCase
       t =  OAuth::Token.new('accesstoken-set-in-test', 'accesssecret')
       OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
 
-      get :set_twitter_token, {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
+      get :set_twitter_token, params: {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
       assert_match /claim/, TwitterRequestRecord.last.status_message
     end
 
@@ -75,7 +75,7 @@ class TwittersControllerTest < ActionController::TestCase
       OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
 
       assert_difference('TwitterProfile.count', 1) do
-        get :set_twitter_token, {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
+        get :set_twitter_token, params: {oauth_token: 'oauthtoken', oauth_verifier: 'oauth_verifier'}
       end
 
       assert_equal users(:user_wo_profile).id, TwitterProfile.last.user_id
@@ -92,17 +92,16 @@ class TwittersControllerTest < ActionController::TestCase
     end
 
     it "users followers_of restriction" do
-      get :index, { followers_of: twitter_profiles(:leader_profile).handle }
+      get :index, params: { followers_of: twitter_profiles(:leader_profile).handle }
       assert_select('.row.handle-details', 4)
     end
   end
   
   test '#show' do
-    get :show, {handle: twitter_profiles(:twitter_profile_1).handle}
+    get :show, params: {handle: twitter_profiles(:twitter_profile_1).handle}
     
     assert_match /ee bee/, response.body
     assert_match /\d.*retrieved/i, response.body
-
     assert_equal [["bear", 2], ["cheetah", 2]], assigns(:word_cloud)[:orig_word_cloud]
   end
 
@@ -121,7 +120,7 @@ class TwittersControllerTest < ActionController::TestCase
 
   test '#bio' do
     assert_enqueued_with(job: TwitterFetcherJob) do
-      post :twitter_call, {commit: 'Get bio', handle: twitter_profiles(:twitter_profile_1).handle}
+      post :twitter_call, params: {commit: 'Get bio', handle: twitter_profiles(:twitter_profile_1).handle}
     end
 
     assert_redirected_to twitter_input_handle_path
@@ -129,19 +128,19 @@ class TwittersControllerTest < ActionController::TestCase
 
   test '#my_friends' do
     assert_enqueued_with(job: TwitterFetcherJob) do
-      post :twitter_call, {commit: 'whom follow', handle: twitter_profiles(:twitter_profile_1).handle}
+      post :twitter_call, params: {commit: 'whom follow', handle: twitter_profiles(:twitter_profile_1).handle}
     end
 
     assert_redirected_to twitter_input_handle_path
   end
   
   test '#refresh_feed' do
-    post :twitter_call, {commit: 'refresh feed', handle: twitter_profiles(:twitter_profile_1).handle}
+    post :twitter_call, params: {commit: 'refresh feed', handle: twitter_profiles(:twitter_profile_1).handle}
     assert (enqueued_jobs.size == 0 or enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size == 0)
 
     devise_sign_in users(:user_2) # users tp 1
     assert_enqueued_with(job: TwitterFetcherJob) do
-      post :twitter_call, {commit: 'refresh feed'}
+      post :twitter_call, params: {commit: 'refresh feed'}
     end
     # tp_1 has two friends, one tweeted 500 days ago though
     fetch_jobs = enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }
@@ -158,7 +157,7 @@ class TwittersControllerTest < ActionController::TestCase
 
       it 'uses access tokens' do
         perform_enqueued_jobs do
-          post :twitter_call, {commit: 'Get older tweets', handle: 'twitter_handle'}
+          post :twitter_call, params: {commit: 'Get older tweets', handle: 'twitter_handle'}
         end
       end
     end
@@ -171,12 +170,12 @@ class TwittersControllerTest < ActionController::TestCase
       it 'uses single app access tokens' do
         assert_difference('Tweet.count', 3) do
           perform_enqueued_jobs do
-            post :twitter_call, {commit: 'Get older tweets', handle: 'twitter_handle'}
+            post :twitter_call, params: {commit: 'Get older tweets', handle: 'twitter_handle'}
           end
         end
 
         perform_enqueued_jobs do
-          post :twitter_call, {commit: 'Get newer tweets', handle: 'twitter_handle'}
+          post :twitter_call, params: {commit: 'Get newer tweets', handle: 'twitter_handle'}
         end
 
         # Look in fixture file
@@ -211,12 +210,12 @@ class TwittersControllerTest < ActionController::TestCase
       end
       it 'renders form' do
         get :schedule
-        assert_template :schedule
+        assert_match /schedule repeated/i, response.body
       end
 
       it 'sets up jobs' do
         assert_enqueued_with(job: DripTweetJob) do
-          post :schedule, twitter_schedule: {messages: ['a', 'b', 'c']}, uri: 'http://www.myuri.com'
+          post :schedule, params: {twitter_schedule: {messages: ['a', 'b', 'c']}, uri: 'http://www.myuri.com'}
         end
 
         assert_equal users(:user_with_profile).latest_token_hash.token,

@@ -32,10 +32,5 @@ class ReadabilityJob < ActiveJob::Base
     else
       status = "failed: #{payload[:status]}"
     end
-
-    if (j = JobRecord.find_by_job_id self.job_id)
-      j.status = status
-      j.save
-    end
   end
 end

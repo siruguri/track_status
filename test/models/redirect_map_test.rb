@@ -1,8 +1,6 @@
 require 'test_helper'
 
 class RedirectMapTest < ActiveSupport::TestCase
-  self.use_transactional_fixtures = true
-  
   test 'Class correctly produces increment' do
     assert_equal 'baa', RedirectMap.increment_source
 

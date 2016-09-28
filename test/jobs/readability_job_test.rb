@@ -29,21 +29,4 @@ class ReadabilityJobTest < ActiveSupport::TestCase
                    w.original_url
     end
   end
-
-  describe "Readability failure" do
-    before do
-      stub_request(:get, 'http://www.aldaily.com/').
-        to_return(body: fixture_file('aldaily-page-error-1.html'))
-    end
-
-    it "Sets the job status in the database" do
-
-      JobRecord.create(job_id: 'fixed job id', status: 'running')
-      ReadabilityJob.any_instance.stubs(:job_id).returns('fixed job id')
-      ReadabilityJob.perform_now(:aldaily)
-
-      j = JobRecord.last
-      assert_match /fail.*at\s/i, j.status
-    end
-  end
 end

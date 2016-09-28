@@ -1,5 +1,6 @@
 DEFAULTS: &DEFAULTS
   processed: <%= false %>
+  is_retweeted: false
   
 tweet_1:
   <<: *DEFAULTS
@@ -48,6 +49,15 @@ tweet_recent_leader_1:
   tweeted_at: <%= DateTime.now - 2.hours %>
   mesg: recent leader tweet for feed testing has to be more recent than 24 hours ago
   tweet_id: 81885777111234
+
+tweet_recent_leader_2:
+  <<: *DEFAULTS
+  tweet_details: <%= {entities: {urls: []}, text: 'fox blue', retweet_count: 5, id: 'latest_tweet_id', retweeted_status: {full_text: 'hello hello rt me', entities: {urls: ['http://www.google.com']}, user: {screen_name: 'orig user'}}}.to_json %>
+  twitter_id: 66
+  tweeted_at: <%= DateTime.now - 2.hours %>
+  mesg: recent leader tweet for feed testing has to be more recent than 24 hours ago
+  tweet_id: 81885798011234
+  is_retweeted: <%= true %>
 
 tweet_just_follower_1:
   <<: *DEFAULTS

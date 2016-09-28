@@ -11,7 +11,7 @@ class AnalysisControllerTest < ActionController::TestCase
 
   test 'document universe creation' do
     assert_difference('DocumentUniverse.count', 1) do
-      post :execute_task, {commit: 'Compute Document Universe'}
+      post :execute_task, params: {commit: 'Compute Document Universe'}
     end
   end
 
@@ -22,7 +22,7 @@ class AnalysisControllerTest < ActionController::TestCase
     no_stat_has_tweets_profile_count = 4
     old_stats_agg = profile_stats(:ps_1).stats_hash[:retweet_aggregate]
     assert_difference('ProfileStat.count', no_stat_has_tweets_profile_count) do
-      post :execute_task, {commit: 'Update Profile Stats'}
+      post :execute_task, params: {commit: 'Update Profile Stats'}
     end
 
     assert_equal old_stats_agg, profile_stats(:ps_1).reload.stats_hash[:retweet_aggregate]
@@ -30,7 +30,7 @@ class AnalysisControllerTest < ActionController::TestCase
 
   test 'reprocess all profiles' do
     assert_enqueued_with(job: TwitterFetcherJob) do
-      post :execute_task, {commit: "Re-bio All Handles"}
+      post :execute_task, params: {commit: "Re-bio All Handles"}
     end
 
     assert_equal TwitterProfile.count, enqueued_jobs.size
