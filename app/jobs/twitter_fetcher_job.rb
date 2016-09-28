@@ -12,6 +12,8 @@ class TwitterFetcherJob < ActiveJob::Base
         case command
         when 'retweet'
           retweet! handle_rec, opts
+          r = RetweetRecord.new tweet_id: opts[:tweet_id], user_id: handle_rec.user.id
+          r.save
         when 'tweet'
           tweet! handle_rec, opts
         when 'followers'

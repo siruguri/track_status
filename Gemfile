@@ -23,8 +23,10 @@ gem 'js-routes'
 gem 'will_paginate'
 
 gem 'newrelic_rpm'
+#gem 'mongoid',  github: 'mongodb/mongoid', tag: 'v6.0.0'
+gem 'pg'
+
 group :production do
-  gem 'pg'
   gem 'execjs'
 end
 
