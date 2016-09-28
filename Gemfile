@@ -56,23 +56,15 @@ gem 'web-console', ">3.0", group: :development
 
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  
-  gem 'sqlite3'
   gem 'pry'
   gem 'pry-remote'
   gem 'pry-stack_explorer'
   gem 'pry-byebug'
-  gem 'capistrano'
-  gem 'capistrano-rails', '~> 1.1'
-  gem 'capistrano-bundler'
-  gem 'capistrano-rvm'
   gem 'rails-controller-testing'
-  
-  # Can unset when https://github.com/phusion/passenger/issues/1392 is closed.
-  gem 'capistrano-passenger', '0.0.2'
-  gem 'capistrano-sidekiq'
 end
 
 group :test do
+  gem 'mongoid-fixture_set', git: 'https://github.com/wittawasw/mongoid-fixture_set', branch: 'rails5'
   gem 'selenium-webdriver'
   gem 'poltergeist'
   gem 'mocha'

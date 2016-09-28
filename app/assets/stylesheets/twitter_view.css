@@ -94,6 +94,12 @@ h3 {
       font-size: 13px;
       line-height: 20px;
       .retweet-button {
+	&.disabled {
+	  background: #8899A6;
+	  color: #FFFFAA;
+	  cursor: inherit;
+	}
+	
 	position: relative;
 	float: right;
 	margin-top: 5px;

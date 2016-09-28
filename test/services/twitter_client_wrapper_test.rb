@@ -100,28 +100,46 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     end
   end
   
-  test 'plain tweets fetching works' do
-    wa_ct = WebArticle.count
-    assert_difference('Tweet.count', 2) do
-      h = twitter_profiles :bobcostas
-      # Bob has a dummy tweet
-      @c.rate_limited do
-        fetch_tweets! h, relative_id: -1
-       end
+  describe 'plain tweets fetching' do
+    it 'works without pagination' do
+      wa_ct = WebArticle.count
+      assert_difference('Tweet.count', 2) do
+        h = twitter_profiles :bobcostas
+        # Bob has a dummy tweet
+        @c.rate_limited do
+          fetch_tweets! h, relative_id: -1
+        end
+      end
+
+      assert_equal 2 + wa_ct, WebArticle.count
+      assert_equal 'twitter', WebArticle.last.source
+
+      # There's one scraper job for the full list of articles and none for the pagination
+      assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterRedirectFetchJob }.size
+      assert_equal 0, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
+      
+      assert_equal 2, enqueued_jobs.first[:args][0].size
+
+      assert_equal Tweet.last.user.id, WebArticle.last.twitter_profile_id
+      refute Tweet.last.mesg.blank?
+      assert Tweet.last.is_retweet?
     end
 
-    assert_equal 2 + wa_ct, WebArticle.count
-    assert_equal 'twitter', WebArticle.last.source
+    it 'works with pagination' do
+      assert_difference('Tweet.count', 2) do
+        h = twitter_profiles :bobcostas
+        # Bob has a dummy tweet
+        @c.rate_limited do
+          fetch_tweets! h, relative_id: -1, pagination: true
+        end
+      end
 
-    # There's one scraper job for the full list of articles and none for the pagination
-    assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterRedirectFetchJob }.size
-    assert_equal 0, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
-    
-    assert_equal 2, enqueued_jobs.first[:args][0].size
+      assert_equal 'twitter', WebArticle.last.source
 
-    assert_equal Tweet.last.user.id, WebArticle.last.twitter_profile_id
-    refute Tweet.last.mesg.blank?
-    assert Tweet.last.is_retweet?
+      # There's one scraper job for the full list of articles and one for the pagination
+      assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterRedirectFetchJob }.size
+      assert_equal 1, enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size
+    end
   end
 
   test 'plain tweets fetching with a relative_id' do

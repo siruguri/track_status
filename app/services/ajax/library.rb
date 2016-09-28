@@ -35,7 +35,7 @@ module Ajax
               code = 200
             end
           rescue Exception => e
-            code = '500'
+            code = 500
           end
 
           status_struct = {status: success ? 'success' : 'error', code: code, data: data}      

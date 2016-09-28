@@ -35,12 +35,6 @@ def set_net_stubs
   stub_request(:get, "https://api.twitter.com/1.1/users/show.json?screen_name=nota_twitter_handle").
     to_return(status: 404, body: invalid_twitter_response)
   
-             
-  stub_request(:post, "https://api.twitter.com/1.1/statuses/update.json").
-    with(body: /screen_name=.*handle.status=my.tweet/).
-    with(headers: app_token_headers).
-    to_return(status: 200, body: valid_twitter_response(:singletweet))
-  
   stub_request(:post, "https://api.twitter.com/1.1/statuses/retweet/12341345.json").
     with(headers: single_token_headers).
     to_return(status: 200, body: valid_twitter_response(:singletweet))
@@ -79,6 +73,15 @@ def set_net_stubs
     to_return(status: 200, body: valid_twitter_response(:newertweets))
 
   # Write a tweet
+  stub_request(:post, "https://api.twitter.com/1.1/statuses/update.json").
+    with(body: /screen_name=.*handle.*status=my.*tweet/).
+    with(headers: app_token_headers).
+    to_return(status: 200, body: valid_twitter_response(:singletweet))
+  stub_request(:post, "https://api.twitter.com/1.1/statuses/update.json").
+    with(body: /screen_name=.*handle.*status=my.*tweet/).
+    with(headers: single_token_headers).
+    to_return(status: 200, body: valid_twitter_response(:singletweet))
+  
   stub_request(:post, "https://api.twitter.com/1.1/statuses/update.json").
     with(:body => {"screen_name"=>"twitter_handle", "status"=>nil},
          :headers => single_token_headers).

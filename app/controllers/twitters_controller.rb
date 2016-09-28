@@ -30,7 +30,6 @@ class TwittersController < ApplicationController
     @handles_by_tweets = Tweet.joins(:user).group('twitter_profiles.handle').count
 
     # Filter down if there's a filter parameter
-
     leader=nil
     if params[:followers_of]
       leader = TwitterProfile.find_by_handle params[:followers_of]
@@ -152,26 +151,30 @@ class TwittersController < ApplicationController
   end
 
   def feed
-    @time_to_wait = (Time.now - 24.hours) - Tweet.top_of_feed(current_user.twitter_profile)
+    unless params[:refresh_now] == '1'
+      @time_to_wait = (Time.now - 24.hours) - Tweet.top_of_feed(current_user.twitter_profile)
 
-    # how long before the next refresh? Might be more efficient to do this on th client, in JS
-    if @time_to_wait < 0
-      t = -1 * @time_to_wait
-      @hrs = (t / 3600).floor
-      @mins = (60 * ((t / 3600) - @hrs)).floor
-      @secs = (t - (3600 * @hrs + 60 * @mins)).floor
+      # how long before the next refresh? Might be more efficient to do this on the client, in JS
+      if @time_to_wait < 0
+        t = -1 * @time_to_wait
+        @hrs = (t / 3600).floor
+        @mins = (60 * ((t / 3600) - @hrs)).floor
+        @secs = (t - (3600 * @hrs + 60 * @mins)).floor
+      end
+    else
+      @time_to_wait = 0
     end
-
+    
     bkmk_key = "#{current_user.email}.twitter.bookmark"
     bkmk = Config.find_by_config_key(bkmk_key)&.config_value
-    page = params[:page] || bkmk || 1
+    page = params[:page]&.to_i || bkmk&.to_i || 1
 
     @feed_list = current_user&.twitter_profile ?
                    Tweet.latest_by_friends(current_user.twitter_profile).paginate(page: page, per_page: 10) :
                    []
-    if @feed_list.size > 0 && (page == '1' || bkmk.nil? || bkmk.to_i < params[:page].to_i)
+    if @feed_list.size > 0 && (params[:page]&.to_i == 1 || bkmk.nil? || bkmk.to_i < page)
       c = Config.find_or_create_by(config_key: bkmk_key)
-      c.update_attributes config_value: params[:page].to_i
+      c.update_attributes config_value: page
     end
   end
   
@@ -207,12 +210,12 @@ class TwittersController < ApplicationController
   def set_handle_or_return
     # Params overrides other behavior
     if params[:handle].nil? 
-      return false if (@bio = current_user&.twitter_profile).nil?
+      (redirect_to new_user_session_path and return) if (@bio = current_user&.twitter_profile).nil?
     end
 
     # Set bio if it didn't come from the logged in user above.
     @bio ||= TwitterProfile.where('lower(handle) = ?', "#{params[:handle].downcase}").first
-    return false if @bio.nil?
+    (redirect_to new_user_session_path and return) if @bio.nil?
 
     if @bio.twitter_id.present?
       @identifier_fk_hash = {twitter_id: @bio.twitter_id}

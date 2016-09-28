@@ -6,8 +6,16 @@ class TwitterFetcherJobTest < ActiveSupport::TestCase
   end
 
   test 'other jobs' do
-    TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'tweet'
+    TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'tweet', text: 'my tweeting now'
     TwitterFetcherJob.perform_now twitter_profiles(:twitter_profile_1), 'my_friends'
+  end
+
+  test 'retweeting' do
+    assert_difference('RetweetRecord.count', 1) do
+      TwitterFetcherJob.perform_now(
+        twitter_profiles(:twitter_profile_1), 'retweet', tweet_id: 12341345
+      )
+    end
   end
   
   test ':bio job works with valid handle' do

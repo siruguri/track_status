@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   post '/reanalyze_email' => 'email#reanalyze'
   
   post '/ajax_api' => 'ajax#multiplex'
+  get '/ajax_api' => 'ajax#multiplex'
   scope :twitter, as: 'twitter', controller: 'twitters' do
     get :authorize_twitter
     get :set_twitter_token    

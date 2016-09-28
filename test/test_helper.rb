@@ -16,14 +16,13 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   include FixtureFiles
   include SetupConfig
-  
+
   fixtures :all
 end
 
 class ActionController::TestCase
   # Let controller test cases open files
   include FixtureFiles
-  
   # Some controllers will need Devise
   include Devise::Test::ControllerHelpers
 end

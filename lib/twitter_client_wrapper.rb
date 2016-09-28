@@ -288,7 +288,7 @@ class TwitterClientWrapper
       save_articles! all_web_articles, handle_rec
 
       # Paginate tweets but don't go crazy trying to fetch tweets for new profiles the first time
-      if relative_id != -1 && opts[:pagination] == true
+      if opts[:pagination] == true
         pass_since = 
           if opts[:since_id].present? && direction == :older
             {since_id: opts[:since_id]}

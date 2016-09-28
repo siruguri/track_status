@@ -1,11 +1,9 @@
 module TwitterHelper
   def number_of_tweets_message(profile)
-    if (stat = profile.profile_stat)
-      "#{sprintf("%0.2f", stat.stats_hash['retweeted_avg'])} / " +
-        " #{stat.stats_hash['retweet_aggregate']}"
-    else
-      "No tweets retrieved"
-    end
+    # This is only ever called for profiles that have stats calculated
+    stat = profile.profile_stat
+    "#{sprintf("%0.2f", stat.stats_hash['retweeted_avg'])} / " +
+      " #{stat.stats_hash['retweet_aggregate']}"
   end
   
   def nice_date(dt)

@@ -7,33 +7,46 @@ class TwittersControllerTest < ActionController::TestCase
     set_net_stubs
   end
 
-  test '#feed' do
-    sign_in users(:user_2)
-    get :feed
-    sign_out :user
+  describe '#feed' do
+    before do
+      # Trigger time to wait logic and paging logic simultaneously
+      sign_in (u = users(:user_with_profile))
+    end
+    
+    it 'shows refresh button if forced to' do
+      get :feed, params: {refresh_now: '1'}
+      # user_with profile follows recent_leader who has tweeted 2 hours ago in fixtures
+      assert_select '.feed-refresh'
+    end
+    
+    it 'shows no refresh button if feed is topped up' do
+      # this is a graph connection: user_with profile follows recent_leader who has tweeted 2 hours ago in fixtures
+      generate_new_tweets twitter_profiles(:recent_leader_profile), 14
 
-    # Trigger time to wait logic and paging logic simultaneously
-    sign_in (u = users(:user_with_profile))
+      # A bookmark is created
+      assert_difference('Config.count') do
+        get :feed, params: {page: 2}
+      end
+      assert_select '.countdown'
 
-    # this is a graph connection
-    generate_new_tweets twitter_profiles(:recent_leader_profile), 14
+      # 3 existing tweets + 14 = 17
+      assert_equal 7, assigns(:feed_list).size
 
-    # A bookmark is created
-    assert_difference('Config.count') do
+      # The bookmark is stable
       get :feed, params: {page: 2}
+      assert_equal 7, assigns(:feed_list).size
+      
+      # Getting the first page does change the bookmark
+      get :feed, params: {page: 1}
+      assert_equal 1, Config.last.config_value.to_i
+      sign_out :user
     end
 
-    # 3 existing tweets + 14 = 17
-    assert_equal 7, assigns(:feed_list).size
-
-    # The bookmark is stable
-    get :feed, params: {page: 2}
-    assert_equal 7, assigns(:feed_list).size
-    
-    # Getting the first page does change the bookmark
-    get :feed, params: {page: 1}
-    assert_equal 1, Config.last.config_value.to_i
-    sign_out :user
+    it 'need signed in user' do
+      sign_out :user
+      get :feed
+      assert_redirected_to new_user_session_path
+    end
   end
   
   test 'routing' do
@@ -44,7 +57,7 @@ class TwittersControllerTest < ActionController::TestCase
 
   test 'errors' do
     post :twitter_call, params: {commit: "Get bio", handle: 'nosuch_handle'}
-    assert_equal 302, response.status
+    assert_redirected_to new_user_session_path
 
     post :twitter_call, params: {commit: 'Hack it', handle: twitter_profiles(:twitter_profile_1).handle}
     assert_redirected_to twitter_input_handle_path
@@ -97,12 +110,14 @@ class TwittersControllerTest < ActionController::TestCase
     end
   end
   
-  test '#show' do
-    get :show, params: {handle: twitter_profiles(:twitter_profile_1).handle}
-    
-    assert_match /ee bee/, response.body
-    assert_match /\d.*retrieved/i, response.body
-    assert_equal [["bear", 2], ["cheetah", 2]], assigns(:word_cloud)[:orig_word_cloud]
+  describe '#show' do
+    it 'with profile stat' do
+      get :show, params: {handle: twitter_profiles(:twitter_profile_1).handle}
+      
+      assert_match /ee bee/, response.body
+      assert_match /\d.*retrieved/i, response.body
+      assert_equal [["bear", 2], ["cheetah", 2]], assigns(:word_cloud)[:orig_word_cloud]
+    end
   end
 
   describe '#input_handle' do

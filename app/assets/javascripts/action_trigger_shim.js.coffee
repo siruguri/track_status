@@ -11,6 +11,11 @@ spinner_div = ->
   
 shim_funcs = ->
   $('.action').click (evt) ->
+    # A user's browser action might have removed this class subsequent to handler
+    # attachment.
+    if !($(evt.target).hasClass('action'))
+      return null
+      
     action_id = $(evt.target).data('action-id')
     if typeof action_id != 'undefined'
       $(evt.target).prepend spinner_div
