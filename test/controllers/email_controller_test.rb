@@ -30,7 +30,7 @@ class EmailControllerTest < ActionController::TestCase
 
   test 'responds to dev_body debugging' do
     assert_enqueued_with(job: ActionMailer::DeliveryJob) do
-      post :transform, {dev_body: 'hello'}
+      post :transform, params: {dev_body: 'hello'}
     end
   end
   
@@ -56,7 +56,7 @@ class EmailControllerTest < ActionController::TestCase
   test 'responds to wildcard requests' do
     init_re_count = ReceivedEmail.count
     assert_enqueued_with(job: ActionMailer::DeliveryJob) do
-      post :transform, {mandrill_events: mandrill_request, wildcard: 'true'}
+      post :transform, params: {mandrill_events: mandrill_request, wildcard: 'true'}
     end
     assert_equal 'GeneralMailer', enqueued_jobs.last[:args][0]
   end
@@ -66,7 +66,7 @@ class EmailControllerTest < ActionController::TestCase
     init_re_count = ReceivedEmail.count
     init_wa_count = WebArticle.count
     assert_enqueued_with(job: ActionMailer::DeliveryJob) do
-      post :transform, req_hash
+      post :transform, params: req_hash
     end
 
     assert_equal init_re_count + 1, ReceivedEmail.count
@@ -77,10 +77,10 @@ class EmailControllerTest < ActionController::TestCase
   end
 
   def sparkpost_json_sample
-    {'_json' => [{'msys' => {'relay_message' => {'content' => {'text' => 'this is sparkpost text and http://www.google.com'}}}}]}
+    {params: {'_json' => [{'msys' => {'relay_message' => {'content' => {'text' => 'this is sparkpost text and http://www.google.com'}}}}]}}
   end
   
   def bad_input_sample
-    {'_json' => {'msys' => 1}}
+    {params: {'_json' => {'msys' => 1}}}
   end
 end

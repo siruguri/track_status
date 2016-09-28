@@ -1,6 +1,6 @@
 class StatusesController < ApplicationController
   # Status controller
-  skip_before_filter :verify_authenticity_token
+  skip_before_action :verify_authenticity_token
 
   def show
     @status=Status.find params[:id]
@@ -18,14 +18,14 @@ class StatusesController < ApplicationController
   def create
     permit_keys = [:source, :description, :message]
     if params[:status].nil?
-      render nothing: true, status: 400
+      head :bad_request
     else
       @status = Status.new(params[:status].permit(permit_keys))
       if @status.valid?
         @status.save
         redirect_to @status
       else
-        render nothing: true, status: 500
+        head :internal_server_error
       end
     end
   end

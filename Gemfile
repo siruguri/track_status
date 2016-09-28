@@ -2,20 +2,21 @@ source 'https://rubygems.org'
 ruby '2.3.0'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~>4.2'
+gem 'rails', ">=5.0"
 # Use SCSS for stylesheets
-gem 'sass-rails'
+gem 'sass-rails', ">=5.0"
+gem 'jquery-ui-rails'
+
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails'
-gem 'jquery-ui-rails'
 gem 'underscore-rails'
 
 gem 'activerecord-import', git: 'https://github.com/zdennis/activerecord-import.git', tag: 'v0.15.0'
 
 # No issue found that references possible bug in update to 3, possibly interacting with something else.
-gem 'sprockets', '~> 2'
+gem 'sprockets'
 gem 'thin'
 
 gem 'devise'
@@ -23,14 +24,14 @@ gem 'js-routes'
 gem 'will_paginate'
 
 gem 'newrelic_rpm'
-#gem 'mongoid',  github: 'mongodb/mongoid', tag: 'v6.0.0'
+gem 'mongoid',  git: 'https://github.com/mongodb/mongoid', tag: 'v6.0.0'
 gem 'pg'
 
 group :production do
   gem 'execjs'
 end
 
-gem 'quiet_assets'
+# quiet_assets? https://rossta.net/blog/quiet-assets-in-rails-5.html
 gem 'dotenv'
 
 # Everybody gotta have some Bootstrap!
@@ -51,7 +52,7 @@ gem 'nokogiri'
 gem 'twitter'
 gem 'oauth'
 
-gem 'web-console', '~> 2.0', group: :development
+gem 'web-console', ">3.0", group: :development
 
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  
@@ -64,7 +65,8 @@ group :development, :test do
   gem 'capistrano-rails', '~> 1.1'
   gem 'capistrano-bundler'
   gem 'capistrano-rvm'
-
+  gem 'rails-controller-testing'
+  
   # Can unset when https://github.com/phusion/passenger/issues/1392 is closed.
   gem 'capistrano-passenger', '0.0.2'
   gem 'capistrano-sidekiq'

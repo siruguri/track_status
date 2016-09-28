@@ -1,28 +1,19 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: {registrations: 'users/registrations'}
 
+  # For lavta
   resources :statuses, only: [:index, :create, :show]
-  resources :job_records, only: [:index]
-  
   delete '/statuses' => 'statuses#destroy'
   
-  # Various things this app does
+  # twitter
   scope :document_analyses, controller: 'analysis', as: 'analyses' do
     get :task_page
     post :execute_task
   end
-  
+
+  # hook for mailchimp
   post '/process_email' => 'email#transform'
   post '/reanalyze_email' => 'email#reanalyze'
-  
-  get '/reddits/userinfo/:user' => 'reddits#userinfo'
-  
-  scope 'readability', as: 'readability', controller: 'readability' do
-    get :run_scrape
-    get :list, action: :list_articles
-    get :tag_words
-    post :tag_article
-  end
   
   post '/ajax_api' => 'ajax#multiplex'
   scope :twitter, as: 'twitter', controller: 'twitters' do
@@ -40,14 +31,7 @@ Rails.application.routes.draw do
     get '/feed(/:handle)', action: :feed, as: :feed
   end
   
-  resources 'channel_posts', only: [:index, :create, :new]
-  resources 'account_entries', only: [:new, :create] do
-    collection do
-      get 'tag', action: 'generate_tags'
-      post 'update_tag'
-    end
-  end
-  
+  # twitter
   resources 'redirect_maps', path: 'r', only: [:show]
   
   # Admin

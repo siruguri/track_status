@@ -7,7 +7,7 @@ class RedirectMapsControllerTest < ActionController::TestCase
   
   test 'getting a redirect updates the DB' do
     assert_difference('RedirectRequest.count', 1) do
-      get :show, {id: @map.src}
+      get :show, params: {id: @map.src}
     end
     
     assert_redirected_to @map.dest
