@@ -93,7 +93,7 @@ def set_net_stubs
     to_return(status: 200, body: valid_twitter_response(:my_feed))
   stub_request(:get, "https://api.twitter.com/1.1/friends/ids.json?cursor=12345&screen_name=twitter_handle").
     with(headers: single_token_headers).    
-    to_return(status: 200, body: valid_twitter_response(:my_feed))
+    to_return(status: 200, body: valid_twitter_response(:my_feed_fresh))
 
   # Followers
   stub_request(:get, "https://api.twitter.com/1.1/followers/ids.json?cursor=-1&screen_name=twitter_handle").

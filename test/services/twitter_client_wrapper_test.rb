@@ -43,7 +43,10 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
   describe 'my feed' do
     it 'works without a prev request' do
       h = @handle
-      assert_difference('GraphConnection.where(follower_id: @handle.id).count', 2) do
+
+      # some_other_leader remains, but leader_profile is gone - so total connections for @handle's friends
+      # remains at 2
+      refute_difference('GraphConnection.where(follower_id: @handle.id).count') do
         @c.rate_limited do
           fetch_my_friends! h
         end
@@ -57,6 +60,8 @@ class TwitterClientWrapperTest < ActiveSupport::TestCase
     it 'works with a previous request' do
       h = @handle
       TwitterRequestRecord.create handle: h.handle, request_type: 'following_ids', cursor: 12345
+
+      # Get four, lose two
       assert_difference('GraphConnection.where(follower_id: @handle.id).count', 2) do
         @c.rate_limited do
           fetch_my_friends! h

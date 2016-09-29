@@ -166,12 +166,22 @@ class TwitterClientWrapper
     
     payload = get(handle_rec, :following_ids, {cursor: cursor})
     if payload[:data] != ''
-      ts = TwitterProfile.where(twitter_id: payload[:data][:ids]).all
-      ts.each do |t|
-        t.followers << handle_rec unless t.followers.include? handle_rec
+      ts = TwitterProfile.where(twitter_id: payload[:data][:ids])
+      friend_ids = handle_rec.friends.pluck :id
+
+      # Remove stale connections
+      stale_connections = GraphConnection.
+                          joins(:leader).where('follower_id = ? and twitter_profiles.twitter_id not in (?)',
+                                               handle_rec.id, payload[:data][:ids])
+      stale_connections.map &:delete
+
+      # Add connections that aren't there if the profile already exists
+      ts.all.each do |t|
+        t.followers << handle_rec unless friend_ids.include? t.id
       end
 
-      new_ids = payload[:data][:ids] - ts.map { |t| t.twitter_id }
+      # For new ids, create a profile and then add a connection
+      new_ids = payload[:data][:ids] - ts.pluck(:twitter_id)
       new_ids.each do |id|
         new_friend = TwitterProfile.create(twitter_id: id, protected: false)
         new_friend.followers << handle_rec
