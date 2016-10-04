@@ -1,13 +1,14 @@
 class GeneralMailer < ActionMailer::Base
   default from: 'siruguri@gmail.com'
   
-  def notification_email(opts={})
-    opts = opts.with_indifferent_access
-
-    # This class is defined in email_controller.rb
-    @payload = opts[:payload] || ''
-
+  def notification_email(opts = {})
+    # fields points to a hash with special keys - see view :(
     opts[:to] ||= 'siruguri@gmail.com'
+
+    if opts[:fields].nil?
+      opts[:fields] = {subject: 'fields not recd', body: 'fields not recd'}
+    end
+    @fields = opts[:fields]
     
     subject = 'webhook receipt notice: siruguri -> siruguri'
     mail to: opts[:to], subject: subject

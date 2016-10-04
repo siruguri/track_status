@@ -8,18 +8,18 @@
   You received a message via a mailer service that said:
 %p
   %b
-    Subject: #{@payload.fields['subject']}
+    Subject: #{@fields[:subject]}
 %hr
   %p
     Body (text)
 %hr
   %p
-    = @payload.fields['body']
+    = @fields[:body]
 
 %hr
   %p
     Body (html)
 %hr
   %p
-    = @payload.fields['html_body']
+    = @fields[:html_body]
 

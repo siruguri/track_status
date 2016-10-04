@@ -16,13 +16,6 @@
 //= require jquery-ui
 //= require bootstrap-sprockets
 //= require jquery.tokeninput
-//= require channel_post
 //= require action_trigger_shim
-//= require twitter_index
-//= require twitter_feed
-//= require twitter_scheduler
 //= require underscore
-//= require backbone
-//= require backbone_rails_sync
-//= require backbone_datalink
-//= require backbone/track_status
+

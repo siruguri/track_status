@@ -66,7 +66,7 @@ end
 group :test do
   gem 'mongoid-fixture_set', git: 'https://github.com/wittawasw/mongoid-fixture_set', branch: 'rails5'
   gem 'selenium-webdriver'
-  gem 'poltergeist'
+  gem 'capybara-webkit'
   gem 'mocha'
   gem 'simplecov'
   gem 'webmock'
