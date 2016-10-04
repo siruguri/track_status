@@ -22,7 +22,7 @@
             %ul.dropdown-menu
               %li
                 - if current_user.twitter_profile
-                  = link_to 'Profile', twitter_handle_url(handle: current_user.twitter_profile.handle)
+                  = link_to 'Profile', twitter_profile_analysis_path
               %li
                 = link_to "Feed", twitter_feed_path
               %li

@@ -25,6 +25,7 @@ class Tweet < ActiveRecord::Base
   end
 
   def has_media?
-    tweet_details['entities']['media']&.size    
+    result = tweet_details['entities']['media']&.size.try(:>, 0)
+    result.present? and result != false
   end
 end

@@ -18,7 +18,7 @@ class AjaxControllerTest < ActionController::TestCase
   end
 
   test '#multiplex:success' do
-    devise_sign_in users(:user_2)
+    sign_in users(:user_2)
     post :multiplex, xhr: true, params: {payload: "actions/trigger/1"}
     assert_equal 'success', JSON.parse(response.body)['status']
   end    

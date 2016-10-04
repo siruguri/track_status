@@ -1,5 +1,5 @@
 .paragraph
-  If you don't see the data you expected, try #{link_to('refreshing this page', twitter_handle_path(handle: @bio.handle, word_cloud: 1))}.
+  If you don't see the data you expected, try #{link_to('refreshing this page', twitter_profile_analysis_path(handle: @bio.handle, word_cloud: 1))}.
 
 %p
   - if @bio

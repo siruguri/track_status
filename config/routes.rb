@@ -28,7 +28,8 @@ Rails.application.routes.draw do
     get :input_handle
     post :twitter_call
     post :batch_call
-    get '/handle/:handle', action: :show, as: :handle
+    
+    get "/analysis(/:handle)", action: :analyze, as: :profile_analysis
     get '/feed(/:handle)', action: :feed, as: :feed
   end
   

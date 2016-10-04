@@ -1,6 +1,6 @@
 class TwittersController < ApplicationController
   include TwitterAnalysis
-  before_action :set_handle_or_return, only: [:twitter_call, :show, :feed]
+  before_action :set_handle_or_return, only: [:twitter_call, :analyze, :feed]
   before_action :authenticate_user!, only: [:schedule]
 
   def schedule
@@ -178,7 +178,7 @@ class TwittersController < ApplicationController
     end
   end
   
-  def show
+  def analyze
     @latest_tweets = Tweet.where(user: @bio).order(tweeted_at: :desc)
 
     newest_tweet_enter_date = (lt = @latest_tweets&.first) ? lt.tweeted_at : nil

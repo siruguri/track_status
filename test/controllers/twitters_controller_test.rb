@@ -12,7 +12,7 @@ class TwittersControllerTest < ActionController::TestCase
       # Trigger time to wait logic and paging logic simultaneously
       sign_in (u = users(:user_with_profile))
     end
-    
+
     it 'shows refresh button if forced to' do
       get :feed, params: {refresh_now: '1'}
       # user_with profile follows recent_leader who has tweeted 2 hours ago in fixtures
@@ -72,7 +72,7 @@ class TwittersControllerTest < ActionController::TestCase
 
   describe '#set_twitter_token' do
     it 'bumps up against uniqueness constraints for users' do
-      devise_sign_in users(:user_2)
+      sign_in users(:user_2)
 
       t =  OAuth::Token.new('accesstoken-set-in-test', 'accesssecret')
       OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
@@ -82,7 +82,7 @@ class TwittersControllerTest < ActionController::TestCase
     end
 
     it 'works otherwise' do
-      devise_sign_in users(:user_wo_profile)
+      sign_in users(:user_wo_profile)
 
       t =  OAuth::Token.new('accesstoken-set-in-test-for-new-profile', 'accesssecret')
       OAuth::Consumer.any_instance.stubs(:get_access_token).returns t
@@ -108,11 +108,17 @@ class TwittersControllerTest < ActionController::TestCase
       get :index, params: { followers_of: twitter_profiles(:leader_profile).handle }
       assert_select('.row.handle-details', 4)
     end
+
+    it 'uses logged in user' do
+      sign_in users(:user_2)
+      get :index
+      assert_select('.row.handle-details', users(:user_2).twitter_profile.followers.count * 4)
+    end      
   end
   
   describe '#show' do
     it 'with profile stat' do
-      get :show, params: {handle: twitter_profiles(:twitter_profile_1).handle}
+      get :analyze, params: {handle: twitter_profiles(:twitter_profile_1).handle}
       
       assert_match /ee bee/, response.body
       assert_match /\d.*retrieved/i, response.body
@@ -127,7 +133,7 @@ class TwittersControllerTest < ActionController::TestCase
     end
 
     it 'works with login' do
-      devise_sign_in users(:user_2)
+      sign_in users(:user_2)
       get :input_handle
       assert assigns(:user_has_profile)
     end
@@ -153,7 +159,7 @@ class TwittersControllerTest < ActionController::TestCase
     post :twitter_call, params: {commit: 'refresh feed', handle: twitter_profiles(:twitter_profile_1).handle}
     assert (enqueued_jobs.size == 0 or enqueued_jobs.select { |j| j[:job] == TwitterFetcherJob }.size == 0)
 
-    devise_sign_in users(:user_2) # users tp 1
+    sign_in users(:user_2) # users tp 1
     assert_enqueued_with(job: TwitterFetcherJob) do
       post :twitter_call, params: {commit: 'refresh feed'}
     end
@@ -167,7 +173,7 @@ class TwittersControllerTest < ActionController::TestCase
   describe 'getting tweets' do
     describe 'when authenticated' do
       before do
-        devise_sign_in users(:user_with_profile)
+        sign_in users(:user_with_profile)
       end
 
       it 'uses access tokens' do
@@ -179,7 +185,7 @@ class TwittersControllerTest < ActionController::TestCase
 
     describe 'unauthenticated' do
       before do
-        devise_sign_out users(:user_1)
+        sign_out users(:user_1)
       end
 
       it 'uses single app access tokens' do
@@ -201,7 +207,7 @@ class TwittersControllerTest < ActionController::TestCase
   
   describe 'twitter oauth' do
     it 'works' do
-      devise_sign_in users(:user_2)
+      sign_in users(:user_2)
       get :authorize_twitter
       assert_redirected_to 'test.twitter.com/authorize'
     end
@@ -214,14 +220,14 @@ class TwittersControllerTest < ActionController::TestCase
       post :schedule
       assert_redirected_to new_user_session_path
 
-      devise_sign_in users(:user_1)
+      sign_in users(:user_1)
       put :schedule
       assert_redirected_to twitter_input_handle_path
     end
   
     describe 'signed in' do
       before do
-        devise_sign_in users(:user_with_profile)
+        sign_in users(:user_with_profile)
       end
       it 'renders form' do
         get :schedule

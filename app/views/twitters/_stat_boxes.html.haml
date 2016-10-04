@@ -1,7 +1,7 @@
 - @profiles_list_sorts[sort_method].all.each do |rec|
   .row.handle-details
     .col-xs-2
-      = link_to rec.handle, twitter_handle_path(handle: rec.handle)
+      = link_to rec.handle, twitter_profile_analysis_path(handle: rec.handle)
     .col-xs-2
       = "#{rec.tweets_count}"
     .col-xs-5
