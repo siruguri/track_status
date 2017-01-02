@@ -13,25 +13,20 @@ gem 'uglifier'
 gem 'coffee-rails'
 gem 'underscore-rails'
 
-gem 'activerecord-import', git: 'https://github.com/zdennis/activerecord-import.git', tag: 'v0.15.0'
-
 # No issue found that references possible bug in update to 3, possibly interacting with something else.
 gem 'sprockets'
 gem 'thin'
 
 gem 'devise'
 gem 'js-routes'
-gem 'will_paginate'
 
 gem 'newrelic_rpm'
-gem 'mongoid',  git: 'https://github.com/mongodb/mongoid', tag: 'v6.0.0'
 gem 'pg'
 
 group :production do
   gem 'execjs'
 end
 
-# quiet_assets? https://rossta.net/blog/quiet-assets-in-rails-5.html
 gem 'dotenv'
 
 # Everybody gotta have some Bootstrap!
@@ -49,9 +44,6 @@ gem 'sinatra', :require => nil
 
 # Reddit scraping
 gem 'nokogiri'
-gem 'twitter'
-gem 'oauth'
-
 gem 'web-console', ">3.0", group: :development
 
 group :development, :test do
@@ -64,7 +56,6 @@ group :development, :test do
 end
 
 group :test do
-  gem 'mongoid-fixture_set', git: 'https://github.com/wittawasw/mongoid-fixture_set', branch: 'rails5'
   gem 'selenium-webdriver'
   gem 'capybara-webkit'
   gem 'mocha'

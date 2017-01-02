@@ -11,6 +11,8 @@ Rails.application.routes.draw do
   
   post '/ajax_api' => 'ajax#multiplex'
   get '/ajax_api' => 'ajax#multiplex'
+
+  resources :status_records, only: [:create]
   
   # Admin
   require 'sidekiq/web'
