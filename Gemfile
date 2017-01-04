@@ -46,6 +46,7 @@ gem 'sinatra', :require => nil
 gem 'nokogiri'
 gem 'web-console', ">3.0", group: :development
 
+gem 'twilio-ruby'
 group :development, :test do
   # Use sqlite3 as the database for Active Record in dev and test envs  
   gem 'pry'

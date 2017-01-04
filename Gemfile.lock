@@ -105,6 +105,7 @@ GEM
       railties (>= 3.2)
       sprockets-rails
     json (1.8.3)
+    jwt (1.5.6)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     mail (2.6.4)
@@ -135,6 +136,7 @@ GEM
       rails (>= 4.1)
     mocha (1.1.0)
       metaclass (~> 0.0.1)
+    multi_json (1.12.1)
     newrelic_rpm (3.16.3.323)
     nio4r (1.2.1)
     nokogiri (1.6.8)
@@ -239,6 +241,10 @@ GEM
     thor (0.19.1)
     thread_safe (0.3.5)
     tilt (2.0.5)
+    twilio-ruby (4.13.0)
+      builder (>= 2.1.2)
+      jwt (~> 1.0)
+      multi_json (>= 1.3.0)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uglifier (3.0.2)
@@ -298,6 +304,7 @@ DEPENDENCIES
   sinatra
   sprockets
   thin
+  twilio-ruby
   uglifier
   underscore-rails
   web-console (> 3.0)
