@@ -1,5 +1,7 @@
 class EmailController < ApplicationController
   # Email controller
+  include SendgridManager
+  
   class MailServicePayload
     attr_reader :source, :fields
     def initialize(source, hash)
@@ -10,6 +12,12 @@ class EmailController < ApplicationController
     private
     def make_fields(hash)
       case @source
+      when 'sendgrid'
+        return {body: hash['text'],
+                html_body: hash['html'],
+                subject: hash['subject'],
+                to: hash['to'],
+                from: hash['from']}
       when 'sparkpost'
         sparkpost_base = hash['_json'][0]['msys']['relay_message']['content']
         return {body: sparkpost_base['text'],
@@ -67,6 +75,11 @@ class EmailController < ApplicationController
     end
   end
 
+  def send_it
+    test_email
+    head :ok
+  end
+    
   private
   def mail_payload(mail_service_hash)
     if mail_service_hash.is_a?(Array) and mail_service_hash[0]['msg'] and
@@ -75,10 +88,10 @@ class EmailController < ApplicationController
       return MailServicePayload.new('mandrill', mail_service_hash[0]['msg']['raw_msg'])
     elsif mail_service_hash['text']
       # This is the Sendgrid format
-      return MailServicePayload.new('sendgrid', mail_service_hash['text'])
+      return MailServicePayload.new('sendgrid', mail_service_hash)
     elsif mail_service_hash['html']
       # This is the Sendgrid format
-      return MailServicePayload.new('sendgrid', mail_service_hash['html'])
+      return MailServicePayload.new('sendgrid', mail_service_hash)
     elsif mail_service_hash.dig('_json', 0, 'msys')
     # This is from Sparkpost
       return MailServicePayload.new('sparkpost', mail_service_hash)

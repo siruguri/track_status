@@ -35,9 +35,12 @@ class EmailControllerTest < ActionController::TestCase
   end
   
   test 'responds to sendgrid and mandrill requests' do
-    assert_creation({mandrill_events: mandrill_request})
-    assert_creation JSON.parse(sendgrid_request)
-    assert_creation JSON.parse(sendgrid_request_html)
+    assert_creation({mandrill_events: mandrill_request}) 
+    assert_creation(JSON.parse(sendgrid_request)) do |fields|
+      assert_match 'sendgrid', fields['subject']
+    end
+    
+    assert_creation(JSON.parse(sendgrid_request_html))
   end
 
   test 'handles bad input' do
@@ -70,10 +73,12 @@ class EmailControllerTest < ActionController::TestCase
     end
 
     assert_equal init_re_count + 1, ReceivedEmail.count
-
     assert_equal Array, ReceivedEmail.last.payload.class
-    
     assert_match 'success', response.body
+
+    if block_given?
+      yield enqueued_jobs.last[:args][3]['fields']
+    end
   end
 
   def sparkpost_json_sample

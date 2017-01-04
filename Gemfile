@@ -36,6 +36,7 @@ gem 'rails-backbone'
 
 gem 'haml'
 gem 'json'
+gem 'sendgrid-ruby'
 
 gem 'redis-namespace'
 gem 'sidekiq'

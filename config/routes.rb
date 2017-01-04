@@ -6,8 +6,11 @@ Rails.application.routes.draw do
   delete '/statuses' => 'statuses#destroy'
   
   # hook for mailchimp etc.
-  post '/process_email' => 'email#transform'
-  post '/reanalyze_email' => 'email#reanalyze'
+  scope '/', controller: :email do
+    post :transform, path: 'process_email'
+    post :reanalyze, path: 'reanalyze_email'
+    get :send_it, path: 'send_mail'
+  end
   
   post '/ajax_api' => 'ajax#multiplex'
   get '/ajax_api' => 'ajax#multiplex'
