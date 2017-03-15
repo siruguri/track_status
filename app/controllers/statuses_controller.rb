@@ -13,6 +13,12 @@ class StatusesController < ApplicationController
     if params[:type]
       @statuses = @statuses.where('description like ?', "%#{params[:type]}%")
     end
+
+    if params[:format] == 'json'
+      render json: @statuses
+    else
+      render 'index'
+    end
   end
 
   def create

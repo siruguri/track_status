@@ -33,16 +33,23 @@ class StatusesControllerTest < ActionController::TestCase
     assert_equal 500, response.status
   end
 
-  test 'can use limit param' do
-    get :index, params: {limit: 1}
-    assert_match 'status 1', response.body
-    assert (/status 2/.match(response.body).nil?), 'Statuses list had status 2 when it shd not have.'
-  end
+  describe 'index' do
+    it 'can use limit param' do
+      get :index, params: {limit: 1}
+      assert_match 'status 1', response.body
+      assert (/status 2/.match(response.body).nil?), 'Statuses list had status 2 when it shd not have.'
+    end
 
-  test 'can use type param' do
-    get :index, params: {type: 'specific'}
-    assert_match 'specific', response.body
-    assert_no_match 'general', response.body
+    it 'can use type param' do
+      get :index, params: {type: 'specific'}
+      assert_match 'specific', response.body
+      assert_no_match 'general', response.body
+    end
+
+    it 'gives you json' do
+      get :index, params: {format: :json}
+      assert JSON.parse(response.body)
+    end
   end
 
   describe 'deletion' do
