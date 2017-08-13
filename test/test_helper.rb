@@ -26,3 +26,6 @@ class ActionController::TestCase
   # Some controllers will need Devise
   include Devise::Test::ControllerHelpers
 end
+Capybara::Webkit.configure do |config|
+  config.allow_url("https://fonts.googleapis.com/css?family=Lato")
+end

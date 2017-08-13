@@ -19,7 +19,7 @@ class EmailController < ApplicationController
                 to: hash['to'],
                 from: hash['from']}
       when 'sparkpost'
-        sparkpost_base = hash['_json'][0]['msys']['relay_message']['content']
+        sparkpost_base = hash['_json'][0]['msys'].dig('relay_message', 'content') || {}
         return {body: sparkpost_base['text'],
                 html_body: sparkpost_base['html'],
                 subject: sparkpost_base['subject'],

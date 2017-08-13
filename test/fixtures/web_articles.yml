@@ -43,8 +43,3 @@ t_co_1:
 nil_body:
   created_at: <%= Time.now - 1.day - 5.minutes %>
   source: nilbody
-
-tp_1_wa_1:
-  twitter_profile: twitter_profile_1
-  created_at: <%= Time.now - 1.day - 5.minutes %>
-  body: guess this could be a body

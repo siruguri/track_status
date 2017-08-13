@@ -9,7 +9,7 @@ default: &default
 development:
   adapter: postgresql
   encoding: unicode
-  username: pg_dev
+  username: postgres_dev
   password: pg_dev_password
   pool: 5
   database: trackstatus_dev
@@ -21,7 +21,7 @@ development:
 test:
   <<: *default
   adapter: postgresql
-  username: pg_dev
+  username: postgres_dev
   password: pg_dev_password
   host: localhost
   database: trackstatus_test

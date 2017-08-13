@@ -36,7 +36,7 @@ class RedditScraperTest < ActiveSupport::TestCase
     end
   
     it 'invalid username does not work' do
-      assert_equal nil, @test_obj.user_info(:hellobellomello)
+      assert_nil @test_obj.user_info(:hellobellomello)
     end
 
     it 'unparseable page fails gracefully' do
