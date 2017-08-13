@@ -49,8 +49,8 @@ class EmailController < ApplicationController
         GeneralMailer.notification_email(fields: payload.fields).deliver_later
 
         # Retrieve first string match on a URL like string
-        m = DataProcessHelpers.hyperlink_pattern.match payload.fields[:body]
-        if m
+        if false
+          m = DataProcessHelpers.hyperlink_pattern.match payload.fields[:body]
           uri = m[1]
           parser = ReadabilityParserWrapper.new
 
