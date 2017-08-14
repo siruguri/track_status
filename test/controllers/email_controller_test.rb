@@ -52,7 +52,7 @@ class EmailControllerTest < ActionController::TestCase
     assert_enqueued_with(job: ActionMailer::DeliveryJob) do
       post :transform, sparkpost_json_sample
     end
-    assert_equal init_wa_count + 1, WebArticle.count
+
     assert_equal 'sparkpost', ReceivedEmail.last.source
 
     assert_enqueued_with(job: ActionMailer::DeliveryJob) do
