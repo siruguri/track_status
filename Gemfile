@@ -6,6 +6,7 @@ gem 'rails'
 # Use SCSS for stylesheets
 gem 'sass-rails'
 gem 'jquery-ui-rails'
+gem 'httparty'
 
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier'
