@@ -1,4 +1,4 @@
-class CreateReceivedEmails < ActiveRecord::Migration
+class CreateReceivedEmails < ActiveRecord::Migration[4.2]
   def change
     create_table :received_emails do |t|
       t.string :source

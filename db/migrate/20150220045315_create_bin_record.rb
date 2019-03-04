@@ -1,4 +1,4 @@
-class CreateBinRecord < ActiveRecord::Migration
+class CreateBinRecord < ActiveRecord::Migration[4.2]
   def change
     create_table :bin_records do |t|
       t.string :number

@@ -1,4 +1,4 @@
-class ChangeTimestampDataTypes < ActiveRecord::Migration
+class ChangeTimestampDataTypes < ActiveRecord::Migration[4.2]
   def change
     change_column :bin_records, :created_at, :timestamp
     change_column :bin_records, :updated_at, :timestamp

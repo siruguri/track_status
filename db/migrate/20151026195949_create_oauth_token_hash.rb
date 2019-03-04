@@ -1,4 +1,4 @@
-class CreateOauthTokenHash < ActiveRecord::Migration
+class CreateOauthTokenHash < ActiveRecord::Migration[4.2]
   def change
     create_table :oauth_token_hashes do |t|
       t.string :source

@@ -1,4 +1,4 @@
-class CreateTransactionTag < ActiveRecord::Migration
+class CreateTransactionTag < ActiveRecord::Migration[4.2]
   def change
     create_table :transaction_tags do |t|
       t.string :tag_name

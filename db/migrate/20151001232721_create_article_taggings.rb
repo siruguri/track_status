@@ -1,4 +1,4 @@
-class CreateArticleTaggings < ActiveRecord::Migration
+class CreateArticleTaggings < ActiveRecord::Migration[4.2]
   def change
     create_table :article_taggings do |t|
       t.integer :article_tag_id

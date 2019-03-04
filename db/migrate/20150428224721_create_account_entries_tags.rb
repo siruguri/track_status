@@ -1,4 +1,4 @@
-class CreateAccountEntriesTags < ActiveRecord::Migration
+class CreateAccountEntriesTags < ActiveRecord::Migration[4.2]
   def change
     create_table :account_entries_tags do |t|
       t.integer :transaction_tag_id

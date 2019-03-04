@@ -1,4 +1,4 @@
-class CreateAccountEntry < ActiveRecord::Migration
+class CreateAccountEntry < ActiveRecord::Migration[4.2]
   def change
     create_table :account_entries do |t|
       t.float :entry_amount
