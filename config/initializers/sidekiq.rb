@@ -1,7 +1,7 @@
 redis_options_hash =
   case Rails.env
   when 'production'
-    { url: "redis://:thisisverysecureok@#{ENV['REDIS_HOST']}:6379/0", namespace: "track_status" }
+    { url: "redis://:#{ENV['REDIS_PASSWORD']}@#{ENV['REDIS_HOST']}:6379/0", namespace: "track_status" }
   when 'development'
     { url: "redis://#{ENV['REDIS_HOST']}:6379/0", namespace: "track_status" }
   end
