@@ -1,0 +1,11 @@
+.container
+  .row
+    .col-xs-12
+      %h2
+        Arrivals
+  .row
+    .col-xs-12
+      %ul{style: 'padding: inherit'}
+        - @available_stops.each do |stop|
+          %li.button
+            = link_to stop.display_name, fetch_mtc_data_path(mtc_id: stop.id, mtc_name: stop.code_name)
