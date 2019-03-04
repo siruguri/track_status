@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   devise_for :users
-  
+  get 'fetch_mtc_data' => 'mtc#fetch_and_mail'
+
   # For lavta, primarily
   resources :statuses, only: [:index, :create, :show]
   delete '/statuses' => 'statuses#destroy'
