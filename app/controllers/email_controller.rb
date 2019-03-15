@@ -45,7 +45,11 @@ class EmailController < ApplicationController
     else
       payload = mail_payload(mail_svc_hash)
       if payload.source != 'unknown'
-        r=ReceivedEmail.create(source: payload.source, payload: (mail_svc_hash.is_a?(Array) ? mail_svc_hash : [mail_svc_hash]))
+
+        payload = mail_svc_hash.is_a?(Array) ? mail_svc_hash : [mail_svc_hash]
+        to_address = payload[0]['to']
+        r=ReceivedEmail.create to_address: to_address,
+                               source: payload.source, payload: payload
         GeneralMailer.notification_email(fields: payload.fields).deliver_later
 
         # Retrieve first string match on a URL like string
