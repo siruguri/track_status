@@ -45,31 +45,11 @@ class EmailController < ApplicationController
     else
       payload = mail_payload(mail_svc_hash)
       if payload.source != 'unknown'
-
-        payload = mail_svc_hash.is_a?(Array) ? mail_svc_hash : [mail_svc_hash]
-        to_address = payload[0]['to']
+        payload_new = mail_svc_hash.is_a?(Array) ? mail_svc_hash : [mail_svc_hash]
+        to_address = payload_new[0]['to']
         r=ReceivedEmail.create to_address: to_address,
-                               source: payload.source, payload: payload
+                               source: payload.source, payload: payload_new
         GeneralMailer.notification_email(fields: payload.fields).deliver_later
-
-        # Retrieve first string match on a URL like string
-        if false
-          m = DataProcessHelpers.hyperlink_pattern.match payload.fields[:body]
-          uri = m[1]
-          parser = ReadabilityParserWrapper.new
-
-          w = WebArticle.find_or_initialize_by original_url: uri
-          begin
-            resp = parser.parse uri
-            if resp
-              w.body = resp.content
-            end
-          rescue Exception => e
-            w.body = e.message
-          end
-
-          w.save
-        end
         render 'pages/success'
       else
         mail_svc_hash['source'] = 'unknown'

@@ -6,7 +6,10 @@ class GeneralMailer < ActionMailer::Base
     opts[:to] ||= 'siruguri@gmail.com'
 
     if opts[:fields].nil?
-      opts[:fields] = {subject: 'fields not recd', body: 'fields not recd'}
+      opts[:fields] = {subject: 'fields not recd - see JSON in body', body: 'fields not recd'}
+      if opts[:payload]
+        opts[:fields][:body] += "\nJSON is: #{opts[:payload].to_json}"
+      end
     end
     @fields = opts[:fields]
     
