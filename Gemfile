@@ -14,7 +14,7 @@ gem 'uglifier'
 gem 'coffee-rails'
 gem 'underscore-rails'
 
-# No issue found that references possible bug in update to 3, possibly interacting with something else.
+gem 'twitter'
 gem 'sprockets'
 gem 'thin'
 

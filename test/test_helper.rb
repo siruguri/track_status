@@ -28,4 +28,5 @@ class ActionController::TestCase
 end
 Capybara::Webkit.configure do |config|
   config.allow_url("https://fonts.googleapis.com/css?family=Lato")
+  config.allow_url("https://fonts.gstatic.com")
 end
