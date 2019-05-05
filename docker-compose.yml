@@ -3,7 +3,7 @@ services:
   app:
     build: .
     env_file: .env
-    command: ./entrypoint_webapp.sh
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 5000 -b '0.0.0.0'"
     ports:
       - ${TRACKSTATUS_APP_PORT}:5000
     volumes:
