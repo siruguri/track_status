@@ -5,4 +5,4 @@ WORKDIR /myapp
 ADD Gemfile /myapp/Gemfile
 ADD Gemfile.lock /myapp/Gemfile.lock
 RUN bundle install --without development test
-RUN /bin/bash
+VOLUME ["/myapp"]
